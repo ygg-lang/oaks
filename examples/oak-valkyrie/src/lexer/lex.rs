@@ -231,6 +231,11 @@ impl crate::lexer::ValkyrieLexer<'_> {
                     "virtual" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Virtual),
                     "readonly" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Readonly),
                     "initiate" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Initiate),
+                    "shader" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Shader),
+                    "by" => ValkyrieTokenType::Keyword(ValkyrieKeywords::By),
+                    "component" if self.config.support_ecs_extension => ValkyrieTokenType::Keyword(ValkyrieKeywords::Component),
+                    "system" if self.config.support_ecs_extension => ValkyrieTokenType::Keyword(ValkyrieKeywords::System),
+                    "events" if self.config.support_ecs_extension => ValkyrieTokenType::Keyword(ValkyrieKeywords::Events),
                     "_" => ValkyrieTokenType::Underscore,
                     _ => ValkyrieTokenType::Identifier,
                 };

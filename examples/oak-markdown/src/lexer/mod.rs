@@ -150,10 +150,19 @@ impl<'config> MarkdownLexer<'config> {
                         self.lex_text(state);
                     }
                     '<' => {
+                        if self.config.allow_mdx && self.lex_mdx_import_export(state) {
+                            continue;
+                        }
                         if self.config.allow_html && self.lex_html_tag(state) {
                             continue;
                         }
                         if self.config.allow_xml && self.lex_xml_tag(state) {
+                            continue;
+                        }
+                        self.lex_special_char(state);
+                    }
+                    '{' => {
+                        if self.config.allow_mdx && self.lex_mdx_expression(state) {
                             continue;
                         }
                         self.lex_special_char(state);
@@ -229,6 +238,127 @@ impl<'config> MarkdownLexer<'config> {
     /// Handles XML tags or comments.
     fn lex_xml_tag<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         self.lex_any_tag(state, MarkdownTokenType::XmlTag, MarkdownTokenType::XmlComment)
+    }
+
+    /// Handles MDX import/export statements.
+    fn lex_mdx_import_export<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
+        let start_pos = state.get_position();
+
+        let source = state.source();
+        let remaining = source.get_text_in((start_pos..source.length()).into());
+
+        if remaining.starts_with("import ") {
+            let mut end_pos = 7;
+            let mut in_string = None;
+
+            for (i, ch) in remaining[7..].char_indices() {
+                if let Some(quote) = in_string {
+                    if ch == quote {
+                        in_string = None;
+                    }
+                }
+                else if ch == '"' || ch == '\'' {
+                    in_string = Some(ch);
+                }
+                else if ch == '\n' {
+                    end_pos = 7 + i;
+                    break;
+                }
+            }
+
+            if end_pos > 7 {
+                state.set_position(start_pos + end_pos);
+                state.add_token(MarkdownTokenType::MdxImport, start_pos, start_pos + end_pos);
+                return true;
+            }
+        }
+
+        if remaining.starts_with("export ") {
+            let mut end_pos = 7;
+
+            for (i, ch) in remaining[7..].char_indices() {
+                if ch == '\n' {
+                    end_pos = 7 + i;
+                    break;
+                }
+            }
+
+            state.set_position(start_pos + end_pos);
+            state.add_token(MarkdownTokenType::MdxExport, start_pos, start_pos + end_pos);
+            return true;
+        }
+
+        if remaining.starts_with("<") && !remaining.starts_with("<!--") {
+            let mut end_pos = 0;
+            let mut depth = 0;
+            let mut in_string = None;
+
+            for (i, ch) in remaining.char_indices() {
+                if let Some(quote) = in_string {
+                    if ch == quote {
+                        in_string = None;
+                    }
+                }
+                else if ch == '"' || ch == '\'' {
+                    in_string = Some(ch);
+                }
+                else if ch == '<' {
+                    depth += 1;
+                }
+                else if ch == '>' {
+                    depth -= 1;
+                    if depth == 0 {
+                        end_pos = i + 1;
+                        break;
+                    }
+                }
+            }
+
+            if end_pos > 0 {
+                state.set_position(start_pos + end_pos);
+                state.add_token(MarkdownTokenType::MdxComponent, start_pos, start_pos + end_pos);
+                return true;
+            }
+        }
+
+        false
+    }
+
+    /// Handles MDX JSX expressions: `{expression}`.
+    fn lex_mdx_expression<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
+        let start_pos = state.get_position();
+
+        if let Some('{') = state.peek() {
+            state.advance(1);
+            let mut depth = 1;
+            let mut in_string = None;
+
+            while let Some(ch) = state.peek() {
+                if let Some(quote) = in_string {
+                    if ch == quote {
+                        in_string = None;
+                    }
+                }
+                else if ch == '"' || ch == '\'' {
+                    in_string = Some(ch);
+                }
+                else if ch == '{' {
+                    depth += 1;
+                }
+                else if ch == '}' {
+                    depth -= 1;
+                    if depth == 0 {
+                        state.advance(1);
+                        state.add_token(MarkdownTokenType::MdxExpression, start_pos, state.get_position());
+                        return true;
+                    }
+                }
+                state.advance(ch.len_utf8());
+            }
+        }
+
+        state.set_position(start_pos);
+        false
     }
 
     /// Common tag handling logic.
@@ -380,6 +510,7 @@ impl<'config> MarkdownLexer<'config> {
         while let Some(ch) = state.peek() {
             match ch {
                 ' ' | '\t' | '\n' | '\r' | '#' | '*' | '_' | '`' | '~' | '[' | ']' | '(' | ')' | '<' | '>' | '|' | '-' | '+' | '.' | ':' | '!' | '\\' | '$' | '^' => break,
+                '{' if self.config.allow_mdx => break,
                 _ => {
                     state.advance(ch.len_utf8());
                 }

@@ -1,31 +1,100 @@
+//! Builder module for the Valkyrie language.
+//!
+//! This module contains the logic for building an AST (Abstract Syntax Tree) from the parsed syntax tree.
+//! It includes builders for various language constructs:
+//! - Root level items
+//! - Classes and structures
+//! - Expressions
+//! - Statements
+//! - Micro functions (lambdas)
+//! - Namespaces
+//! - Terms (binary operations, unary operations, etc.)
+
+mod build_access;
+mod build_anonymous_class;
+mod build_binary;
+mod build_block;
+mod build_call;
 mod build_class;
+mod build_control;
 mod build_expr;
+mod build_lambda;
+mod build_literal;
 mod build_micro;
 mod build_namespace;
+mod build_object;
+mod build_pratt;
 mod build_root;
 mod build_stmt;
+mod build_unary;
+mod utils;
 
 use crate::{ValkyrieLanguage, ValkyrieParser};
-use oak_core::{Builder, BuilderCache, OakDiagnostics, Parser, SourceText, TextEdit, builder::BuildOutput, source::Source};
+use oak_core::{Builder, BuilderCache, OakDiagnostics, Parser, TextEdit, builder::BuildOutput, source::Source};
 
 /// Extracts text from source using a range.
+///
+/// # Parameters
+/// - `source`: The source code provider
+/// - `range`: The range of text to extract
+///
+/// # Returns
+/// The extracted text as a string.
 pub(crate) fn text(source: &(impl Source + ?Sized), range: oak_core::Range<usize>) -> String {
     source.get_text_in(range).to_string()
 }
 
-/// Valkyrie builder.
+/// Valkyrie builder for constructing AST from parsed syntax trees.
+///
+/// The Valkyrie builder takes the green tree produced by the parser and transforms it into a
+/// structured AST that can be used for further analysis or code generation.
+///
+/// # V Language Example
+/// ```v
+/// // Example of using the builder to parse and build AST from V code
+/// import oak_valkyrie
+///
+/// fn main() {
+///     let source = "class Person {\n    name: String\n    age: i32\n}\n";
+///     let language = oak_valkyrie::ValkyrieLanguage::default();
+///     let builder = oak_valkyrie::ValkyrieBuilder::new(&language);
+///     
+///     // Parse and build AST
+///     let result = builder.build(source, &[], &mut oak_core::builder::DefaultBuilderCache::new());
+///     
+///     match result.result {
+///         Ok(ast) => println("AST built successfully: {:?}", ast),
+///         Err(error) => println("Error building AST: {:?}", error),
+///     }
+/// }
+/// ```
 pub struct ValkyrieBuilder<'config> {
     config: &'config ValkyrieLanguage,
 }
 
 impl<'config> ValkyrieBuilder<'config> {
     /// Create a new Valkyrie builder.
+    ///
+    /// # Parameters
+    /// - `config`: The Valkyrie language configuration
+    ///
+    /// # Returns
+    /// A new instance of `ValkyrieBuilder`.
     pub fn new(config: &'config ValkyrieLanguage) -> Self {
         Self { config }
     }
 }
 
 impl<'config> Builder<ValkyrieLanguage> for ValkyrieBuilder<'config> {
+    /// Builds an AST from the parsed green tree.
+    ///
+    /// # Parameters
+    /// - `source`: The source code provider
+    /// - `edits`: Text edits to apply to the source
+    /// - `_cache`: Builder cache (not used in this implementation)
+    ///
+    /// # Returns
+    /// A `BuildOutput` containing the built AST or an error, along with any diagnostics.
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<ValkyrieLanguage>) -> BuildOutput<ValkyrieLanguage> {
         let parser = ValkyrieParser::new(self.config);
 

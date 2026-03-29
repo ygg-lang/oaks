@@ -1,87 +1,62 @@
-#![doc = include_str!("readme.md")]
+/// EJS Lexer module
+///
+/// This module defines the lexer for EJS (Embedded JavaScript) templates,
+/// responsible for tokenizing the input into meaningful tokens.
+use oak_core::{
+    OakError,
+    lexer::{LexOutput, Lexer, LexerCache, LexerState},
+    source::Source,
+};
 
+/// Token type definitions for EJS lexer
 pub mod token_type;
+use crate::language::EjsLanguage;
+use token_type::EjsTokenType;
 
-use crate::{language::JavaScriptLanguage, lexer::token_type::JavaScriptTokenType};
-use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
-use std::simd::prelude::*;
+/// Lexer state type alias for EJS
+pub(crate) type State<'a, S> = LexerState<'a, S, EjsLanguage>;
 
-pub(crate) type State<'a, S> = LexerState<'a, S, JavaScriptLanguage>;
-
-/// JavaScript lexer.
-#[derive(Clone, Debug)]
-pub struct JavaScriptLexer<'config> {
-    config: &'config JavaScriptLanguage,
+/// Lexer for EJS templates
+///
+/// The EJS lexer handles two distinct modes:
+/// - Text mode: Recognizes plain text content until an EJS tag is encountered
+/// - Code mode: Uses JavaScript lexical rules inside EJS tags
+///
+/// The lexer transitions between these modes based on the EJS delimiters.
+#[derive(Debug, Clone)]
+pub struct EjsLexer<'config> {
+    /// Language configuration containing delimiter settings
+    config: &'config EjsLanguage,
 }
 
-impl<'config> JavaScriptLexer<'config> {
-    /// Creates a new JavaScript lexer.
-    pub fn new(config: &'config JavaScriptLanguage) -> Self {
+impl<'config> EjsLexer<'config> {
+    /// Creates a new EJS lexer with the given configuration
+    ///
+    /// # Arguments
+    ///
+    /// * `config` - Reference to the EJS language configuration
+    ///
+    /// # Returns
+    ///
+    /// A new `EjsLexer` instance
+    pub fn new(config: &'config EjsLanguage) -> Self {
         Self { config }
     }
 
-    fn safe_check<'a, S: Source + ?Sized>(&self, state: &State<'a, S>) -> Result<(), OakError> {
-        if state.get_position() <= state.get_length() { Ok(()) } else { Err(OakError::custom_error(format!("Lexer out-of-bounds: pos={}, len={}", state.get_position(), state.get_length()))) }
-    }
-
-    /// Main lexer run method.
-    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+    /// Main lexing loop that processes the entire source
+    ///
+    /// This method orchestrates the lexing process by alternating between
+    /// text mode and code mode based on the EJS delimiters encountered.
+    fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
-            self.safe_check(state)?;
 
-            if let Some(ch) = state.peek() {
-                match ch {
-                    ' ' | '\t' => {
-                        self.skip_whitespace(state);
-                    }
-                    '\n' | '\r' => {
-                        self.lex_newline(state);
-                    }
-                    '/' => {
-                        // Comment or Slash or SlashEqual
-                        if let Some(next) = state.peek_next_n(1) {
-                            if next == '/' || next == '*' {
-                                self.lex_comment(state);
-                            }
-                            else {
-                                self.lex_operator_or_punctuation(state);
-                            }
-                        }
-                        else {
-                            self.lex_operator_or_punctuation(state);
-                        }
-                    }
-                    '"' | '\'' => {
-                        self.lex_string_literal(state);
-                    }
-                    '`' => {
-                        self.lex_template_literal(state);
-                    }
-                    '0'..='9' => {
-                        self.lex_numeric_literal(state);
-                    }
-                    '.' => {
-                        // Dot, DotDotDot, or Number (.5)
-                        if self.is_next_digit(state) {
-                            self.lex_numeric_literal(state);
-                        }
-                        else {
-                            self.lex_operator_or_punctuation(state);
-                        }
-                    }
-                    'a'..='z' | 'A'..='Z' | '_' | '$' => {
-                        self.lex_identifier_or_keyword(state);
-                    }
-                    '+' | '-' | '*' | '%' | '<' | '>' | '=' | '!' | '&' | '|' | '^' | '~' | '?' | '(' | ')' | '{' | '}' | '[' | ']' | ';' | ',' | ':' => {
-                        self.lex_operator_or_punctuation(state);
-                    }
-                    _ => {
-                        let start = state.get_position();
-                        state.advance(ch.len_utf8());
-                        state.add_token(JavaScriptTokenType::Error, start, state.get_position());
-                    }
-                }
+            if self.lex_text(state) {
+                continue;
+            }
+
+            if self.lex_template_tag(state) {
+                continue;
             }
 
             state.advance_if_dead_lock(safe_point)
@@ -90,148 +65,288 @@ impl<'config> JavaScriptLexer<'config> {
         Ok(())
     }
 
-    /// Skips whitespace characters.
-    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+    /// Lexes plain text content outside of EJS tags
+    ///
+    /// This method recognizes text content until it encounters an EJS opening
+    /// delimiter (`<%`) or reaches the end of the source.
+    ///
+    /// # Returns
+    ///
+    /// `true` if text was successfully lexed, `false` otherwise
+    fn lex_text<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
-        let bytes = state.rest_bytes();
-        let mut i = 0;
-        let len = bytes.len();
-        const LANES: usize = 32;
 
-        while i + LANES <= len {
-            let chunk = Simd::<u8, LANES>::from_slice(unsafe { bytes.get_unchecked(i..i + LANES) });
-            let is_space = chunk.simd_eq(Simd::splat(b' '));
-            let is_tab = chunk.simd_eq(Simd::splat(b'\t'));
-            let is_ws = is_space | is_tab;
+        while let Some(ch) = state.peek() {
+            let rest = state.rest();
 
-            if !is_ws.all() {
-                let not_ws = !is_ws;
-                let idx = not_ws.first_set().unwrap();
-                i += idx;
-                state.advance(i);
-                state.add_token(JavaScriptTokenType::Whitespace, start, state.get_position());
-                return true;
-            }
-            i += LANES
-        }
-
-        while i < len {
-            let ch = unsafe { *bytes.get_unchecked(i) };
-            if ch != b' ' && ch != b'\t' {
+            if rest.starts_with(&self.config.open_delimiter) {
                 break;
             }
-            i += 1
+
+            state.advance(ch.len_utf8());
         }
 
-        if i > 0 {
-            state.advance(i);
-            state.add_token(JavaScriptTokenType::Whitespace, start, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// Handles newline characters.
-    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(JavaScriptTokenType::Newline, start_pos, state.get_position());
-            true
-        }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
-                state.advance(1)
-            }
-            state.add_token(JavaScriptTokenType::Newline, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// Handles comments (line and block comments).
-    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start = state.get_position();
-        let rest = state.rest();
-
-        // Line comment: // ... until newline
-        if rest.starts_with("//") {
-            state.advance(2);
-            while let Some(ch) = state.peek() {
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-                state.advance(ch.len_utf8())
-            }
-            state.add_token(JavaScriptTokenType::LineComment, start, state.get_position());
-            return true;
-        }
-
-        // Block comment: /* ... */
-        if rest.starts_with("/*") {
-            state.advance(2);
-            let mut found_end = false;
-            while let Some(ch) = state.peek() {
-                if ch == '*' && state.peek_next_n(1) == Some('/') {
-                    state.advance(2);
-                    found_end = true;
-                    break;
-                }
-                state.advance(ch.len_utf8())
-            }
-
-            if !found_end {
-                let error = OakError::syntax_error("Unterminated comment".to_string(), start, None);
-                state.add_error(error)
-            }
-
-            state.add_token(JavaScriptTokenType::BlockComment, start, state.get_position());
+        if state.get_position() > start {
+            state.add_token(EjsTokenType::Text, start, state.get_position());
             return true;
         }
 
         false
     }
 
-    /// Handles string literals.
-    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start_pos = state.get_position();
+    /// Lexes EJS template tags and their contents
+    ///
+    /// This method handles the complete lexing of EJS tags including:
+    /// - Opening tags: `<%`, `<%=`, `%-`, `<%#`, `<%%`
+    /// - Tag content using JavaScript lexical rules
+    /// - Closing tags: `%>`, `-%>`
+    ///
+    /// # Returns
+    ///
+    /// `true` if a template tag was successfully lexed, `false` otherwise
+    fn lex_template_tag<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        let rest = state.rest();
 
-        if let Some(first_char) = state.peek() {
-            if first_char == '"' || first_char == '\'' {
-                let quote = first_char;
+        if !rest.starts_with(&self.config.open_delimiter) {
+            return false;
+        }
+
+        let open_start = state.get_position();
+        let open_delim_len = self.config.open_delimiter.len();
+        state.advance(open_delim_len);
+
+        let after_open = state.get_position();
+
+        if let Some(ch) = state.peek() {
+            let marker = ch.to_string();
+
+            if marker == self.config.output_escape {
                 state.advance(1);
-                let mut found_end = false;
+                state.add_token(EjsTokenType::OpenTagOutputEscape, open_start, state.get_position());
+                self.lex_code_content(state);
+                return true;
+            }
+
+            if marker == self.config.output_raw {
+                state.advance(1);
+                state.add_token(EjsTokenType::OpenTagOutputRaw, open_start, state.get_position());
+                self.lex_code_content(state);
+                return true;
+            }
+
+            if marker == self.config.comment_marker {
+                state.advance(1);
+                state.add_token(EjsTokenType::OpenTagComment, open_start, state.get_position());
+                self.lex_comment_content(state);
+                return true;
+            }
+
+            if ch == '%' {
+                state.advance(1);
+                state.add_token(EjsTokenType::EscapedOpenTag, open_start, state.get_position());
+                return true;
+            }
+        }
+
+        state.add_token(EjsTokenType::OpenTag, open_start, after_open);
+        self.lex_code_content(state);
+        true
+    }
+
+    /// Lexes the content inside a code EJS tag
+    ///
+    /// Uses JavaScript lexical rules to tokenize the code content until
+    /// a closing tag is encountered.
+    fn lex_code_content<S: Source + ?Sized>(&self, state: &mut State<'_, S>) {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            if self.lex_close_tag(state) {
+                return;
+            }
+
+            if self.lex_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.lex_string(state) {
+                continue;
+            }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_identifier(state) {
+                continue;
+            }
+
+            if self.lex_punctuation(state) {
+                continue;
+            }
+
+            state.advance_if_dead_lock(safe_point)
+        }
+    }
+
+    /// Lexes the content inside a comment EJS tag
+    ///
+    /// Consumes all content until a closing tag is found.
+    fn lex_comment_content<S: Source + ?Sized>(&self, state: &mut State<'_, S>) {
+        let start = state.get_position();
+
+        while state.not_at_end() {
+            if self.is_close_tag(state) {
+                break;
+            }
+
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+            }
+        }
+
+        if state.get_position() > start {
+            state.add_token(EjsTokenType::Comment, start, state.get_position());
+        }
+
+        self.lex_close_tag(state);
+    }
+
+    /// Checks if the current position is at a closing tag
+    ///
+    /// Handles both regular closing tag (`%>`) and trim mode closing tag (`-%>`).
+    fn is_close_tag<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        let rest = state.rest();
+
+        if rest.starts_with(&self.config.close_delimiter) {
+            return true;
+        }
+
+        let trim_close = format!("-{}", self.config.close_delimiter);
+        rest.starts_with(&trim_close)
+    }
+
+    /// Lexes a closing EJS tag
+    ///
+    /// Recognizes both regular closing tag (`%>`) and trim mode closing tag (`-%>`).
+    /// The trim mode closing tag removes trailing whitespace from the output.
+    ///
+    /// # Returns
+    ///
+    /// `true` if a closing tag was successfully lexed, `false` otherwise
+    fn lex_close_tag<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
+
+        let trim_close = format!("-{}", self.config.close_delimiter);
+
+        if rest.starts_with(&trim_close) {
+            state.advance(trim_close.len());
+            state.add_token(EjsTokenType::CloseTagTrim, start, state.get_position());
+            return true;
+        }
+
+        if rest.starts_with(&self.config.close_delimiter) {
+            state.advance(self.config.close_delimiter.len());
+            state.add_token(EjsTokenType::CloseTag, start, state.get_position());
+            return true;
+        }
+
+        false
+    }
+
+    /// Lexes whitespace characters (space and tab)
+    ///
+    /// Consecutive whitespace characters are grouped into a single token.
+    ///
+    /// # Returns
+    ///
+    /// `true` if whitespace was successfully lexed, `false` otherwise
+    fn lex_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        let start = state.get_position();
+        let mut found = false;
+
+        while let Some(ch) = state.peek() {
+            if ch == ' ' || ch == '\t' {
+                state.advance(ch.len_utf8());
+                found = true;
+            }
+            else {
+                break;
+            }
+        }
+
+        if found {
+            state.add_token(EjsTokenType::Whitespace, start, state.get_position());
+        }
+
+        found
+    }
+
+    /// Lexes newline characters
+    ///
+    /// Handles both Unix-style (`\n`) and Windows-style (`\r\n`) line endings.
+    ///
+    /// # Returns
+    ///
+    /// `true` if a newline was successfully lexed, `false` otherwise
+    fn lex_newline<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        let start = state.get_position();
+
+        if let Some('\r') = state.peek() {
+            state.advance(1);
+            if let Some('\n') = state.peek() {
+                state.advance(1);
+            }
+            state.add_token(EjsTokenType::Newline, start, state.get_position());
+            return true;
+        }
+
+        if let Some('\n') = state.peek() {
+            state.advance(1);
+            state.add_token(EjsTokenType::Newline, start, state.get_position());
+            return true;
+        }
+
+        false
+    }
+
+    /// Lexes string literals
+    ///
+    /// Handles both single-quoted and double-quoted strings with escape sequences.
+    ///
+    /// # Returns
+    ///
+    /// `true` if a string literal was successfully lexed, `false` otherwise
+    fn lex_string<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        let start = state.get_position();
+
+        if let Some(quote) = state.peek() {
+            if quote == '"' || quote == '\'' {
+                state.advance(1);
 
                 while let Some(ch) = state.peek() {
                     if ch == quote {
                         state.advance(1);
-                        found_end = true;
                         break;
                     }
-                    else if ch == '\\' {
-                        // Skip escaped character
+
+                    if ch == '\\' {
                         state.advance(1);
                         if let Some(escaped) = state.peek() {
-                            state.advance(escaped.len_utf8())
+                            state.advance(escaped.len_utf8());
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8())
+                        state.advance(ch.len_utf8());
                     }
                 }
 
-                if !found_end {
-                    let error = OakError::syntax_error("Unterminated string literal".to_string(), start_pos, None);
-                    state.add_error(error)
-                }
-
-                state.add_token(JavaScriptTokenType::StringLiteral, start_pos, state.get_position());
+                state.add_token(EjsTokenType::String, start, state.get_position());
                 return true;
             }
         }
@@ -239,520 +354,190 @@ impl<'config> JavaScriptLexer<'config> {
         false
     }
 
-    /// Handles template literals.
-    fn lex_template_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('`') = state.peek() {
-            state.advance(1);
-            let mut found_end = false;
-
-            while let Some(ch) = state.peek() {
-                if ch == '`' {
-                    state.advance(1);
-                    found_end = true;
-                    break;
-                }
-                else if ch == '\\' {
-                    // Handle escaped characters
-                    state.advance(1);
-                    if let Some(escaped) = state.peek() {
-                        state.advance(escaped.len_utf8())
-                    }
-                }
-                else if ch == '$' {
-                    if let Some('{') = state.peek_next_n(1) {
-                        // Template expression, skip for now
-                        state.advance(2);
-                        let mut brace_count = 1;
-                        while let Some(inner_ch) = state.peek() {
-                            if inner_ch == '{' {
-                                brace_count += 1
-                            }
-                            else if inner_ch == '}' {
-                                brace_count -= 1;
-                                if brace_count == 0 {
-                                    state.advance(1);
-                                    break;
-                                }
-                            }
-                            state.advance(inner_ch.len_utf8())
-                        }
-                    }
-                    else {
-                        state.advance(ch.len_utf8())
-                    }
-                }
-                else {
-                    state.advance(ch.len_utf8())
-                }
-            }
-
-            if !found_end {
-                let error = OakError::syntax_error("Unterminated template literal".to_string(), start_pos, None);
-                state.add_error(error)
-            }
-
-            state.add_token(JavaScriptTokenType::TemplateString, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// Handles numeric literals.
-    fn lex_numeric_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start_pos = state.get_position();
+    /// Lexes numeric literals
+    ///
+    /// Handles integer and floating-point numbers, including hexadecimal notation.
+    ///
+    /// # Returns
+    ///
+    /// `true` if a number was successfully lexed, `false` otherwise
+    fn lex_number<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        let start = state.get_position();
 
         if let Some(ch) = state.peek() {
-            // Hexadecimal number (0x or 0X)
             if ch == '0' {
                 if let Some(next) = state.peek_next_n(1) {
                     if next == 'x' || next == 'X' {
-                        state.advance(2); // Skip '0x'
-                        let mut has_digits = false;
+                        state.advance(2);
+
                         while let Some(hex_ch) = state.peek() {
                             if hex_ch.is_ascii_hexdigit() {
                                 state.advance(1);
-                                has_digits = true
                             }
                             else {
                                 break;
                             }
                         }
 
-                        if !has_digits {
-                            let error = OakError::syntax_error("Invalid hexadecimal number".to_string(), start_pos, None);
-                            state.add_error(error)
-                        }
-
-                        // Check for BigInt suffix
-                        if let Some('n') = state.peek() {
-                            state.advance(1);
-                            state.add_token(JavaScriptTokenType::BigIntLiteral, start_pos, state.get_position())
-                        }
-                        else {
-                            state.add_token(JavaScriptTokenType::NumericLiteral, start_pos, state.get_position())
-                        }
+                        state.add_token(EjsTokenType::Number, start, state.get_position());
                         return true;
                     }
                 }
             }
 
-            // Normal number or decimal
-            if ch.is_ascii_digit() || (ch == '.' && self.is_next_digit(state)) {
-                // Handle integer part
-                if ch != '.' {
-                    while let Some(digit) = state.peek() {
-                        if digit.is_ascii_digit() { state.advance(1) } else { break }
+            if ch.is_ascii_digit() {
+                while let Some(digit) = state.peek() {
+                    if digit.is_ascii_digit() {
+                        state.advance(1);
+                    }
+                    else {
+                        break;
                     }
                 }
 
-                // Handle decimal part
                 if let Some('.') = state.peek() {
-                    state.advance(1);
-                    while let Some(digit) = state.peek() {
-                        if digit.is_ascii_digit() { state.advance(1) } else { break }
+                    if let Some(next) = state.peek_next_n(1) {
+                        if next.is_ascii_digit() {
+                            state.advance(1);
+
+                            while let Some(digit) = state.peek() {
+                                if digit.is_ascii_digit() {
+                                    state.advance(1);
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
 
-                // Handle exponent part
                 if let Some(exp) = state.peek() {
                     if exp == 'e' || exp == 'E' {
                         state.advance(1);
 
-                        // Optional sign
                         if let Some(sign) = state.peek() {
                             if sign == '+' || sign == '-' {
-                                state.advance(1)
+                                state.advance(1);
                             }
                         }
 
-                        // Must have digits
-                        let mut has_exp_digits = false;
                         while let Some(digit) = state.peek() {
                             if digit.is_ascii_digit() {
                                 state.advance(1);
-                                has_exp_digits = true
                             }
                             else {
                                 break;
                             }
                         }
-
-                        if !has_exp_digits {
-                            let error = OakError::syntax_error("Invalid number exponent".to_string(), start_pos, None);
-                            state.add_error(error)
-                        }
                     }
                 }
 
-                // Check for BigInt suffix
-                if let Some('n') = state.peek() {
-                    state.advance(1);
-                    state.add_token(JavaScriptTokenType::BigIntLiteral, start_pos, state.get_position())
-                }
-                else {
-                    state.add_token(JavaScriptTokenType::NumericLiteral, start_pos, state.get_position())
-                }
-                true
-            }
-            else {
-                false
+                state.add_token(EjsTokenType::Number, start, state.get_position());
+                return true;
             }
         }
-        else {
-            false
-        }
+
+        false
     }
 
-    /// Checks if the next character is a digit.
-    fn is_next_digit<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        if let Some(next_ch) = state.peek_next_n(1) { next_ch.is_ascii_digit() } else { false }
-    }
-
-    /// Handles identifiers or keywords.
-    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start_pos = state.get_position();
+    /// Lexes identifiers and keywords
+    ///
+    /// Recognizes JavaScript identifiers and the keywords: true, false, null, undefined.
+    ///
+    /// # Returns
+    ///
+    /// `true` if an identifier or keyword was successfully lexed, `false` otherwise
+    fn lex_identifier<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        let start = state.get_position();
 
         if let Some(ch) = state.peek() {
-            if ch.is_alphabetic() || ch == '_' || ch == '$' {
+            if ch.is_ascii_alphabetic() || ch == '_' || ch == '$' {
                 state.advance(ch.len_utf8());
 
                 while let Some(next_ch) = state.peek() {
-                    if next_ch.is_alphanumeric() || next_ch == '_' || next_ch == '$' { state.advance(next_ch.len_utf8()) } else { break }
+                    if next_ch.is_ascii_alphanumeric() || next_ch == '_' || next_ch == '$' {
+                        state.advance(next_ch.len_utf8());
+                    }
+                    else {
+                        break;
+                    }
                 }
 
-                let text = state.get_text_in((start_pos..state.get_position()).into());
-                let token_kind = self.keyword_or_identifier(&text);
-                state.add_token(token_kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+                let end = state.get_position();
+                let text = state.get_text_in((start..end).into());
+
+                let kind = match text.as_ref() {
+                    "true" | "false" => EjsTokenType::Boolean,
+                    "null" | "undefined" => EjsTokenType::Boolean,
+                    _ => EjsTokenType::Identifier,
+                };
+
+                state.add_token(kind, start, end);
+                return true;
             }
         }
-        else {
-            false
-        }
+
+        false
     }
 
-    /// Determines if it's a keyword or an identifier.
-    fn keyword_or_identifier(&self, text: &str) -> JavaScriptTokenType {
-        JavaScriptTokenType::from_keyword(text).unwrap_or(JavaScriptTokenType::IdentifierName)
-    }
-
-    /// Handles operators and punctuation.
-    fn lex_operator_or_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start_pos = state.get_position();
+    /// Lexes punctuation and operators
+    ///
+    /// Recognizes JavaScript operators and punctuation symbols.
+    ///
+    /// # Returns
+    ///
+    /// `true` if punctuation was successfully lexed, `false` otherwise
+    fn lex_punctuation<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        let start = state.get_position();
 
         if let Some(ch) = state.peek() {
-            let token_kind = match ch {
-                '+' => {
-                    state.advance(1);
-                    match state.peek() {
-                        Some('+') => {
-                            state.advance(1);
-                            JavaScriptTokenType::PlusPlus
-                        }
-                        Some('=') => {
-                            state.advance(1);
-                            JavaScriptTokenType::PlusEqual
-                        }
-                        _ => JavaScriptTokenType::Plus,
-                    }
-                }
-                '-' => {
-                    state.advance(1);
-                    match state.peek() {
-                        Some('-') => {
-                            state.advance(1);
-                            JavaScriptTokenType::MinusMinus
-                        }
-                        Some('=') => {
-                            state.advance(1);
-                            JavaScriptTokenType::MinusEqual
-                        }
-                        _ => JavaScriptTokenType::Minus,
-                    }
-                }
-                '*' => {
-                    state.advance(1);
-                    match state.peek() {
-                        Some('*') => {
-                            state.advance(1);
-                            if let Some('=') = state.peek() {
-                                state.advance(1);
-                                JavaScriptTokenType::StarStarEqual
-                            }
-                            else {
-                                JavaScriptTokenType::StarStar
-                            }
-                        }
-                        Some('=') => {
-                            state.advance(1);
-                            JavaScriptTokenType::StarEqual
-                        }
-                        _ => JavaScriptTokenType::Star,
-                    }
-                }
-                '/' => {
-                    // Check if it's a comment
-                    if let Some(next) = state.peek_next_n(1) {
-                        if next == '/' || next == '*' {
-                            return false; // Let the comment handler process it
-                        }
-                    }
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        JavaScriptTokenType::SlashEqual
-                    }
-                    else {
-                        JavaScriptTokenType::Slash
-                    }
-                }
-                '%' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        JavaScriptTokenType::PercentEqual
-                    }
-                    else {
-                        JavaScriptTokenType::Percent
-                    }
-                }
-                '<' => {
-                    state.advance(1);
-                    match state.peek() {
-                        Some('<') => {
-                            state.advance(1);
-                            if let Some('=') = state.peek() {
-                                state.advance(1);
-                                JavaScriptTokenType::LeftShiftEqual
-                            }
-                            else {
-                                JavaScriptTokenType::LeftShift
-                            }
-                        }
-                        Some('=') => {
-                            state.advance(1);
-                            JavaScriptTokenType::LessEqual
-                        }
-                        _ => JavaScriptTokenType::Less,
-                    }
-                }
-                '>' => {
-                    state.advance(1);
-                    match state.peek() {
-                        Some('>') => {
-                            state.advance(1);
-                            match state.peek() {
-                                Some('>') => {
-                                    state.advance(1);
-                                    if let Some('=') = state.peek() {
-                                        state.advance(1);
-                                        JavaScriptTokenType::UnsignedRightShiftEqual
-                                    }
-                                    else {
-                                        JavaScriptTokenType::UnsignedRightShift
-                                    }
-                                }
-                                Some('=') => {
-                                    state.advance(1);
-                                    JavaScriptTokenType::RightShiftEqual
-                                }
-                                _ => JavaScriptTokenType::RightShift,
-                            }
-                        }
-                        Some('=') => {
-                            state.advance(1);
-                            JavaScriptTokenType::GreaterEqual
-                        }
-                        _ => JavaScriptTokenType::Greater,
-                    }
-                }
-                '=' => {
-                    state.advance(1);
-                    match state.peek() {
-                        Some('=') => {
-                            state.advance(1);
-                            if let Some('=') = state.peek() {
-                                state.advance(1);
-                                JavaScriptTokenType::EqualEqualEqual
-                            }
-                            else {
-                                JavaScriptTokenType::EqualEqual
-                            }
-                        }
-                        Some('>') => {
-                            state.advance(1);
-                            JavaScriptTokenType::Arrow
-                        }
-                        _ => JavaScriptTokenType::Equal,
-                    }
-                }
-                '!' => {
-                    state.advance(1);
-                    match state.peek() {
-                        Some('=') => {
-                            state.advance(1);
-                            if let Some('=') = state.peek() {
-                                state.advance(1);
-                                JavaScriptTokenType::NotEqualEqual
-                            }
-                            else {
-                                JavaScriptTokenType::NotEqual
-                            }
-                        }
-                        _ => JavaScriptTokenType::Exclamation,
-                    }
-                }
-                '&' => {
-                    state.advance(1);
-                    match state.peek() {
-                        Some('&') => {
-                            state.advance(1);
-                            if let Some('=') = state.peek() {
-                                state.advance(1);
-                                JavaScriptTokenType::AmpersandAmpersandEqual
-                            }
-                            else {
-                                JavaScriptTokenType::AmpersandAmpersand
-                            }
-                        }
-                        Some('=') => {
-                            state.advance(1);
-                            JavaScriptTokenType::AmpersandEqual
-                        }
-                        _ => JavaScriptTokenType::Ampersand,
-                    }
-                }
-                '|' => {
-                    state.advance(1);
-                    match state.peek() {
-                        Some('|') => {
-                            state.advance(1);
-                            if let Some('=') = state.peek() {
-                                state.advance(1);
-                                JavaScriptTokenType::PipePipeEqual
-                            }
-                            else {
-                                JavaScriptTokenType::PipePipe
-                            }
-                        }
-                        Some('=') => {
-                            state.advance(1);
-                            JavaScriptTokenType::PipeEqual
-                        }
-                        _ => JavaScriptTokenType::Pipe,
-                    }
-                }
-                '^' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        JavaScriptTokenType::CaretEqual
-                    }
-                    else {
-                        JavaScriptTokenType::Caret
-                    }
-                }
-                '~' => {
-                    state.advance(1);
-                    JavaScriptTokenType::Tilde
-                }
-                '?' => {
-                    state.advance(1);
-                    match state.peek() {
-                        Some('?') => {
-                            state.advance(1);
-                            if let Some('=') = state.peek() {
-                                state.advance(1);
-                                JavaScriptTokenType::QuestionQuestionEqual
-                            }
-                            else {
-                                JavaScriptTokenType::QuestionQuestion
-                            }
-                        }
-                        Some('.') => {
-                            state.advance(1);
-                            JavaScriptTokenType::QuestionDot
-                        }
-                        _ => JavaScriptTokenType::Question,
-                    }
-                }
-                '(' => {
-                    state.advance(1);
-                    JavaScriptTokenType::LeftParen
-                }
-                ')' => {
-                    state.advance(1);
-                    JavaScriptTokenType::RightParen
-                }
-                '{' => {
-                    state.advance(1);
-                    JavaScriptTokenType::LeftBrace
-                }
-                '}' => {
-                    state.advance(1);
-                    JavaScriptTokenType::RightBrace
-                }
-                '[' => {
-                    state.advance(1);
-                    JavaScriptTokenType::LeftBracket
-                }
-                ']' => {
-                    state.advance(1);
-                    JavaScriptTokenType::RightBracket
-                }
-                ';' => {
-                    state.advance(1);
-                    JavaScriptTokenType::Semicolon
-                }
-                ',' => {
-                    state.advance(1);
-                    JavaScriptTokenType::Comma
-                }
-                '.' => {
-                    state.advance(1);
-                    if let Some('.') = state.peek() {
-                        if let Some('.') = state.peek_next_n(1) {
-                            state.advance(2);
-                            JavaScriptTokenType::DotDotDot
-                        }
-                        else {
-                            JavaScriptTokenType::Dot
-                        }
-                    }
-                    else {
-                        JavaScriptTokenType::Dot
-                    }
-                }
-                ':' => {
-                    state.advance(1);
-                    JavaScriptTokenType::Colon
-                }
+            let kind = match ch {
+                '(' => EjsTokenType::LeftParen,
+                ')' => EjsTokenType::RightParen,
+                '{' => EjsTokenType::LeftBrace,
+                '}' => EjsTokenType::RightBrace,
+                '[' => EjsTokenType::LeftBracket,
+                ']' => EjsTokenType::RightBracket,
+                ',' => EjsTokenType::Comma,
+                '.' => EjsTokenType::Dot,
+                ':' => EjsTokenType::Colon,
+                ';' => EjsTokenType::Semicolon,
+                '=' => EjsTokenType::Eq,
+                '+' => EjsTokenType::Plus,
+                '-' => EjsTokenType::Minus,
+                '*' => EjsTokenType::Star,
+                '/' => EjsTokenType::Slash,
+                '%' => EjsTokenType::Percent,
+                '!' => EjsTokenType::Bang,
+                '?' => EjsTokenType::Question,
+                '<' => EjsTokenType::Lt,
+                '>' => EjsTokenType::Gt,
+                '&' => EjsTokenType::Amp,
+                '|' => EjsTokenType::Pipe,
+                '^' => EjsTokenType::Caret,
+                '~' => EjsTokenType::Tilde,
                 _ => return false,
             };
 
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
+            state.advance(ch.len_utf8());
+            state.add_token(kind, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
+
+        false
     }
 }
 
-impl<'config> Lexer<JavaScriptLanguage> for JavaScriptLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<JavaScriptLanguage>) -> LexOutput<JavaScriptLanguage> {
-        let mut state = LexerState::new(text);
+impl<'config> Lexer<EjsLanguage> for EjsLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<EjsLanguage>) -> LexOutput<EjsLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
+
         if result.is_ok() {
             state.add_eof()
         }
+
         state.finish_with_cache(result, cache)
     }
 }

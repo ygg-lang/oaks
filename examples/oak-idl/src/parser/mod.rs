@@ -45,17 +45,23 @@ fn parse_top_level_item<'a, S: Source + ?Sized>(state: &mut oak_core::parser::Pa
 
     if parse_interface(state) {
         true
-    } else if parse_struct(state) {
+    }
+    else if parse_struct(state) {
         true
-    } else if parse_enum(state) {
+    }
+    else if parse_enum(state) {
         true
-    } else if parse_typedef(state) {
+    }
+    else if parse_typedef(state) {
         true
-    } else if parse_const(state) {
+    }
+    else if parse_const(state) {
         true
-    } else if parse_module(state) {
+    }
+    else if parse_module(state) {
         true
-    } else {
+    }
+    else {
         state.restore(checkpoint);
         false
     }
@@ -434,7 +440,8 @@ fn parse_variants<'a, S: Source + ?Sized>(state: &mut oak_core::parser::ParserSt
             if state.at(IdlTokenType::Comma) {
                 state.bump();
             }
-        } else {
+        }
+        else {
             state.bump();
         }
     }
@@ -558,7 +565,8 @@ fn parse_type<'a, S: Source + ?Sized>(state: &mut oak_core::parser::ParserState<
             while !state.at(IdlTokenType::RightBracket) && state.not_at_end() {
                 if !parse_type(state) {
                     state.bump();
-                } else {
+                }
+                else {
                     if state.at(IdlTokenType::Or) {
                         state.bump();
                     }

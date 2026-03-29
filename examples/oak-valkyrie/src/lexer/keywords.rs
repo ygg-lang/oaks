@@ -362,4 +362,48 @@ pub enum ValkyrieKeywords {
     /// }
     /// ```
     Initiate,
+    /// Declare a shader.
+    ///
+    /// ```gs
+    /// shader StandardShader by PBR {
+    ///     // shader definition
+    /// }
+    /// ```
+    Shader,
+    /// By keyword for shader definition.
+    ///
+    /// ```gs
+    /// shader StandardShader by PBR {
+    ///     // shader definition
+    /// }
+    /// ```
+    By,
+    /// Declare a component for ECS (Entity Component System).
+    ///
+    /// ```valkyrie
+    /// component Position {
+    ///     x: f32,
+    ///     y: f32
+    /// }
+    /// ```
+    Component,
+    /// Declare a system for ECS (Entity Component System).
+    ///
+    /// ```valkyrie
+    /// system MovementSystem {
+    ///     micro execute(world: World): Result<()> {
+    ///         // system logic
+    ///     }
+    /// }
+    /// ```
+    System,
+    /// Declare events within a component.
+    ///
+    /// ```valkyrie
+    /// component Player {
+    ///     events on_health_change: micro(current: i32, max: i32) -> (),
+    ///     events on_death: micro() -> ()
+    /// }
+    /// ```
+    Events,
 }

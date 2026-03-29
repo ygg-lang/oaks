@@ -51,7 +51,7 @@ mod tests {
         let builder = WolframBuilder::new(&language);
         let mut session = ParseSession::<WolframLanguage>::default();
 
-        let code = "f @@@ expr + g //@ list";
+        let code = "f @@@ terms + g //@ list";
         let source = SourceText::new(code);
         let output = builder.build(&source, &[], &mut session);
 

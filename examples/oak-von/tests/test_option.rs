@@ -13,12 +13,9 @@ fn test_option_some() {
         optional_field: Some("Hello"),
         another_optional: Some(42)
     }"#;
-    
+
     let result: TestStruct = from_str(von_str).unwrap();
-    assert_eq!(result, TestStruct { 
-        optional_field: Some("Hello".to_string()), 
-        another_optional: Some(42) 
-    });
+    assert_eq!(result, TestStruct { optional_field: Some("Hello".to_string()), another_optional: Some(42) });
 }
 
 #[test]
@@ -28,10 +25,7 @@ fn test_option_none() {
         optional_field: None,
         another_optional: None
     }"#;
-    
+
     let result: TestStruct = from_str(von_str).unwrap();
-    assert_eq!(result, TestStruct { 
-        optional_field: None, 
-        another_optional: None 
-    });
+    assert_eq!(result, TestStruct { optional_field: None, another_optional: None });
 }

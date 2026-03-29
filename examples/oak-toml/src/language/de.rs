@@ -213,14 +213,61 @@ where
 /// 将 TomlRoot 转换为 Value
 fn root_into_value(root: TomlRoot) -> TomlValue {
     let mut table = HashMap::new();
+    let mut array_tables = HashMap::new();
 
-    // 处理顶层键值对
+    // 处理顶层项目
     for item in root.items {
-        if let crate::ast::TomlItem::KeyValue(kv) = item {
-            let key = kv.key.to_string();
-            let value = toml_value_node_into_value(kv.value);
-            table.insert(key, value);
+        match item {
+            crate::ast::TomlItem::KeyValue(kv) => {
+                let key = kv.key.to_string();
+                let value = toml_value_node_into_value(kv.value);
+                table.insert(key, value);
+            }
+            crate::ast::TomlItem::Table(t) => {
+                let key = t.header.key.to_string();
+                let mut table_items = HashMap::new();
+
+                // 处理表中的每个键值对
+                for kv in t.items {
+                    let kv_key = kv.key.to_string();
+                    let kv_value = toml_value_node_into_value(kv.value);
+                    table_items.insert(kv_key, kv_value);
+                }
+
+                // 将表添加到顶层表中
+                table.insert(key, TomlValue::Table(TomlTable { dict: table_items }));
+            }
+            crate::ast::TomlItem::ArrayOfTables(aot) => {
+                let key = aot.header.key.to_string();
+                let mut table_items = HashMap::new();
+
+                // 处理数组中的每个表
+                for kv in aot.items {
+                    let kv_key = kv.key.to_string();
+                    let kv_value = toml_value_node_into_value(kv.value);
+                    table_items.insert(kv_key, kv_value);
+                }
+
+                // 将表添加到数组中
+                let table_value = TomlValue::Table(TomlTable { dict: table_items });
+
+                // 如果数组不存在，创建一个新数组
+                if !array_tables.contains_key(&key) {
+                    array_tables.insert(key.clone(), Vec::new());
+                }
+
+                // 将表添加到数组中
+                array_tables.get_mut(&key).unwrap().push(table_value);
+            }
+            _ => {
+                // 忽略其他类型的项目
+            }
         }
+    }
+
+    // 将数组添加到表中
+    for (key, items) in array_tables {
+        table.insert(key, TomlValue::Array(TomlArray { list: items }));
     }
 
     TomlValue::Table(TomlTable { dict: table })

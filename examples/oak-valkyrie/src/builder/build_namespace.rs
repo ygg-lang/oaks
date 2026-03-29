@@ -1,6 +1,6 @@
 use crate::{
     ValkyrieLanguage,
-    ast::{Item, NamePath, Namespace},
+    ast::{NamePath, NamespaceDeclaration, StatementNode},
     builder::ValkyrieBuilder,
     lexer::token_type::ValkyrieTokenType,
     parser::element_type::ValkyrieElementType,
@@ -8,7 +8,7 @@ use crate::{
 use oak_core::{OakError, RedNode, RedTree, Source};
 
 impl<'config> ValkyrieBuilder<'config> {
-    pub(crate) fn build_namespace<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Namespace, OakError> {
+    pub(crate) fn build_namespace<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<NamespaceDeclaration, OakError> {
         let span = node.span();
         let mut name = NamePath { parts: Vec::new(), span: Default::default() };
         let mut annotations = Vec::new();
@@ -29,47 +29,47 @@ impl<'config> ValkyrieBuilder<'config> {
                     }
                     ValkyrieElementType::Namespace => {
                         let ns = self.build_namespace(n, source)?;
-                        items.push(Item::Namespace(ns));
+                        items.push(StatementNode::Namespace(Box::new(ns)));
                     }
                     ValkyrieElementType::Class => {
                         let class = self.build_class(n, source)?;
-                        items.push(Item::Class(class));
+                        items.push(StatementNode::Class(Box::new(class)));
                     }
                     ValkyrieElementType::Flags => {
                         let flags = self.build_flags(n, source)?;
-                        items.push(Item::Flags(flags));
+                        items.push(StatementNode::Flags(Box::new(flags)));
                     }
                     ValkyrieElementType::Enums => {
                         let enums = self.build_enums(n, source)?;
-                        items.push(Item::Enums(enums));
+                        items.push(StatementNode::Enums(Box::new(enums)));
                     }
                     ValkyrieElementType::Trait => {
                         let trait_node = self.build_trait(n, source)?;
-                        items.push(Item::Trait(trait_node));
+                        items.push(StatementNode::Trait(Box::new(trait_node)));
                     }
                     ValkyrieElementType::Widget => {
                         let widget = self.build_widget(n, source)?;
-                        items.push(Item::Widget(widget));
+                        items.push(StatementNode::Widget(Box::new(widget)));
                     }
                     ValkyrieElementType::UsingStatement => {
                         let us = self.build_using(n, source)?;
-                        items.push(Item::Using(us));
+                        items.push(StatementNode::Using(Box::new(us)));
                     }
                     ValkyrieElementType::Micro => {
                         let micro = self.build_micro(n, source)?;
-                        items.push(Item::Micro(micro));
+                        items.push(StatementNode::Micro(Box::new(micro)));
                     }
                     ValkyrieElementType::Mezzo => {
                         let mezzo = self.build_mezzo(n, source)?;
-                        items.push(Item::TypeFunction(mezzo));
+                        items.push(StatementNode::TypeFunction(Box::new(mezzo)));
                     }
                     ValkyrieElementType::LetStatement => {
                         let stmt = self.build_let(n, source)?;
-                        items.push(Item::Statement(stmt));
+                        items.push(StatementNode::Let(Box::new(stmt)));
                     }
                     ValkyrieElementType::ExprStatement => {
                         let stmt = self.build_expr_stmt(n, source)?;
-                        items.push(Item::Statement(stmt));
+                        items.push(StatementNode::ExprStmt(Box::new(stmt)));
                     }
                     ValkyrieElementType::BlockExpression => {
                         for inner_child in n.children() {
@@ -84,6 +84,6 @@ impl<'config> ValkyrieBuilder<'config> {
                 },
             }
         }
-        Ok(Namespace { name, annotations, items, span })
+        Ok(NamespaceDeclaration { name, annotations, items, span })
     }
 }

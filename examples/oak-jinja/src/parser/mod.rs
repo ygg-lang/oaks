@@ -70,6 +70,11 @@ impl<'config> JinjaParser<'config> {
                     "for" => self.parse_for_statement(state, cp),
                     "block" => self.parse_block_statement(state, cp),
                     "macro" => self.parse_macro_definition(state, cp),
+                    "extends" => self.parse_extends_statement(state, cp),
+                    "include" => self.parse_include_statement(state, cp),
+                    "set" => self.parse_set_statement(state, cp),
+                    "from" => self.parse_from_import_statement(state, cp),
+                    "import" => self.parse_import_statement(state, cp),
                     _ => {
                         while state.not_at_end() && !state.at(JinjaTokenType::PercentRightBrace) {
                             state.advance();
@@ -98,8 +103,8 @@ impl<'config> JinjaParser<'config> {
 
         while state.not_at_end() {
             if state.at(JinjaTokenType::LeftBracePercent) {
-                if let Some(JinjaTokenType::Identifier) = state.peek_kind_at(1) {
-                    let text = state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).unwrap_or_default();
+                if let Some(JinjaTokenType::Identifier) = state.peek_non_trivia_kind_at(1) {
+                    let text = state.peek_non_trivia_at(1).map(|t| state.source.get_text_in(t.span)).unwrap_or_default();
                     if text == "endif" || text == "elif" || text == "else" {
                         break;
                     }
@@ -109,7 +114,7 @@ impl<'config> JinjaParser<'config> {
         }
 
         if state.at(JinjaTokenType::LeftBracePercent) {
-            let text = state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).unwrap_or_default();
+            let text = state.peek_non_trivia_at(1).map(|t| state.source.get_text_in(t.span)).unwrap_or_default();
             if text == "elif" {
                 state.expect(JinjaTokenType::LeftBracePercent)?;
                 self.parse_if_statement(state, state.checkpoint())?;
@@ -118,13 +123,13 @@ impl<'config> JinjaParser<'config> {
                 state.expect(JinjaTokenType::LeftBracePercent)?;
                 state.expect(JinjaTokenType::Identifier)?; // else
                 state.expect(JinjaTokenType::PercentRightBrace)?;
-                while state.not_at_end() && !(state.at(JinjaTokenType::LeftBracePercent) && state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endif").unwrap_or(false)) {
+                while state.not_at_end() && !(state.at(JinjaTokenType::LeftBracePercent) && state.peek_non_trivia_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endif").unwrap_or(false)) {
                     self.parse_node(state)?;
                 }
             }
         }
 
-        if state.at(JinjaTokenType::LeftBracePercent) && state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endif").unwrap_or(false) {
+        if state.at(JinjaTokenType::LeftBracePercent) && state.peek_non_trivia_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endif").unwrap_or(false) {
             state.expect(JinjaTokenType::LeftBracePercent)?;
             state.expect(JinjaTokenType::Identifier)?; // endif
             state.expect(JinjaTokenType::PercentRightBrace)?;
@@ -144,8 +149,36 @@ impl<'config> JinjaParser<'config> {
         }
         state.expect(JinjaTokenType::PercentRightBrace)?;
 
-        while state.not_at_end() && !(state.at(JinjaTokenType::LeftBracePercent) && state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endfor").unwrap_or(false)) {
+        while state.not_at_end() {
+            if state.at(JinjaTokenType::LeftBracePercent) {
+                if let Some(JinjaTokenType::Identifier) = state.peek_non_trivia_kind_at(1) {
+                    let text = state.peek_non_trivia_at(1).map(|t| state.source.get_text_in(t.span)).unwrap_or_default();
+                    if text == "endfor" || text == "else" {
+                        break;
+                    }
+                }
+            }
             self.parse_node(state)?;
+        }
+
+        if state.at(JinjaTokenType::LeftBracePercent) {
+            let text = state.peek_non_trivia_at(1).map(|t| state.source.get_text_in(t.span)).unwrap_or_default();
+            if text == "else" {
+                state.expect(JinjaTokenType::LeftBracePercent)?;
+                state.expect(JinjaTokenType::Identifier)?; // else
+                state.expect(JinjaTokenType::PercentRightBrace)?;
+                while state.not_at_end() {
+                    if state.at(JinjaTokenType::LeftBracePercent) {
+                        if let Some(JinjaTokenType::Identifier) = state.peek_non_trivia_kind_at(1) {
+                            let text = state.peek_non_trivia_at(1).map(|t| state.source.get_text_in(t.span)).unwrap_or_default();
+                            if text == "endfor" {
+                                break;
+                            }
+                        }
+                    }
+                    self.parse_node(state)?;
+                }
+            }
         }
 
         state.expect(JinjaTokenType::LeftBracePercent)?;
@@ -161,7 +194,7 @@ impl<'config> JinjaParser<'config> {
         state.expect(JinjaTokenType::Identifier)?; // name
         state.expect(JinjaTokenType::PercentRightBrace)?;
 
-        while state.not_at_end() && !(state.at(JinjaTokenType::LeftBracePercent) && state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endblock").unwrap_or(false)) {
+        while state.not_at_end() && !(state.at(JinjaTokenType::LeftBracePercent) && state.peek_non_trivia_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endblock").unwrap_or(false)) {
             self.parse_node(state)?;
         }
 
@@ -195,7 +228,7 @@ impl<'config> JinjaParser<'config> {
 
         state.expect(JinjaTokenType::PercentRightBrace)?;
 
-        while state.not_at_end() && !(state.at(JinjaTokenType::LeftBracePercent) && state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endmacro").unwrap_or(false)) {
+        while state.not_at_end() && !(state.at(JinjaTokenType::LeftBracePercent) && state.peek_non_trivia_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endmacro").unwrap_or(false)) {
             self.parse_node(state)?;
         }
 
@@ -204,6 +237,55 @@ impl<'config> JinjaParser<'config> {
         state.expect(JinjaTokenType::PercentRightBrace)?;
 
         state.finish_at(cp, JinjaElementType::MacroDefinition);
+        Ok(())
+    }
+
+    fn parse_extends_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), oak_core::OakError> {
+        state.expect(JinjaTokenType::Identifier)?;
+        self.parse_expression(state)?;
+        state.expect(JinjaTokenType::PercentRightBrace)?;
+        state.finish_at(cp, JinjaElementType::Extends);
+        Ok(())
+    }
+
+    fn parse_include_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), oak_core::OakError> {
+        state.expect(JinjaTokenType::Identifier)?;
+        self.parse_expression(state)?;
+        state.expect(JinjaTokenType::PercentRightBrace)?;
+        state.finish_at(cp, JinjaElementType::Include);
+        Ok(())
+    }
+
+    fn parse_set_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), oak_core::OakError> {
+        state.expect(JinjaTokenType::Identifier)?;
+        state.expect(JinjaTokenType::Identifier)?;
+        state.expect(JinjaTokenType::Eq)?;
+        self.parse_expression(state)?;
+        state.expect(JinjaTokenType::PercentRightBrace)?;
+        state.finish_at(cp, JinjaElementType::Set);
+        Ok(())
+    }
+
+    fn parse_from_import_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), oak_core::OakError> {
+        state.expect(JinjaTokenType::Identifier)?;
+        self.parse_expression(state)?;
+        state.expect(JinjaTokenType::Identifier)?;
+        while state.not_at_end() && !state.at(JinjaTokenType::PercentRightBrace) {
+            state.advance();
+        }
+        state.expect(JinjaTokenType::PercentRightBrace)?;
+        state.finish_at(cp, JinjaElementType::FromImport);
+        Ok(())
+    }
+
+    fn parse_import_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), oak_core::OakError> {
+        state.expect(JinjaTokenType::Identifier)?;
+        self.parse_expression(state)?;
+        while state.not_at_end() && !state.at(JinjaTokenType::PercentRightBrace) {
+            state.advance();
+        }
+        state.expect(JinjaTokenType::PercentRightBrace)?;
+        state.finish_at(cp, JinjaElementType::Import);
         Ok(())
     }
 
@@ -231,9 +313,12 @@ impl<'config> JinjaParser<'config> {
 
     fn get_precedence(&self, kind: JinjaTokenType) -> i32 {
         match kind {
-            JinjaTokenType::Pipe => 1,
-            JinjaTokenType::Plus | JinjaTokenType::Minus => 2,
-            JinjaTokenType::Star | JinjaTokenType::Slash => 3,
+            JinjaTokenType::Or => 0,
+            JinjaTokenType::And => 1,
+            JinjaTokenType::EqEq | JinjaTokenType::Neq | JinjaTokenType::Lt | JinjaTokenType::Gt | JinjaTokenType::LtEq | JinjaTokenType::GtEq => 3,
+            JinjaTokenType::Pipe => 4,
+            JinjaTokenType::Plus | JinjaTokenType::Minus => 5,
+            JinjaTokenType::Star | JinjaTokenType::Slash => 6,
             _ => -1,
         }
     }
@@ -244,6 +329,22 @@ impl<'config> JinjaParser<'config> {
         match state.peek_kind() {
             Some(JinjaTokenType::Identifier) => {
                 state.advance();
+                loop {
+                    if state.at(JinjaTokenType::Dot) {
+                        state.advance();
+                        if state.at(JinjaTokenType::Identifier) {
+                            state.advance();
+                        }
+                    }
+                    else if state.at(JinjaTokenType::LeftBracket) {
+                        state.advance();
+                        self.parse_expression(state)?;
+                        state.expect(JinjaTokenType::RightBracket)?;
+                    }
+                    else {
+                        break;
+                    }
+                }
                 if state.at(JinjaTokenType::LeftParen) {
                     state.advance();
                     while state.not_at_end() && !state.at(JinjaTokenType::RightParen) {
@@ -267,6 +368,10 @@ impl<'config> JinjaParser<'config> {
                 state.advance();
                 self.parse_expression(state)?;
                 state.expect(JinjaTokenType::RightParen)?;
+            }
+            Some(JinjaTokenType::Not) => {
+                state.advance();
+                self.parse_primary_expression(state)?;
             }
             _ => {
                 while state.not_at_end() && !state.at(JinjaTokenType::PercentRightBrace) && !state.at(JinjaTokenType::DoubleRightBrace) && !state.at(JinjaTokenType::RightParen) && !state.at(JinjaTokenType::Comma) {

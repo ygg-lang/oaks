@@ -1,5 +1,5 @@
-use oak_highlighter::Highlighter as HighlighterTrait;
 use oak_core::lexer::Token;
+use oak_highlighter::Highlighter as HighlighterTrait;
 
 use crate::lexer::token_type::GlobTokenType;
 

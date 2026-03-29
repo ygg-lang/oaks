@@ -1,5 +1,5 @@
-use oak_formatter::Formatter as FormatterTrait;
 use oak_core::language::Language;
+use oak_formatter::Formatter as FormatterTrait;
 
 /// Formatter for glob pattern syntax.
 pub struct GlobFormatter;

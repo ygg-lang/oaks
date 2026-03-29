@@ -11,12 +11,6 @@ pub mod builder;
 pub mod language;
 /// Lexer for TypeScript.
 pub mod lexer;
-/// LSP-related functionality for TypeScript.
-#[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
-pub mod lsp;
-/// MCP module.
-#[cfg(feature = "mcp")]
-pub mod mcp;
 
 /// Parser for TypeScript.
 pub mod parser;

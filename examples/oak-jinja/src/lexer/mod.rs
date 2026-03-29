@@ -73,7 +73,7 @@ impl<'config> JinjaLexer<'config> {
             state.advance(ch.len_utf8());
         }
         if state.get_position() > start {
-            state.add_token(JinjaTokenType::Identifier, start, state.get_position());
+            state.add_token(JinjaTokenType::Text, start, state.get_position());
             return true;
         }
         false
@@ -190,11 +190,46 @@ impl<'config> JinjaLexer<'config> {
         if rest.starts_with(&self.config.tag_start) {
             state.advance(self.config.tag_start.len());
             state.add_token(JinjaTokenType::LeftBracePercent, start, state.get_position());
+            if state.peek() == Some('-') {
+                let trim_start = state.get_position();
+                state.advance(1);
+                state.add_token(JinjaTokenType::TrimMark, trim_start, state.get_position());
+            }
+            return true;
+        }
+        let trim_tag_end = format!("-{}", &self.config.tag_end);
+        if rest.starts_with(&trim_tag_end) {
+            let trim_start = state.get_position();
+            state.advance(1);
+            state.add_token(JinjaTokenType::TrimMark, trim_start, state.get_position());
+            state.advance(self.config.tag_end.len());
+            state.add_token(JinjaTokenType::PercentRightBrace, start, state.get_position());
             return true;
         }
         if rest.starts_with(&self.config.tag_end) {
             state.advance(self.config.tag_end.len());
             state.add_token(JinjaTokenType::PercentRightBrace, start, state.get_position());
+            return true;
+        }
+
+        if rest.starts_with("==") {
+            state.advance(2);
+            state.add_token(JinjaTokenType::EqEq, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("!=") {
+            state.advance(2);
+            state.add_token(JinjaTokenType::Neq, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("<=") {
+            state.advance(2);
+            state.add_token(JinjaTokenType::LtEq, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with(">=") {
+            state.advance(2);
+            state.add_token(JinjaTokenType::GtEq, start, state.get_position());
             return true;
         }
 
@@ -258,6 +293,9 @@ impl<'config> JinjaLexer<'config> {
                 // Check if it is a boolean keyword
                 let kind = match text.as_ref() {
                     "true" | "false" => JinjaTokenType::Boolean,
+                    "and" => JinjaTokenType::And,
+                    "or" => JinjaTokenType::Or,
+                    "not" => JinjaTokenType::Not,
                     _ => JinjaTokenType::Identifier,
                 };
                 state.add_token(kind, start, end);

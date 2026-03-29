@@ -31,6 +31,12 @@ pub enum Block {
     Html(Html),
     /// Abbreviation definition.
     AbbreviationDefinition(AbbreviationDefinition),
+    /// MDX import statement.
+    MdxImport(MdxImport),
+    /// MDX export statement.
+    MdxExport(MdxExport),
+    /// MDX JSX component.
+    MdxComponent(MdxComponent),
 }
 
 /// Abbreviation definition element.
@@ -214,4 +220,61 @@ pub enum Inline {
         /// Abbreviation definition.
         definition: String,
     },
+    /// MDX JSX expression.
+    MdxExpression {
+        /// Expression content.
+        content: String,
+        /// Source code range.
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+        span: Range<usize>,
+    },
+}
+
+/// MDX import statement.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct MdxImport {
+    /// Import statement content.
+    pub content: String,
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// MDX export statement.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct MdxExport {
+    /// Export statement content.
+    pub content: String,
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// MDX JSX component.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct MdxComponent {
+    /// Component name.
+    pub name: String,
+    /// Component attributes.
+    pub attributes: Vec<MdxAttribute>,
+    /// Whether it's a self-closing tag.
+    pub is_self_closing: bool,
+    /// Child components (if not self-closing).
+    pub children: Vec<Block>,
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// MDX component attribute.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct MdxAttribute {
+    /// Attribute name.
+    pub name: String,
+    /// Attribute value.
+    pub value: Option<String>,
 }

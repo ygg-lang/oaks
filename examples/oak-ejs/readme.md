@@ -1,34 +1,60 @@
-# 🚀 Oak JavaScript Parser
+# 🚀 Oak EJS Template Parser
 
-[![Crates.io](https://img.shields.io/crates/v/oak-javascript.svg)](https://crates.io/crates/oak-javascript)
-[![Documentation](https://docs.rs/oak-javascript/badge.svg)](https://docs.rs/oak-javascript)
+[![Crates.io](https://img.shields.io/crates/v/oak-ejs.svg)](https://crates.io/crates/oak-ejs)
+[![Documentation](https://docs.rs/oak-ejs/badge.svg)](https://docs.rs/oak-ejs)
 
-**Performance and Flexibility for the Web Ecosystem** — A high-performance, incremental JavaScript parser built on the Oak framework. Optimized for modern ECMAScript (ES2022+) features, JSX support, and real-time developer tools.
+**Embedded JavaScript Templates for the Oak Ecosystem** — A high-performance, incremental EJS template parser built on the Oak framework. Optimized for server-side rendering, static site generation, and real-time template processing.
 
 ## 🎯 Project Vision
 
-JavaScript is the backbone of the modern web, with an ecosystem that moves faster than almost any other. `oak-javascript` aims to provide a robust, modern, Rust-powered infrastructure for parsing JavaScript that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, static analyzers, and refactoring tools that can handle massive JavaScript projects in real-time. Whether you are building custom linters, automated code migration tools, or sophisticated IDE extensions, `oak-javascript` provides the high-fidelity AST and efficiency needed to keep pace with the continuous evolution of ECMAScript.
+EJS (Embedded JavaScript) is one of the most popular templating engines for JavaScript, enabling developers to embed JavaScript code directly within HTML templates. `oak-ejs` provides a robust, Rust-powered infrastructure for parsing EJS templates that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive template engines, static site generators, and server-side rendering tools.
 
 ## ✨ Core Features
 
-- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time analysis in large web projects.
-- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for large-scale JavaScript projects where maintainability and tool responsiveness are critical.
-- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of modern JavaScript:
-    - **Modern ECMAScript**: Full support for ES2022+ features, including classes, async/await, and optional chaining.
-    - **JSX Support**: First-class support for parsing JSX syntax, essential for modern React and Vue development.
-    - **Asynchronous Programming**: Deep integration of `async`, `await`, and `Promise` related constructs.
-    - **Modules**: Robust handling of ESM (`import`/`export`) and CommonJS module systems.
-    - **Decorators**: Support for experimental and proposed decorator syntax.
-- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active coding.
-- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-throughput template rendering.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for hot-reloading during development.
+- **🌳 High-Fidelity AST**: Generates a comprehensive Abstract Syntax Tree capturing the full structure of EJS templates:
+    - **Output Expressions**: `<%= ... %>` for HTML-escaped output, `<%- ... %>` for raw output.
+    - **Code Blocks**: `<% ... %>` for arbitrary JavaScript code execution.
+    - **Comments**: `<%# ... %>` for template comments that are not rendered.
+    - **Escaped Tags**: `<%%` renders as literal `<%` in the output.
+    - **Trim Mode**: `-%>` trims the following newline.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and template intelligence.
+
+## 📖 EJS Syntax Reference
+
+| Syntax | Description |
+|--------|-------------|
+| `<% code %>` | Execute JavaScript code (no output) |
+| `<%= value %>` | Output HTML-escaped value |
+| `<%- value %>` | Output raw value (no escaping) |
+| `<%# comment %>` | Comment (not rendered) |
+| `<%%` | Literal `<%` in output |
+| `-%>` | Trim following newline |
 
 ## 🏗️ Architecture
 
 The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
 1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
-2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful template formatting.
 3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
+## 🚦 Quick Start
+
+```rust
+use oak_ejs::{EjsLanguage, EjsLexer, EjsParser, EjsElementType};
+use oak_core::SourceText;
+
+fn main() {
+    let template = r#"<h1>Hello, <%= name %>!</h1>"#;
+    let source = SourceText::new(template);
+    let config = EjsLanguage::default();
+    
+    let parser = EjsParser::new(&config);
+    // Parse and process the template...
+}
+```
 
 ## 🤝 Contributing
 

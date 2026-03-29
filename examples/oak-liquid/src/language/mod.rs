@@ -50,7 +50,7 @@ impl Language for LiquidLanguage {
 
     type TokenType = LiquidTokenType;
     type ElementType = LiquidElementType;
-    type TypedRoot = LiquidRoot<'static>;
+    type TypedRoot = LiquidRoot;
 }
 
 impl LiquidLanguage {

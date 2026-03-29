@@ -1,7 +1,19 @@
 use crate::{DejavuLanguage, DejavuLexer};
-use oak_core::{Parser, TextEdit, parser::ParseCache};
-
 pub use element_type::DejavuElementType;
+use oak_core::{Parser, TextEdit, parser::ParseCache};
+// Import extension trait to bring parse methods into scope
+use parse_raw::DejavuParserExt;
+
+/// Element type definitions.
+pub mod element_type;
+/// Control flow parsing utilities.
+pub mod parse_control_flow;
+/// Expression parsing utilities.
+pub mod parse_expr;
+/// Raw block parsing utilities.
+pub mod parse_raw;
+/// Type parsing utilities.
+pub mod parse_types;
 
 /// Checkpoint type alias for parser state positions.
 pub type Checkpoint = (usize, usize);
@@ -279,7 +291,7 @@ impl<'config> DejavuParser<'config> {
         if has_tokens {
             state.finish_at(inner_cp, DejavuElementType::NamePath);
         }
-        state.finish_at(expr_cp, DejavuElementType::PathExpression);
+        state.finish_at(expr_cp, DejavuElementType::Expression);
 
         if state.at(crate::lexer::token_type::DejavuTokenType::TemplateControlEnd) || state.at(crate::lexer::token_type::DejavuTokenType::CodeEnd) {
             state.bump();
@@ -530,17 +542,3 @@ impl<'config> Parser<DejavuLanguage> for DejavuParser<'config> {
         })
     }
 }
-
-/// Element type definitions.
-pub mod element_type;
-/// Control flow parsing utilities.
-pub mod parse_control_flow;
-/// Expression parsing utilities.
-pub mod parse_expr;
-/// Raw block parsing utilities.
-pub mod parse_raw;
-/// Type parsing utilities.
-pub mod parse_types;
-
-// Import extension trait to bring parse methods into scope
-use parse_raw::DejavuParserExt;

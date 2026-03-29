@@ -1,4 +1,4 @@
-use crate::{ast::VocRoot, lexer::token_type::VocTokenType, parser::element_type::VocElementType};
+use crate::{ast::VxDocument, lexer::token_type::VocTokenType, parser::element_type::VocElementType};
 use oak_core::{Language, LanguageCategory};
 
 /// VOC language configuration and metadata.
@@ -25,5 +25,5 @@ impl Language for VocLanguage {
 
     type TokenType = VocTokenType;
     type ElementType = VocElementType;
-    type TypedRoot = VocRoot;
+    type TypedRoot = VxDocument;
 }

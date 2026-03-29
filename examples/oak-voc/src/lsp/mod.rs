@@ -17,6 +17,7 @@ impl<V: Vfs> VocLanguageService<V> {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }
 }
+#[cfg(feature = "lsp")]
 impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for VocLanguageService<V> {
     type Lang = VocLanguage;
     type Vfs = V;

@@ -1,5 +1,5 @@
 use oak_valkyrie::{
-    ast::{Expr, Identifier, Span, StringSegment},
+    ast::{Identifier, Span, StringSegment, TermExpression},
     parser::parse_string_segments,
 };
 
@@ -27,7 +27,7 @@ fn test_simple_interpolation() {
         StringSegment::Interpolation { expr, is_fluent, .. } => {
             assert!(!is_fluent);
             match expr.as_ref() {
-                Expr::Ident(ident) => assert_eq!(ident.name, "name"),
+                TermExpression::Identifier(ident) => assert_eq!(ident.name, "name"),
                 _ => panic!("Expected Identifier"),
             }
         }
@@ -80,7 +80,7 @@ fn test_nested_braces() {
 
     match &segments[1] {
         StringSegment::Interpolation { expr, .. } => match expr.as_ref() {
-            Expr::Ident(ident) => assert_eq!(ident.name, "foo{bar}"),
+            TermExpression::Identifier(ident) => assert_eq!(ident.name, "foo{bar}"),
             _ => panic!("Expected Identifier"),
         },
         _ => panic!("Expected Interpolation segment"),
@@ -95,7 +95,7 @@ fn test_multiple_interpolations() {
     for (i, segment) in segments.iter().enumerate() {
         match segment {
             StringSegment::Interpolation { expr, .. } => match expr.as_ref() {
-                Expr::Ident(ident) => {
+                TermExpression::Identifier(ident) => {
                     let expected = match i {
                         0 => "a",
                         1 => "b",

@@ -1,6 +1,6 @@
 use crate::{
     ValkyrieLanguage,
-    ast::*,
+    ast::{type_nodes::AssociatedType, *},
     builder::{ValkyrieBuilder, text},
     lexer::{ValkyrieKeywords, token_type::ValkyrieTokenType},
     parser::element_type::ValkyrieElementType,
@@ -53,7 +53,7 @@ impl<'config> ValkyrieBuilder<'config> {
         Ok(TypeFunction { name, generics, annotations, params, return_type, body, span })
     }
 
-    pub(crate) fn build_micro<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<MicroDefinition, OakError> {
+    pub(crate) fn build_micro<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<MicroDeclaration, OakError> {
         let span = node.span();
         let mut name = Identifier { name: String::new(), span: Default::default() };
         let mut generics = Vec::new();
@@ -106,34 +106,7 @@ impl<'config> ValkyrieBuilder<'config> {
 
         let body = if is_abstract { Block { statements: Vec::new(), span: span.clone() } } else { body.ok_or_else(|| source.syntax_error(format!("Missing micro body at {:?}", span), span.start))? };
 
-        Ok(MicroDefinition { name, generics, annotations, params, return_type, body, span, is_abstract, is_final })
-    }
-
-    pub(crate) fn build_lambda_expr<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<LambdaExpr, OakError> {
-        let span = node.span();
-        let mut params = Vec::new();
-        let mut return_type = None;
-        let mut body = None;
-
-        for child in node.children() {
-            match child {
-                RedTree::Leaf(t) => match t.kind {
-                    ValkyrieTokenType::Whitespace | ValkyrieTokenType::Newline | ValkyrieTokenType::LineComment | ValkyrieTokenType::BlockComment => continue,
-                    _ => {}
-                },
-                RedTree::Node(n) => match n.green.kind {
-                    ValkyrieElementType::Whitespace | ValkyrieElementType::Newline | ValkyrieElementType::LineComment | ValkyrieElementType::BlockComment => continue,
-                    ValkyrieElementType::ParameterList => params = self.build_params(n, source)?,
-                    ValkyrieElementType::Type => return_type = Some(self.build_type(n, source)?),
-                    ValkyrieElementType::BlockExpression => body = Some(self.build_block(n, source)?),
-                    _ => {}
-                },
-            }
-        }
-
-        let body = body.ok_or_else(|| source.syntax_error(format!("Missing lambda body at {:?}", span), span.start))?;
-
-        Ok(LambdaExpr { params, return_type, body, span })
+        Ok(MicroDeclaration { name, generics, annotations, params, return_type, body, span, is_abstract, is_final })
     }
 
     pub(crate) fn build_generic_params<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Vec<GenericParam>, OakError> {
@@ -187,7 +160,7 @@ impl<'config> ValkyrieBuilder<'config> {
         Ok(GenericParam { name, constraints, default, span })
     }
 
-    pub(crate) fn build_type<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Type, OakError> {
+    pub(crate) fn build_type<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<TypeExpression, OakError> {
         let span = node.span();
         let mut base_ident: Option<Identifier> = None;
         let mut has_double_colon = false;
@@ -220,7 +193,7 @@ impl<'config> ValkyrieBuilder<'config> {
                     ValkyrieElementType::NamePath => {
                         if base_ident.is_none() {
                             let path = self.build_name_path(n, source)?;
-                            return Ok(Type::Named { path, span });
+                            return Ok(TypeExpression::Namepath(Box::new(path)));
                         }
                     }
                     _ => {}
@@ -229,13 +202,13 @@ impl<'config> ValkyrieBuilder<'config> {
         }
 
         if let (Some(base), true, Some(name)) = (base_ident.clone(), has_double_colon, associated_name) {
-            Ok(Type::AssociatedType { base, name, span })
+            Ok(TypeExpression::AssociatedType(Box::new(AssociatedType { base, name, span })))
         }
         else if let Some(base) = base_ident {
-            Ok(Type::Named { path: NamePath { parts: vec![base], span }, span })
+            Ok(TypeExpression::Namepath(Box::new(NamePath { parts: vec![base], span })))
         }
         else {
-            Ok(Type::Named { path: NamePath { parts: Vec::new(), span }, span })
+            Ok(TypeExpression::Namepath(Box::new(NamePath { parts: Vec::new(), span })))
         }
     }
 

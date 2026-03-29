@@ -1,9 +1,31 @@
-use super::Item;
+//! Root nodes for the Valkyrie language AST.
+//!
+//! This module defines the core root-level nodes for the Valkyrie language, including:
+//! - Source code spans
+//! - Loop and enum keyword kinds
+//! - Identifiers
+//! - Name paths
+//! - The root AST node
 
-/// Source code span
+use crate::ast::items_nodes::StatementNode;
+
+/// Source code span representing a range of positions in the source code.
 pub type Span = oak_core::Range<usize>;
 
 /// Loop keyword kind for deprecation warnings.
+///
+/// # V Language Example
+/// ```v
+/// // Preferred syntax
+/// loop i in 0..10 {
+///     println(i)
+/// }
+///
+/// // Deprecated syntax (use `loop` instead)
+/// for i in 0..10 {
+///     println(i)
+/// }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum LoopKind {
@@ -14,24 +36,31 @@ pub enum LoopKind {
     For,
 }
 
-/// Structure keyword kind for class-like definitions.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum StructureKind {
-    /// Using `class` keyword.
-    #[default]
-    Class,
-    /// Using `struct` keyword (deprecated, use `class` instead).
-    Struct,
-    /// Using `structure` keyword.
-    Structure,
-    /// Using `widget` keyword.
-    Widget,
-    /// Using `trait` keyword.
-    Trait,
-}
-
 /// Enums keyword kind for deprecation warnings.
+///
+/// # V Language Example
+/// ```v
+/// // Preferred syntax
+/// enums Color {
+///     Red
+///     Green
+///     Blue
+/// }
+///
+/// // Alternative preferred syntax
+/// unity Color {
+///     Red
+///     Green
+///     Blue
+/// }
+///
+/// // Deprecated syntax (use `enums` or `unity` instead)
+/// enum Color {
+///     Red
+///     Green
+///     Blue
+/// }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum EnumsKind {
@@ -44,7 +73,19 @@ pub enum EnumsKind {
     Unity,
 }
 
-/// An identifier
+/// An identifier representing a name in the source code.
+///
+/// # V Language Example
+/// ```v
+/// // Identifier examples
+/// let name = "John"  // 'name' is an identifier
+/// let age: i32 = 30   // 'age' is an identifier
+///
+/// micro greet(name: String) -> String {
+///     return "Hello, " + name
+/// }
+/// // 'greet' is an identifier
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Identifier {
@@ -61,7 +102,21 @@ impl Default for Identifier {
     }
 }
 
-/// A name path (e.g., `std::collections::HashMap`)
+/// A name path representing a qualified name (e.g., `std::collections::HashMap`).
+///
+/// # V Language Example
+/// ```v
+/// // Name path examples
+/// using std::collections::HashMap
+///
+/// class Person {
+///     name: String
+///     age: i32
+/// }
+///
+/// let map: HashMap<String, Person> = HashMap::new()
+/// // 'std::collections::HashMap' is a name path
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NamePath {
@@ -72,10 +127,32 @@ pub struct NamePath {
     pub span: Span,
 }
 
-/// Valkyrie root node.
+/// Valkyrie root node representing the entire AST of a Valkyrie module.
+///
+/// # V Language Example
+/// ```v
+/// // A complete Valkyrie module
+/// using std::io
+///
+/// class Person {
+///     name: String
+///     age: i32
+///
+///     micro new(name: String, age: i32) -> Person {
+///         return Person { name: name, age: age }
+///     }
+///
+///     micro greet(self) -> String {
+///         return "Hello, my name is " + self.name
+///     }
+/// }
+///
+/// let person = Person::new("John", 30)
+/// println(person.greet())
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ValkyrieRoot {
     /// The collection of top-level items in the Valkyrie module.
-    pub items: Vec<Item>,
+    pub items: Vec<StatementNode>,
 }

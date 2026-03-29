@@ -73,7 +73,8 @@ impl<'config> VonParser<'config> {
                     if !state.eat(VonTokenType::RightParen) {
                         state.record_expected(")");
                     }
-                } else {
+                }
+                else {
                     self.parse_value(state)?;
                 }
             }

@@ -173,7 +173,7 @@ impl<'a> TypedNode<'a> for WolframPostfixExpr<'a> {
     }
 }
 
-/// Wolfram parenthesized expression (expr).
+/// Wolfram parenthesized expression (terms).
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct WolframExpression<'a> {
     /// The underlying green node.

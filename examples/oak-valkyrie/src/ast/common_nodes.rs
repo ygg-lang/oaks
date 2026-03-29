@@ -1,21 +1,4 @@
-use super::{Block, Expr, GenericParam, Identifier, Param, Pattern, Span, Type};
-
-/// A field in a class or struct
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Field {
-    /// The field name.
-    pub name: Identifier,
-    /// The field type.
-    pub ty: Type,
-    /// Optional default value expression.
-    pub default: Option<Expr>,
-    /// Annotations applied to the field.
-    pub annotations: Vec<Attribute>,
-    /// The source code span.
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-    pub span: Span,
-}
+use super::{Block, FieldDeclaration, GenericParam, Identifier, Param, Pattern, Span, TermExpression, TypeExpression};
 
 /// An attribute
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -24,7 +7,7 @@ pub struct Attribute {
     /// The attribute name.
     pub name: Identifier,
     /// The attribute arguments.
-    pub args: Vec<Expr>,
+    pub args: Vec<TermExpression>,
     /// The source code span.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Span,
@@ -50,48 +33,33 @@ pub struct StringLiteral {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum StringSegment {
     /// Text content.
-    Text {
-        /// The text content.
-        content: String,
-        /// The source code span.
-        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-        span: Span,
-    },
+    Text(Box<TextSegment>),
     /// Interpolation expression.
-    Interpolation {
-        /// The interpolation expression.
-        expr: Box<Expr>,
-        /// Whether this is a Fluent variable (with the ߷ marker).
-        is_fluent: bool,
-        /// The source code span.
-        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-        span: Span,
-    },
+    Interpolation(Box<InterpolationSegment>),
 }
 
-/// A function definition
+/// Text content segment.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Function {
-    /// The function name.
-    pub name: Identifier,
-    /// Generic parameters for the function.
-    pub generics: Vec<GenericParam>,
-    /// The function parameters.
-    pub params: Vec<Param>,
-    /// Optional return type annotation.
-    pub return_type: Option<Type>,
-    /// The optional function body.
-    pub body: Option<Block>,
-    /// Annotations applied to the function.
-    pub annotations: Vec<Attribute>,
+pub struct TextSegment {
+    /// The text content.
+    pub content: String,
     /// The source code span.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Span,
-    /// Whether this function is abstract (has no body implementation).
-    pub is_abstract: bool,
-    /// Whether this function is final (cannot be overridden).
-    pub is_final: bool,
+}
+
+/// Interpolation expression segment.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct InterpolationSegment {
+    /// The interpolation expression.
+    pub expr: TermExpression,
+    /// Whether this is a Fluent variable (with the ߷ marker).
+    pub is_fluent: bool,
+    /// The source code span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Span,
 }
 
 /// An enum variant
@@ -101,14 +69,14 @@ pub struct EnumVariant {
     /// The variant name.
     pub name: Identifier,
     /// The variant fields.
-    pub fields: Vec<Field>,
+    pub fields: Vec<FieldDeclaration>,
     /// Annotations applied to the variant.
     pub annotations: Vec<Attribute>,
     /// The source code span.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Span,
     /// Optional value expression for flags (e.g., `READ = 1` or `ALL = READ | WRITE`).
-    pub value: Option<Expr>,
+    pub value: Option<TermExpression>,
 }
 
 /// A variant case
@@ -118,7 +86,7 @@ pub struct VariantCase {
     /// The pattern for this case.
     pub pattern: Pattern,
     /// The body expression for this case.
-    pub body: Expr,
+    pub body: TermExpression,
     /// The source code span.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Span,

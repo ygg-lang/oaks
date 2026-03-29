@@ -13,32 +13,15 @@ pub mod builder;
 pub mod language;
 /// Lexer module.
 pub mod lexer;
-/// LSP module.
-#[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
-pub mod lsp;
-/// MCP module.
-#[cfg(feature = "mcp")]
-pub mod mcp;
 
 /// Parser module.
 pub mod parser;
 
-pub use crate::{ast::ValkyrieRoot, builder::ValkyrieBuilder, language::ValkyrieLanguage, lexer::ValkyrieLexer, parser::ValkyrieParser};
-
+pub use crate::{
+    ast::ValkyrieRoot,
+    builder::ValkyrieBuilder,
+    language::ValkyrieLanguage,
+    lexer::{ValkyrieLexer, token_type::ValkyrieTokenType},
+    parser::{ValkyrieParser, element_type::ValkyrieElementType},
+};
 pub use oak_core::{ElementType, TokenType};
-
-/// Highlighter implementation.
-#[cfg(feature = "oak-highlight")]
-pub use crate::lsp::highlighter::ValkyrieHighlighter;
-
-#[cfg(feature = "lsp")]
-pub use crate::lsp::ValkyrieLanguageService;
-/// LSP implementation.
-#[cfg(feature = "lsp")]
-pub use crate::lsp::formatter::ValkyrieFormatter;
-
-/// MCP service implementation.
-#[cfg(feature = "mcp")]
-pub use crate::mcp::serve_valkyrie_mcp;
-pub use lexer::token_type::ValkyrieTokenType;
-pub use parser::element_type::ValkyrieElementType;

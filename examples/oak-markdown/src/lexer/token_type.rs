@@ -119,6 +119,14 @@ pub enum MarkdownTokenType {
     XmlTag,
     /// An XML comment.
     XmlComment,
+    /// MDX import statement.
+    MdxImport,
+    /// MDX export statement.
+    MdxExport,
+    /// MDX JSX expression.
+    MdxExpression,
+    /// MDX JSX component.
+    MdxComponent,
     /// An asterisk: `*`.
     Asterisk,
     /// An underscore: `_`.

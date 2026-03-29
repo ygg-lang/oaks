@@ -1,9 +1,13 @@
 pub use element_type::ValkyrieElementType;
 
-use crate::{ValkyrieLanguage, ValkyrieLexer};
+use crate::{ValkyrieLanguage, ValkyrieLexer, parser::parse_items::parse_item};
 use oak_core::{Parser, Source, TextEdit, parser::ParseCache};
 
-/// Valkyrie parser.
+/// Valkyrie 语言解析器
+///
+/// 将 Valkyrie 源码解析为结构化的 green tree 节点。
+/// 支持完整的 Valkyrie 语言特性：micro/mezzo 函数、namespace、class、struct、
+/// enums、flags、trait、表达式、控制流等。
 pub struct ValkyrieParser<'config> {
     config: &'config ValkyrieLanguage,
 }
@@ -11,27 +15,32 @@ pub struct ValkyrieParser<'config> {
 impl<'config> Parser<ValkyrieLanguage> for ValkyrieParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<ValkyrieLanguage>) -> oak_core::parser::ParseOutput<'a, ValkyrieLanguage> {
         oak_core::parser::parse_with_lexer(&ValkyrieLexer::new(self.config), text, edits, cache, |state| {
-            let checkpoint = state.sink.checkpoint();
+            let cp = state.sink.checkpoint();
             while state.not_at_end() {
-                state.advance();
+                parse_item(state)?;
+                state.skip_trivia();
             }
-            let root = state.sink.finish_node(checkpoint, ValkyrieElementType::Root);
+            let root = state.sink.finish_node(cp, ValkyrieElementType::Root);
             Ok(root)
         })
     }
 }
 
 impl<'config> ValkyrieParser<'config> {
-    /// Create a new Valkyrie parser.
+    /// 创建新的 Valkyrie 解析器
     pub fn new(config: &'config ValkyrieLanguage) -> Self {
         Self { config }
     }
 }
 
-/// Element type definitions for the Valkyrie parser.
+/// 元素类型定义
 pub mod element_type;
 
-/// String segment parser for interpolation and escape handling.
-pub mod parse_string_segments;
-
-pub use parse_string_segments::parse_string_segments;
+pub(crate) mod parse_blocks;
+pub(crate) mod parse_control;
+pub(crate) mod parse_expressions;
+pub(crate) mod parse_items;
+pub(crate) mod parse_statements;
+/// 字符串段解析器（插值和转义处理）
+pub(crate) mod parse_string_segments;
+pub(crate) mod parse_types;

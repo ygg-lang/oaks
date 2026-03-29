@@ -134,9 +134,7 @@ impl VonValue {
     /// Returns a reference to the enum if the value is an enum.
     pub fn as_enum(&self) -> Option<(&String, Option<&VonValue>)> {
         match self {
-            VonValue::Enum(VonEnum { variant, payload }) => {
-                Some((variant, payload.as_deref()))
-            }
+            VonValue::Enum(VonEnum { variant, payload }) => Some((variant, payload.as_deref())),
             _ => None,
         }
     }
@@ -144,9 +142,7 @@ impl VonValue {
     /// Gets a value from the object by key name.
     pub fn get(&self, key: &str) -> Option<&VonValue> {
         match self {
-            VonValue::Object(VonObject { fields: o }) => {
-                o.iter().find(|field| field.name == key).map(|field| &field.value)
-            }
+            VonValue::Object(VonObject { fields: o }) => o.iter().find(|field| field.name == key).map(|field| &field.value),
             _ => None,
         }
     }
@@ -210,30 +206,10 @@ pub fn from_ast(value: &crate::ast::VonValue) -> VonValue {
         crate::ast::VonValue::Boolean(b) => VonValue::Boolean(b.value),
         crate::ast::VonValue::Number(n) => VonValue::Number(n.value),
         crate::ast::VonValue::String(s) => VonValue::String(s.value.clone()),
-        crate::ast::VonValue::Array(a) => {
-            VonValue::Array(VonArray {
-                elements: a.elements.iter().map(from_ast).collect(),
-            })
-        }
-        crate::ast::VonValue::Tuple(t) => {
-            VonValue::Tuple(VonTuple {
-                elements: t.elements.iter().map(from_ast).collect(),
-            })
-        }
-        crate::ast::VonValue::Object(o) => {
-            VonValue::Object(VonObject {
-                fields: o.fields.iter().map(|field| VonField {
-                    name: field.name.clone(),
-                    value: from_ast(&field.value),
-                }).collect(),
-            })
-        }
-        crate::ast::VonValue::Enum(e) => {
-            VonValue::Enum(VonEnum {
-                variant: e.variant.clone(),
-                payload: e.payload.as_ref().map(|p| Box::new(from_ast(p))),
-            })
-        }
+        crate::ast::VonValue::Array(a) => VonValue::Array(VonArray { elements: a.elements.iter().map(from_ast).collect() }),
+        crate::ast::VonValue::Tuple(t) => VonValue::Tuple(VonTuple { elements: t.elements.iter().map(from_ast).collect() }),
+        crate::ast::VonValue::Object(o) => VonValue::Object(VonObject { fields: o.fields.iter().map(|field| VonField { name: field.name.clone(), value: from_ast(&field.value) }).collect() }),
+        crate::ast::VonValue::Enum(e) => VonValue::Enum(VonEnum { variant: e.variant.clone(), payload: e.payload.as_ref().map(|p| Box::new(from_ast(p))) }),
         crate::ast::VonValue::Undefined(_) => VonValue::Undefined,
         crate::ast::VonValue::Inf(_) => VonValue::Inf,
         crate::ast::VonValue::Nan(_) => VonValue::Nan,
@@ -248,35 +224,10 @@ pub fn to_ast(value: &VonValue) -> crate::ast::VonValue {
         VonValue::Boolean(b) => AstVonValue::Boolean(VonBoolean { span: (0..0).into(), value: *b }),
         VonValue::Number(n) => AstVonValue::Number(VonNumber { span: (0..0).into(), value: *n }),
         VonValue::String(s) => AstVonValue::String(VonString { span: (0..0).into(), value: s.clone() }),
-        VonValue::Array(a) => {
-            AstVonValue::Array(crate::ast::VonArray {
-                elements: a.elements.iter().map(to_ast).collect(),
-                span: (0..0).into(),
-            })
-        }
-        VonValue::Tuple(t) => {
-            AstVonValue::Tuple(crate::ast::VonTuple {
-                elements: t.elements.iter().map(to_ast).collect(),
-                span: (0..0).into(),
-            })
-        }
-        VonValue::Object(o) => {
-            AstVonValue::Object(crate::ast::VonObject {
-                fields: o.fields.iter().map(|field| crate::ast::VonField {
-                    span: (0..0).into(),
-                    name: field.name.clone(),
-                    value: to_ast(&field.value),
-                }).collect(),
-                span: (0..0).into(),
-            })
-        }
-        VonValue::Enum(e) => {
-            AstVonValue::Enum(crate::ast::VonEnum {
-                span: (0..0).into(),
-                variant: e.variant.clone(),
-                payload: e.payload.as_ref().map(|p| Box::new(to_ast(p))),
-            })
-        }
+        VonValue::Array(a) => AstVonValue::Array(crate::ast::VonArray { elements: a.elements.iter().map(to_ast).collect(), span: (0..0).into() }),
+        VonValue::Tuple(t) => AstVonValue::Tuple(crate::ast::VonTuple { elements: t.elements.iter().map(to_ast).collect(), span: (0..0).into() }),
+        VonValue::Object(o) => AstVonValue::Object(crate::ast::VonObject { fields: o.fields.iter().map(|field| crate::ast::VonField { span: (0..0).into(), name: field.name.clone(), value: to_ast(&field.value) }).collect(), span: (0..0).into() }),
+        VonValue::Enum(e) => AstVonValue::Enum(crate::ast::VonEnum { span: (0..0).into(), variant: e.variant.clone(), payload: e.payload.as_ref().map(|p| Box::new(to_ast(p))) }),
         VonValue::Undefined => AstVonValue::Undefined(VonUndefined { span: (0..0).into() }),
         VonValue::Inf => AstVonValue::Inf(VonInf { span: (0..0).into() }),
         VonValue::Nan => AstVonValue::Nan(VonNan { span: (0..0).into() }),

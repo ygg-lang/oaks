@@ -366,10 +366,7 @@ impl DebugVisitor {
 impl StylusVisitor for DebugVisitor {
     fn visit_root(&mut self, node: &crate::ast::StylusRoot) -> VisitResult {
         self.print_indent();
-        println!(
-            "StylusRoot (span: {:?})\n",
-            node.span
-        );
+        println!("StylusRoot (span: {:?})\n", node.span);
         self.indent += 1;
         let result = VisitResult::Continue;
         self.indent -= 1;
@@ -378,10 +375,7 @@ impl StylusVisitor for DebugVisitor {
 
     fn visit_rule(&mut self, node: &crate::ast::StylusRule) -> VisitResult {
         self.print_indent();
-        println!(
-            "StylusRule (selector: {}, span: {:?})\n",
-            node.selector, node.span
-        );
+        println!("StylusRule (selector: {}, span: {:?})\n", node.selector, node.span);
         self.indent += 1;
         let result = VisitResult::Continue;
         self.indent -= 1;
@@ -390,28 +384,19 @@ impl StylusVisitor for DebugVisitor {
 
     fn visit_comment(&mut self, node: &crate::ast::StylusComment) -> VisitResult {
         self.print_indent();
-        println!(
-            "StylusComment (text: {}, span: {:?})\n",
-            node.text, node.span
-        );
+        println!("StylusComment (text: {}, span: {:?})\n", node.text, node.span);
         VisitResult::Continue
     }
 
     fn visit_property(&mut self, node: &crate::ast::StylusProperty) -> VisitResult {
         self.print_indent();
-        println!(
-            "StylusProperty (name: {}, value: {}, span: {:?})\n",
-            node.name, node.value, node.span
-        );
+        println!("StylusProperty (name: {}, value: {}, span: {:?})\n", node.name, node.value, node.span);
         VisitResult::Continue
     }
 
     fn visit_mixin(&mut self, node: &crate::ast::StylusMixin) -> VisitResult {
         self.print_indent();
-        println!(
-            "StylusMixin (name: {}, span: {:?})\n",
-            node.name, node.span
-        );
+        println!("StylusMixin (name: {}, span: {:?})\n", node.name, node.span);
         self.indent += 1;
         let result = VisitResult::Continue;
         self.indent -= 1;
@@ -420,28 +405,19 @@ impl StylusVisitor for DebugVisitor {
 
     fn visit_variable(&mut self, node: &crate::ast::StylusVariable) -> VisitResult {
         self.print_indent();
-        println!(
-            "StylusVariable (name: {}, value: {}, span: {:?})\n",
-            node.name, node.value, node.span
-        );
+        println!("StylusVariable (name: {}, value: {}, span: {:?})\n", node.name, node.value, node.span);
         VisitResult::Continue
     }
 
     fn visit_import(&mut self, node: &crate::ast::StylusImport) -> VisitResult {
         self.print_indent();
-        println!(
-            "StylusImport (path: {}, span: {:?})\n",
-            node.path, node.span
-        );
+        println!("StylusImport (path: {}, span: {:?})\n", node.path, node.span);
         VisitResult::Continue
     }
 
     fn visit_function(&mut self, node: &crate::ast::StylusFunction) -> VisitResult {
         self.print_indent();
-        println!(
-            "StylusFunction (name: {}, span: {:?})\n",
-            node.name, node.span
-        );
+        println!("StylusFunction (name: {}, span: {:?})\n", node.name, node.span);
         self.indent += 1;
         let result = VisitResult::Continue;
         self.indent -= 1;
@@ -450,10 +426,7 @@ impl StylusVisitor for DebugVisitor {
 
     fn visit_if(&mut self, node: &crate::ast::StylusIf) -> VisitResult {
         self.print_indent();
-        println!(
-            "StylusIf (condition: {}, span: {:?})\n",
-            node.condition, node.span
-        );
+        println!("StylusIf (condition: {}, span: {:?})\n", node.condition, node.span);
         self.indent += 1;
         let result = VisitResult::Continue;
         self.indent -= 1;
@@ -462,10 +435,7 @@ impl StylusVisitor for DebugVisitor {
 
     fn visit_for(&mut self, node: &crate::ast::StylusFor) -> VisitResult {
         self.print_indent();
-        println!(
-            "StylusFor (variable: {}, range: {}, span: {:?})\n",
-            node.variable, node.range, node.span
-        );
+        println!("StylusFor (variable: {}, range: {}, span: {:?})\n", node.variable, node.range, node.span);
         self.indent += 1;
         let result = VisitResult::Continue;
         self.indent -= 1;
@@ -474,10 +444,7 @@ impl StylusVisitor for DebugVisitor {
 
     fn visit_while(&mut self, node: &crate::ast::StylusWhile) -> VisitResult {
         self.print_indent();
-        println!(
-            "StylusWhile (condition: {}, span: {:?})\n",
-            node.condition, node.span
-        );
+        println!("StylusWhile (condition: {}, span: {:?})\n", node.condition, node.span);
         self.indent += 1;
         let result = VisitResult::Continue;
         self.indent -= 1;
@@ -486,10 +453,7 @@ impl StylusVisitor for DebugVisitor {
 
     fn visit_param(&mut self, node: &crate::ast::StylusParam) -> VisitResult {
         self.print_indent();
-        println!(
-            "StylusParam (name: {}, default: {:?}, span: {:?})\n",
-            node.name, node.default, node.span
-        );
+        println!("StylusParam (name: {}, default: {:?}, span: {:?})\n", node.name, node.default, node.span);
         VisitResult::Continue
     }
 }

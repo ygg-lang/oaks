@@ -23,6 +23,18 @@ pub enum JinjaElementType {
     ForStatement,
     /// Macro definition
     MacroDefinition,
+    /// Extends statement for template inheritance
+    Extends,
+    /// Include statement for template inclusion
+    Include,
+    /// Import statement for module import
+    Import,
+    /// From-import statement for selective import
+    FromImport,
+    /// Set statement for variable assignment
+    Set,
+    /// Do statement for side effects
+    Do,
     /// Tag statement
     Tag,
     /// Filter expression
@@ -58,14 +70,22 @@ impl From<crate::lexer::token_type::JinjaTokenType> for JinjaElementType {
             crate::lexer::token_type::JinjaTokenType::DoubleRightBrace => Self::Variable,
             crate::lexer::token_type::JinjaTokenType::LeftBracePercent => Self::Tag,
             crate::lexer::token_type::JinjaTokenType::PercentRightBrace => Self::Tag,
+            crate::lexer::token_type::JinjaTokenType::TrimMark => Self::Tag,
             crate::lexer::token_type::JinjaTokenType::Identifier => Self::Identifier,
             crate::lexer::token_type::JinjaTokenType::String => Self::Literal,
             crate::lexer::token_type::JinjaTokenType::Number => Self::Literal,
             crate::lexer::token_type::JinjaTokenType::Boolean => Self::Literal,
             crate::lexer::token_type::JinjaTokenType::Whitespace => Self::Text,
             crate::lexer::token_type::JinjaTokenType::Comment => Self::Comment,
-            crate::lexer::token_type::JinjaTokenType::Eof => Self::Text,
+            crate::lexer::token_type::JinjaTokenType::Eof => Self::Error,
             crate::lexer::token_type::JinjaTokenType::Error => Self::Error,
+            crate::lexer::token_type::JinjaTokenType::EqEq => Self::Expression,
+            crate::lexer::token_type::JinjaTokenType::Neq => Self::Expression,
+            crate::lexer::token_type::JinjaTokenType::LtEq => Self::Expression,
+            crate::lexer::token_type::JinjaTokenType::GtEq => Self::Expression,
+            crate::lexer::token_type::JinjaTokenType::And => Self::Expression,
+            crate::lexer::token_type::JinjaTokenType::Or => Self::Expression,
+            crate::lexer::token_type::JinjaTokenType::Not => Self::Expression,
             _ => Self::Expression,
         }
     }

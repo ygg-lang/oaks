@@ -7,11 +7,9 @@ This directory contains the core logic implementation of the project. Below are 
 ### Core API Usage
 ```rust
 // Example: Basic calling workflow
-fn main() {
-    // 1. Initialization
-    // 2. Execute core logic
-    // 3. Handle returned results
-}
+// 1. Initialization
+// 2. Execute core logic
+// 3. Handle returned results
 ```
 
 ## 🔍 Module Description

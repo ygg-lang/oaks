@@ -1,6 +1,6 @@
 use crate::{
     ValkyrieLanguage,
-    ast::{Class, EnumVariant, Enums, EnumsKind, Field, Flags, Identifier, Item, Parent, Singleton, StructureKind, Trait, Variant, VariantCase, Widget},
+    ast::{ClassDeclaration, EnumVariant, Enums, EnumsKind, FieldDeclaration, Flags, Identifier, Parent, SingletonDeclaration, StatementNode, StructureDeclaration, Trait, Variant, VariantCase, WidgetDeclaration},
     builder::{ValkyrieBuilder, text},
     lexer::{ValkyrieKeywords, token_type::ValkyrieTokenType},
     parser::element_type::ValkyrieElementType,
@@ -8,14 +8,15 @@ use crate::{
 use oak_core::{OakError, RedNode, RedTree, Source};
 
 impl<'config> ValkyrieBuilder<'config> {
-    pub(crate) fn build_class<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Class, OakError> {
+    pub(crate) fn build_class<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<ClassDeclaration, OakError> {
         let span = node.span();
-        let mut kind = StructureKind::default();
+        let mut kind = 0;
         let mut name = Identifier { name: String::new(), span: Default::default() };
         let mut generics = Vec::new();
         let mut annotations = Vec::new();
         let mut parents = Vec::new();
-        let mut items = Vec::new();
+        let mut fields = Vec::new();
+        let mut methods = Vec::new();
         let mut is_abstract = false;
         let mut is_sealed = false;
         let mut is_final = false;
@@ -29,7 +30,7 @@ impl<'config> ValkyrieBuilder<'config> {
                         name = Identifier { name: t_text, span: t.span };
                     }
                     ValkyrieTokenType::Keyword(ValkyrieKeywords::Class) => {
-                        kind = StructureKind::Class;
+                        kind = 1;
                     }
                     ValkyrieTokenType::Keyword(ValkyrieKeywords::Abstract) => {
                         is_abstract = true;
@@ -41,16 +42,16 @@ impl<'config> ValkyrieBuilder<'config> {
                         is_final = true;
                     }
                     ValkyrieTokenType::Keyword(ValkyrieKeywords::Struct) => {
-                        kind = StructureKind::Struct;
+                        kind = 2;
                     }
                     ValkyrieTokenType::Keyword(ValkyrieKeywords::Structure) => {
-                        kind = StructureKind::Structure;
+                        kind = 3;
                     }
                     ValkyrieTokenType::Keyword(ValkyrieKeywords::Widget) => {
-                        kind = StructureKind::Widget;
+                        kind = 4;
                     }
                     ValkyrieTokenType::Keyword(ValkyrieKeywords::Trait) => {
-                        kind = StructureKind::Trait;
+                        kind = 5;
                     }
                     _ => {}
                 },
@@ -75,64 +76,21 @@ impl<'config> ValkyrieBuilder<'config> {
                             }
                         }
                     }
-                    ValkyrieElementType::Namespace => {
-                        let ns = self.build_namespace(n, source)?;
-                        items.push(Item::Namespace(ns));
-                    }
-                    ValkyrieElementType::Class => {
-                        let class = self.build_class(n, source)?;
-                        items.push(Item::Class(class));
-                    }
-                    ValkyrieElementType::Flags => {
-                        let flags = self.build_flags(n, source)?;
-                        items.push(Item::Flags(flags));
-                    }
-                    ValkyrieElementType::Enums => {
-                        let enums = self.build_enums(n, source)?;
-                        items.push(Item::Enums(enums));
-                    }
-                    ValkyrieElementType::Trait => {
-                        let trait_node = self.build_trait(n, source)?;
-                        items.push(Item::Trait(trait_node));
-                    }
-                    ValkyrieElementType::Widget => {
-                        let widget = self.build_widget(n, source)?;
-                        items.push(Item::Widget(widget));
-                    }
-                    ValkyrieElementType::UsingStatement => {
-                        let us = self.build_using(n, source)?;
-                        items.push(Item::Using(us));
+                    ValkyrieElementType::Field => {
+                        if let Ok(field) = self.build_field(n, source) {
+                            fields.push(field);
+                        }
                     }
                     ValkyrieElementType::Micro => {
-                        let micro = self.build_micro(n, source)?;
-                        items.push(Item::Micro(micro));
-                    }
-                    ValkyrieElementType::LetStatement => {
-                        let stmt = self.build_let(n, source)?;
-                        items.push(Item::Statement(stmt));
-                    }
-                    ValkyrieElementType::ExprStatement => {
-                        let stmt = self.build_expr_stmt(n, source)?;
-                        items.push(Item::Statement(stmt));
-                    }
-                    ValkyrieElementType::Variant => {
-                        let variant = self.build_variant_decl(n, source)?;
-                        items.push(Item::Variant(variant));
-                    }
-                    ValkyrieElementType::BlockExpression => {
-                        for inner_child in n.children() {
-                            if let RedTree::Node(inner_n) = inner_child {
-                                if let Ok(item) = self.build_item(inner_n, source) {
-                                    items.push(item);
-                                }
-                            }
+                        if let Ok(method) = self.build_function(n, source) {
+                            methods.push(method);
                         }
                     }
                     _ => {}
                 },
             }
         }
-        Ok(Class { kind, name, generics, annotations, parents, items, span, is_abstract, is_sealed, is_final })
+        Ok(ClassDeclaration { name, generics, annotations, parents, fields, methods, span })
     }
 
     pub(crate) fn build_flags<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Flags, OakError> {
@@ -266,7 +224,7 @@ impl<'config> ValkyrieBuilder<'config> {
         Ok(EnumVariant { name, fields, annotations, span, value })
     }
 
-    pub(crate) fn build_field<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Field, OakError> {
+    pub(crate) fn build_field<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<FieldDeclaration, OakError> {
         let span = node.span();
         let mut name = Identifier { name: String::new(), span: Default::default() };
         let mut ty = None;
@@ -297,7 +255,7 @@ impl<'config> ValkyrieBuilder<'config> {
         }
 
         let ty = ty.ok_or_else(|| source.syntax_error("Missing type for field".to_string(), span.start))?;
-        Ok(Field { name, ty, default, annotations, span })
+        Ok(FieldDeclaration { name, ty, default, annotations, span })
     }
 
     pub(crate) fn build_variant_decl<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Variant, OakError> {
@@ -412,7 +370,7 @@ impl<'config> ValkyrieBuilder<'config> {
         Ok(Trait { name, generics, methods, associated_types, annotations, span })
     }
 
-    pub(crate) fn build_widget<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Widget, OakError> {
+    pub(crate) fn build_widget<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<WidgetDeclaration, OakError> {
         let span = node.span();
         let mut name = Identifier { name: String::new(), span: Default::default() };
         let mut generics = Vec::new();
@@ -435,54 +393,55 @@ impl<'config> ValkyrieBuilder<'config> {
                     }
                     ValkyrieElementType::Namespace => {
                         let ns = self.build_namespace(n, source)?;
-                        items.push(Item::Namespace(ns))
+                        items.push(StatementNode::Namespace(Box::new(ns)))
                     }
                     ValkyrieElementType::Class => {
                         let class = self.build_class(n, source)?;
-                        items.push(Item::Class(class))
+                        items.push(StatementNode::Class(Box::new(class)))
                     }
                     ValkyrieElementType::Flags => {
                         let flags = self.build_flags(n, source)?;
-                        items.push(Item::Flags(flags))
+                        items.push(StatementNode::Flags(Box::new(flags)))
                     }
                     ValkyrieElementType::Trait => {
                         let trait_node = self.build_trait(n, source)?;
-                        items.push(Item::Trait(trait_node))
+                        items.push(StatementNode::Trait(Box::new(trait_node)))
                     }
                     ValkyrieElementType::Widget => {
                         let widget = self.build_widget(n, source)?;
-                        items.push(Item::Widget(widget))
+                        items.push(StatementNode::Widget(Box::new(widget)))
                     }
                     ValkyrieElementType::UsingStatement => {
                         let us = self.build_using(n, source)?;
-                        items.push(Item::Using(us))
+                        items.push(StatementNode::Using(Box::new(us)))
                     }
                     ValkyrieElementType::Micro => {
                         let micro = self.build_micro(n, source)?;
-                        items.push(Item::Micro(micro))
+                        items.push(StatementNode::Micro(Box::new(micro)))
                     }
                     ValkyrieElementType::LetStatement => {
                         let stmt = self.build_let(n, source)?;
-                        items.push(Item::Statement(stmt))
+                        items.push(StatementNode::Let(Box::new(stmt)))
                     }
                     ValkyrieElementType::ExprStatement => {
                         let stmt = self.build_expr_stmt(n, source)?;
-                        items.push(Item::Statement(stmt))
+                        items.push(StatementNode::ExprStmt(Box::new(stmt)))
                     }
                     _ => {}
                 },
             }
         }
-        Ok(Widget { name, generics, items, annotations, span })
+        Ok(WidgetDeclaration { name, generics, items, annotations, span })
     }
 
-    pub(crate) fn build_singleton<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Singleton, OakError> {
+    pub(crate) fn build_singleton<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<SingletonDeclaration, OakError> {
         let span = node.span();
         let mut name = Identifier { name: String::new(), span: Default::default() };
         let mut generics = Vec::new();
         let mut parents = Vec::new();
         let mut annotations = Vec::new();
-        let mut items = Vec::new();
+        let mut fields = Vec::new();
+        let mut methods = Vec::new();
 
         for child in node.children() {
             match child {
@@ -512,30 +471,83 @@ impl<'config> ValkyrieBuilder<'config> {
                             }
                         }
                     }
-                    ValkyrieElementType::Namespace => {
-                        let ns = self.build_namespace(n, source)?;
-                        items.push(Item::Namespace(ns))
-                    }
-                    ValkyrieElementType::Class => {
-                        let class = self.build_class(n, source)?;
-                        items.push(Item::Class(class))
+                    ValkyrieElementType::Field => {
+                        if let Ok(field) = self.build_field(n, source) {
+                            fields.push(field);
+                        }
                     }
                     ValkyrieElementType::Micro => {
-                        let micro = self.build_micro(n, source)?;
-                        items.push(Item::Micro(micro))
-                    }
-                    ValkyrieElementType::LetStatement => {
-                        let stmt = self.build_let(n, source)?;
-                        items.push(Item::Statement(stmt))
-                    }
-                    ValkyrieElementType::ExprStatement => {
-                        let stmt = self.build_expr_stmt(n, source)?;
-                        items.push(Item::Statement(stmt))
+                        if let Ok(method) = self.build_function(n, source) {
+                            methods.push(method);
+                        }
                     }
                     _ => {}
                 },
             }
         }
-        Ok(Singleton { name, generics, parents, items, annotations, span })
+        Ok(SingletonDeclaration { name, generics, parents, fields, methods, annotations, span })
+    }
+
+    pub(crate) fn build_struct<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<StructureDeclaration, OakError> {
+        let span = node.span();
+        let mut name = Identifier { name: String::new(), span: Default::default() };
+        let mut generics = Vec::new();
+        let mut annotations = Vec::new();
+        let mut parents = Vec::new();
+        let mut fields = Vec::new();
+
+        for child in node.children() {
+            match child {
+                RedTree::Leaf(t) => match t.kind {
+                    ValkyrieTokenType::Whitespace | ValkyrieTokenType::Newline | ValkyrieTokenType::LineComment | ValkyrieTokenType::BlockComment => continue,
+                    ValkyrieTokenType::Identifier => {
+                        if name.name.is_empty() {
+                            name = Identifier { name: text(source, t.span), span: t.span };
+                        }
+                    }
+                    _ => {}
+                },
+                RedTree::Node(n) => match n.green.kind {
+                    ValkyrieElementType::Attribute => {
+                        annotations.push(self.build_attribute(n, source)?);
+                    }
+                    ValkyrieElementType::GenericParameterList => {
+                        generics = self.build_generic_params(n, source)?;
+                    }
+                    ValkyrieElementType::NamePath => {
+                        let parent = Parent { alias: None, name: self.build_name_path(n, source)?, span: n.span() };
+                        parents.push(parent);
+                    }
+                    ValkyrieElementType::Type => {
+                        for child in n.children() {
+                            if let RedTree::Node(inner) = child {
+                                if inner.green.kind == ValkyrieElementType::NamePath {
+                                    let parent = Parent { alias: None, name: self.build_name_path(inner, source)?, span: inner.span() };
+                                    parents.push(parent);
+                                }
+                            }
+                        }
+                    }
+                    ValkyrieElementType::Field => {
+                        if let Ok(field) = self.build_field(n, source) {
+                            fields.push(field);
+                        }
+                    }
+                    ValkyrieElementType::BlockExpression => {
+                        for inner_child in n.children() {
+                            if let RedTree::Node(inner_n) = inner_child {
+                                if inner_n.green.kind == ValkyrieElementType::Field {
+                                    if let Ok(field) = self.build_field(inner_n, source) {
+                                        fields.push(field);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                },
+            }
+        }
+        Ok(StructureDeclaration { name, generics, parents, fields, annotations, span })
     }
 }

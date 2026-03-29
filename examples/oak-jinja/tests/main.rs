@@ -85,3 +85,124 @@ fn test_jinja_parser_macro() {
     assert!(result.diagnostics.is_empty(), "Parser should not return errors");
     println!("Macro parse successful!");
 }
+
+#[test]
+fn test_jinja_parser_comparison_operators() {
+    let source = SourceText::new("{% if x == 1 %}equal{% endif %}");
+    let language = JinjaLanguage::default();
+    let parser = JinjaParser::new(&language);
+    let mut cache = ParseSession::default();
+
+    let result = parser.parse(&source, &[], &mut cache);
+    assert!(result.diagnostics.is_empty(), "Parser should not return errors for comparison operators");
+}
+
+#[test]
+fn test_jinja_parser_logical_operators() {
+    let source = SourceText::new("{% if x and y or not z %}result{% endif %}");
+    let language = JinjaLanguage::default();
+    let parser = JinjaParser::new(&language);
+    let mut cache = ParseSession::default();
+
+    let result = parser.parse(&source, &[], &mut cache);
+    assert!(result.diagnostics.is_empty(), "Parser should not return errors for logical operators");
+}
+
+#[test]
+fn test_jinja_parser_property_access() {
+    let source = SourceText::new("{{ user.name }}");
+    let language = JinjaLanguage::default();
+    let parser = JinjaParser::new(&language);
+    let mut cache = ParseSession::default();
+
+    let result = parser.parse(&source, &[], &mut cache);
+    assert!(result.diagnostics.is_empty(), "Parser should not return errors for property access");
+}
+
+#[test]
+fn test_jinja_parser_index_access() {
+    let source = SourceText::new("{{ items[0] }}");
+    let language = JinjaLanguage::default();
+    let parser = JinjaParser::new(&language);
+    let mut cache = ParseSession::default();
+
+    let result = parser.parse(&source, &[], &mut cache);
+    assert!(result.diagnostics.is_empty(), "Parser should not return errors for index access");
+}
+
+#[test]
+fn test_jinja_parser_filter_with_args() {
+    let source = SourceText::new("{{ value | filter(arg) }}");
+    let language = JinjaLanguage::default();
+    let parser = JinjaParser::new(&language);
+    let mut cache = ParseSession::default();
+
+    let result = parser.parse(&source, &[], &mut cache);
+    assert!(result.diagnostics.is_empty(), "Parser should not return errors for filter with arguments");
+}
+
+#[test]
+fn test_jinja_parser_extends() {
+    let source = SourceText::new("{% extends \"base.html\" %}");
+    let language = JinjaLanguage::default();
+    let parser = JinjaParser::new(&language);
+    let mut cache = ParseSession::default();
+
+    let result = parser.parse(&source, &[], &mut cache);
+    assert!(result.diagnostics.is_empty(), "Parser should not return errors for extends tag");
+}
+
+#[test]
+fn test_jinja_parser_include() {
+    let source = SourceText::new("{% include \"partial.html\" %}");
+    let language = JinjaLanguage::default();
+    let parser = JinjaParser::new(&language);
+    let mut cache = ParseSession::default();
+
+    let result = parser.parse(&source, &[], &mut cache);
+    assert!(result.diagnostics.is_empty(), "Parser should not return errors for include tag");
+}
+
+#[test]
+fn test_jinja_parser_set() {
+    let source = SourceText::new("{% set x = 42 %}");
+    let language = JinjaLanguage::default();
+    let parser = JinjaParser::new(&language);
+    let mut cache = ParseSession::default();
+
+    let result = parser.parse(&source, &[], &mut cache);
+    assert!(result.diagnostics.is_empty(), "Parser should not return errors for set tag");
+}
+
+#[test]
+fn test_jinja_parser_from_import() {
+    let source = SourceText::new("{% from \"macros.html\" import foo %}");
+    let language = JinjaLanguage::default();
+    let parser = JinjaParser::new(&language);
+    let mut cache = ParseSession::default();
+
+    let result = parser.parse(&source, &[], &mut cache);
+    assert!(result.diagnostics.is_empty(), "Parser should not return errors for from-import tag");
+}
+
+#[test]
+fn test_jinja_parser_whitespace_control() {
+    let source = SourceText::new("{%- if x -%}hello{%- endif -%}");
+    let language = JinjaLanguage::default();
+    let parser = JinjaParser::new(&language);
+    let mut cache = ParseSession::default();
+
+    let result = parser.parse(&source, &[], &mut cache);
+    assert!(result.diagnostics.is_empty(), "Parser should not return errors for whitespace control markers");
+}
+
+#[test]
+fn test_jinja_parser_for_else() {
+    let source = SourceText::new("{% for item in items %}{{ item }}{% else %}No items{% endfor %}");
+    let language = JinjaLanguage::default();
+    let parser = JinjaParser::new(&language);
+    let mut cache = ParseSession::default();
+
+    let result = parser.parse(&source, &[], &mut cache);
+    assert!(result.diagnostics.is_empty(), "Parser should not return errors for for/else");
+}

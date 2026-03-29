@@ -1,7 +1,7 @@
 use serde::de::{self, Deserializer, SeqAccess, Visitor};
 use std::fmt;
 
-use crate::language::value::{from_ast, VonValue};
+use crate::language::value::{VonValue, from_ast};
 use oak_core::OakError;
 
 /// VON 反序列化实现
@@ -178,10 +178,7 @@ impl<'de> Visitor<'de> for VonDeserializer {
     {
         let mut fields = Vec::new();
         while let Some((key, value)) = map.next_entry()? {
-            fields.push(crate::language::value::VonField { 
-                name: key, 
-                value 
-            });
+            fields.push(crate::language::value::VonField { name: key, value });
         }
         Ok(VonValue::Object(crate::language::value::VonObject { fields }))
     }
@@ -235,18 +232,11 @@ impl<'de> serde::de::Deserializer<'de> for VonValueDeserializer {
             VonValue::Enum(en) => {
                 if let Some(payload) = en.payload {
                     // For Option types, if the variant is "Some", return Some(payload)
-                    if en.variant == "Some" {
-                        visitor.visit_some(VonValueDeserializer::new(*payload))
-                    } else {
-                        visitor.visit_str(&en.variant)
-                    }
-                } else {
+                    if en.variant == "Some" { visitor.visit_some(VonValueDeserializer::new(*payload)) } else { visitor.visit_str(&en.variant) }
+                }
+                else {
                     // For Option types, if the variant is "None", return None
-                    if en.variant == "None" {
-                        visitor.visit_none()
-                    } else {
-                        visitor.visit_str(&en.variant)
-                    }
+                    if en.variant == "None" { visitor.visit_none() } else { visitor.visit_str(&en.variant) }
                 }
             }
             VonValue::Undefined => visitor.visit_none(),
@@ -296,7 +286,7 @@ impl<'de> serde::de::Deserializer<'de> for VonValueDeserializer {
     {
         match self.value {
             VonValue::Number(n) => visitor.visit_u8(n as u8),
-            _ => self.deserialize_any(visitor)
+            _ => self.deserialize_any(visitor),
         }
     }
 
@@ -306,7 +296,7 @@ impl<'de> serde::de::Deserializer<'de> for VonValueDeserializer {
     {
         match self.value {
             VonValue::Number(n) => visitor.visit_u16(n as u16),
-            _ => self.deserialize_any(visitor)
+            _ => self.deserialize_any(visitor),
         }
     }
 
@@ -316,7 +306,7 @@ impl<'de> serde::de::Deserializer<'de> for VonValueDeserializer {
     {
         match self.value {
             VonValue::Number(n) => visitor.visit_u32(n as u32),
-            _ => self.deserialize_any(visitor)
+            _ => self.deserialize_any(visitor),
         }
     }
 
@@ -326,7 +316,7 @@ impl<'de> serde::de::Deserializer<'de> for VonValueDeserializer {
     {
         match self.value {
             VonValue::Number(n) => visitor.visit_u64(n as u64),
-            _ => self.deserialize_any(visitor)
+            _ => self.deserialize_any(visitor),
         }
     }
 
@@ -336,7 +326,7 @@ impl<'de> serde::de::Deserializer<'de> for VonValueDeserializer {
     {
         match self.value {
             VonValue::Number(n) => visitor.visit_f32(n as f32),
-            _ => self.deserialize_any(visitor)
+            _ => self.deserialize_any(visitor),
         }
     }
 
@@ -346,7 +336,7 @@ impl<'de> serde::de::Deserializer<'de> for VonValueDeserializer {
     {
         match self.value {
             VonValue::Number(n) => visitor.visit_f64(n),
-            _ => self.deserialize_any(visitor)
+            _ => self.deserialize_any(visitor),
         }
     }
 

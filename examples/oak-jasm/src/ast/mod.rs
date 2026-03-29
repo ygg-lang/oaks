@@ -23,7 +23,7 @@ impl ToSource for JasmRoot {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for JasmRoot {
     type Params = ();
-    
+
     fn as_document(&self, params: &Self::Params) -> Document<'_> {
         self.class.as_document(params)
     }
@@ -107,7 +107,7 @@ impl ToSource for JasmClass {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for JasmClass {
     type Params = ();
-    
+
     fn as_document(&self, params: &Self::Params) -> Document<'_> {
         let mut docs = Vec::new();
         if let Some(source) = &self.source_file {
@@ -219,7 +219,7 @@ impl ToSource for JasmMethod {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for JasmMethod {
     type Params = ();
-    
+
     fn as_document(&self, params: &Self::Params) -> Document<'_> {
         let mut docs = Vec::new();
         let mut method_line = vec![Document::Text(".method ".into())];
@@ -296,7 +296,7 @@ impl ToSource for JasmField {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for JasmField {
     type Params = ();
-    
+
     fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         let mut docs = Vec::new();
         for annotation in &self.annotations {
@@ -372,7 +372,7 @@ impl ToSource for JasmInstruction {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for JasmInstruction {
     type Params = ();
-    
+
     fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         match self {
             JasmInstruction::Simple(s) => Document::Text(s.clone().into()),
