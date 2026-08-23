@@ -37,3 +37,38 @@ where
     let def = <RangeDef<T> as serde::Deserialize>::deserialize(deserializer)?;
     Ok(Range { start: def.start, end: def.end })
 }
+
+/// Serde support for `Option<Range<T>>`.
+#[cfg(feature = "serde")]
+pub mod option {
+    use super::*;
+
+    /// Serializes an `Option<Range<T>>`.
+    pub fn serialize<S, T>(value: &Option<Range<T>>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+        T: serde::Serialize,
+    {
+        match value {
+            Some(range) => serializer.serialize_some(&RangeDefRef {
+                start: &range.start,
+                end: &range.end,
+            }),
+            None => serializer.serialize_none(),
+        }
+    }
+
+    /// Deserializes an `Option<Range<T>>`.
+    pub fn deserialize<'de, D, T>(deserializer: D) -> Result<Option<Range<T>>, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+        T: serde::Deserialize<'de>,
+    {
+        let opt = <Option<RangeDef<T>> as serde::Deserialize>::deserialize(deserializer)?;
+        Ok(opt.map(|def| Range {
+            start: def.start,
+            end: def.end,
+        }))
+    }
+}
+

@@ -19,6 +19,7 @@ tracing = { workspace = true }
 twox-hash.workspace = true
 
 [dev-dependencies]
+serde_json = { workspace = true }
 
 [features]
 default = []
