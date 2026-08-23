@@ -1,31 +1,33 @@
 #![doc = include_str!("readme.md")]
-#[cfg(feature = "lsp")]
-use crate::language::SvelteLanguage;
-#[cfg(feature = "lsp")]
+#[cfg(feature = "oak-highlight")]
+pub mod highlighter;
+
+#[cfg(feature = "oak-pretty-print")]
+pub mod formatter;
+
+use crate::language::ValkyrieLanguage;
 use core::range::Range;
-#[cfg(feature = "lsp")]
 use oak_core::tree::RedNode;
+
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
 
 #[cfg(feature = "lsp")]
-/// Language service for the Svelte framework.
-pub struct SvelteLanguageService<V: Vfs> {
+pub struct ValkyrieLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
 
 #[cfg(feature = "lsp")]
-impl<V: Vfs> SvelteLanguageService<V> {
-    /// Creates a new Svelte language service.
+impl<V: Vfs> ValkyrieLanguageService<V> {
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }
 }
 
 #[cfg(feature = "lsp")]
-impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for SvelteLanguageService<V> {
-    type Lang = SvelteLanguage;
+impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for ValkyrieLanguageService<V> {
+    type Lang = ValkyrieLanguage;
     type Vfs = V;
     fn vfs(&self) -> &Self::Vfs {
         &self.vfs
@@ -33,8 +35,22 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
     fn workspace(&self) -> &oak_lsp::workspace::WorkspaceManager {
         &self.workspace
     }
-    fn get_root(&self, _uri: &str) -> impl Future<Output = Option<RedNode<'_, SvelteLanguage>>> + Send + '_ {
-        async move { None }
+    fn with_root<R, F>(&self, uri: &str, f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
+        let source = self.vfs().get_source(uri);
+        async move {
+            let source = source?;
+            let language = ValkyrieLanguage::default();
+            let parser = crate::parser::ValkyrieParser::new(&language);
+            let lexer = crate::lexer::ValkyrieLexer::new(&language);
+            let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
+            let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
+            let green = parse_out.result.ok()?;
+            Some(f(RedNode::new(green, 0)))
+        }
     }
     fn hover(&self, _uri: &str, _range: Range<usize>) -> impl Future<Output = Option<LspHover>> + Send + '_ {
         async move { None }

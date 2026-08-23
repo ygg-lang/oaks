@@ -31,18 +31,21 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
     fn workspace(&self) -> &oak_lsp::workspace::WorkspaceManager {
         &self.workspace
     }
-    fn get_root(&self, uri: &str) -> impl Future<Output = Option<RedNode<'_, JavadocLanguage>>> + Send + '_ {
+    fn with_root<R, F>(&self, uri: &str, f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
         let source = self.vfs().get_source(uri);
         async move {
             let source = source?;
             let language = JavadocLanguage::default();
             let parser = crate::parser::JavadocParser::new(&language);
             let lexer = crate::lexer::JavadocLexer::new(&language);
-            let mut cache = oak_core::parser::session::ParseSession::<JavadocLanguage>::default();
-            let _output = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
-            // FIXME: Store the tree in workspace and return it
-            // For now, return None to satisfy compiler lifetimes
-            None
+            let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
+            let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
+            let green = parse_out.result.ok()?;
+            Some(f(RedNode::new(green, 0)))
         }
     }
 }

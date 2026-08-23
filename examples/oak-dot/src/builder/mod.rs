@@ -14,6 +14,6 @@ impl DotBuilder {
 
 impl Builder<DotLanguage> for DotBuilder {
     fn build<'a, S: Source + ?Sized>(&self, _text: &S, _edits: &[TextEdit], _cache: &'a mut impl BuilderCache<DotLanguage>) -> BuildOutput<DotLanguage> {
-        todo!()
+        oak_core::errors::OakDiagnostics { result: Err(oak_core::errors::OakError::custom_error("Not implemented")), diagnostics: vec![] }
     }
 }

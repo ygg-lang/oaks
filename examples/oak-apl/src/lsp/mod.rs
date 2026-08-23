@@ -57,20 +57,21 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
     fn workspace(&self) -> &oak_lsp::workspace::WorkspaceManager {
         &self.workspace
     }
-    fn get_root(&self, uri: &str) -> impl Future<Output = Option<RedNode<'_, AplLanguage>>> + Send + '_ {
+    fn with_root<R, F>(&self, uri: &str, f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
         let source = self.vfs().get_source(uri);
         async move {
             let source = source?;
             let language = AplLanguage::default();
             let parser = crate::parser::AplParser::new(&language);
             let lexer = crate::lexer::AplLexer::new(&language);
-            let mut cache = Box::new(oak_core::parser::session::ParseSession::<AplLanguage>::default());
-            let cache_ptr: *mut oak_core::parser::session::ParseSession<AplLanguage> = &mut *cache;
-            let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], unsafe { &mut *cache_ptr });
+            let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
+            let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
             let green = parse_out.result.ok()?;
-            let _leaked_cache = Box::leak(cache);
-            let green_static: &'static oak_core::GreenNode<AplLanguage> = unsafe { std::mem::transmute(green) };
-            Some(RedNode::new(green_static, 0))
+            Some(f(RedNode::new(green, 0)))
         }
     }
     fn hover(&self, uri: &str, range: Range<usize>) -> impl Future<Output = Option<oak_lsp::Hover>> + Send + '_ {

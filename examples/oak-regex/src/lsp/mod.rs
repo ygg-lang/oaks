@@ -1,6 +1,5 @@
 #![doc = include_str!("readme.md")]
 #[cfg(feature = "oak-highlight")]
-/// Highlighter for regular expressions.
 pub mod highlighter;
 
 #[cfg(feature = "lsp")]
@@ -11,7 +10,6 @@ use {
     oak_vfs::Vfs,
 };
 #[cfg(feature = "oak-pretty-print")]
-/// Formatter for regular expressions.
 pub mod formatter;
 use crate::language::RegexLanguage;
 use core::range::Range;
@@ -48,14 +46,21 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
     fn workspace(&self) -> &oak_lsp::workspace::WorkspaceManager {
         &self.workspace
     }
-    fn get_root(&self, uri: &str) -> impl Future<Output = Option<RedNode<'_, RegexLanguage>>> + Send + '_ {
+    fn with_root<R, F>(&self, uri: &str, f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
         let source = self.vfs().get_source(uri);
         async move {
             let source = source?;
-            let _parser = crate::parser::RegexParser::new();
-            let _lexer = crate::lexer::RegexLexer::new();
-            let _cache = oak_core::parser::session::ParseSession::<RegexLanguage>::default();
-            None
+            let language = RegexLanguage::default();
+            let parser = crate::parser::RegexParser::new(&language);
+            let lexer = crate::lexer::RegexLexer::new(&language);
+            let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
+            let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
+            let green = parse_out.result.ok()?;
+            Some(f(RedNode::new(green, 0)))
         }
     }
     fn hover(&self, uri: &str, range: Range<usize>) -> impl Future<Output = Option<oak_lsp::Hover>> + Send + '_ {

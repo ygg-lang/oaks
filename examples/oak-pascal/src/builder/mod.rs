@@ -14,6 +14,6 @@ impl PascalBuilder {
 
 impl Builder<PascalLanguage> for PascalBuilder {
     fn build<'s, S: Source + ?Sized>(&self, _text: &S, _edits: &[TextEdit], _cache: &'s mut impl BuilderCache<PascalLanguage>) -> oak_core::builder::BuildOutput<PascalLanguage> {
-        todo!()
+        oak_core::errors::OakDiagnostics { result: Err(oak_core::errors::OakError::custom_error("Not implemented")), diagnostics: vec![] }
     }
 }

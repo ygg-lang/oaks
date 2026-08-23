@@ -89,25 +89,21 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
     fn workspace(&self) -> &oak_lsp::workspace::WorkspaceManager {
         &self.workspace
     }
-    fn get_root(&self, uri: &str) -> impl Future<Output = Option<RedNode<'_, JsonLanguage>>> + Send + '_ {
-        let uri = uri.to_string();
+    fn with_root<R, F>(&self, uri: &str, f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
+        let source = self.vfs().get_source(uri);
         async move {
-            let source = self.vfs().get_source(&uri)?;
-            let mut session_entry = self.sessions.entry(uri.clone()).or_insert_with(|| Box::new(ParseSession::<JsonLanguage>::default()));
-            let session = session_entry.as_mut();
+            let source = source?;
             let language = JsonLanguage::default();
             let parser = crate::parser::JsonParser::new(&language);
             let lexer = crate::lexer::JsonLexer::new(&language);
-            let tree = {
-                let output = oak_core::parser::parse(&parser, &lexer, &source, &[], session);
-                let tree_ref = output.result.as_ref().ok()?;
-                // Safety: The tree is allocated in session's arena.
-                // We cast away local lifetimes to return a reference that can be returned from this block.
-                // The tree actually lives as long as the session in self.sessions.
-                unsafe { &*(*tree_ref as *const oak_core::GreenNode<JsonLanguage> as *const oak_core::GreenNode<'static, JsonLanguage>) }
-            };
-            session.commit_generation(tree);
-            Some(RedNode::new(tree, 0))
+            let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
+            let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
+            let green = parse_out.result.ok()?;
+            Some(f(RedNode::new(green, 0)))
         }
     }
     fn definition<'a>(&'a self, uri: &'a str, range: Range<usize>) -> impl Future<Output = Vec<oak_lsp::LocationRange>> + Send + 'a {

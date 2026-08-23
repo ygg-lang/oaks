@@ -31,8 +31,22 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
         &self.workspace
     }
 
-    fn get_root(&self, _uri: &str) -> impl Future<Output = Option<RedNode<'_, BatLanguage>>> + Send + '_ {
-        async move { None }
+    fn with_root<R, F>(&self, uri: &str, f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
+        let source = self.vfs().get_source(uri);
+        async move {
+            let source = source?;
+            let language = BatLanguage::default();
+            let parser = crate::parser::BatParser::new(&language);
+            let lexer = crate::lexer::BatLexer::new(&language);
+            let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
+            let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
+            let green = parse_out.result.ok()?;
+            Some(f(RedNode::new(green, 0)))
+        }
     }
 
     fn hover(&self, _uri: &str, _range: Range<usize>) -> impl Future<Output = Option<LspHover>> + Send + '_ {

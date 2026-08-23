@@ -9,6 +9,6 @@ pub struct SqlHighlighter;
 
 impl Highlighter for SqlHighlighter {
     fn highlight<'a>(&self, _source: &'a str, _language: &str, _theme: Theme) -> oak_core::errors::ParseResult<HighlightResult<'a>> {
-        todo!()
+        None
     }
 }
