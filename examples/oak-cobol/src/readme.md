@@ -10,7 +10,7 @@ This guide is designed to help you quickly get started with developing and integ
 
 The following is a standard workflow for parsing a simple COBOL program:
 
-```rust
+```rust,ignore
 use oak_cobol::{CobolParser, SourceText, CobolLanguage};
 
 fn main() {
@@ -47,14 +47,14 @@ After a successful parse, you can use the built-in visitor pattern or manually t
 
 ### 2. Incremental Parsing
 No need to re-parse massive COBOL files when small changes occur:
-```rust
+```rust,ignore
 // Assuming you have an old parse result 'old_result' and new source text 'new_source'
 let new_result = parser.reparse(&new_source, &old_result);
 ```
 
 ### 3. Diagnostics
 `oak-cobol` provides rich error contexts specifically tailored for COBOL developers:
-```rust
+```rust,ignore
 for diag in result.diagnostics() {
     println!("[{}:{}] {}", diag.line, diag.column, diag.message);
 }

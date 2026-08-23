@@ -6,8 +6,8 @@ use std::{path::Path, time::Duration};
 #[test]
 fn test_elixir_lexer() -> Result<(), OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let language = Box::leak(Box::new(ElixirLanguage::default()));
-    let lexer = ElixirLexer::new(language);
+    let language = ElixirLanguage::default();
+    let lexer = ElixirLexer::new(&language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("ex").with_timeout(Duration::from_secs(5));
     test_runner.run_tests::<ElixirLanguage, _>(&lexer)?;
     Ok(())
@@ -45,8 +45,8 @@ fn test_elixir_module_parsing() -> Result<(), OakError> {
     use oak_core::{Lexer, SourceText};
 
     let source = SourceText::new("defmodule MyModule do\n  def hello do\n    :world\n  end\nend");
-    let language = Box::leak(Box::new(ElixirLanguage::default()));
-    let lexer = ElixirLexer::new(language);
+    let language = ElixirLanguage::default();
+    let lexer = ElixirLexer::new(&language);
 
     let mut cache = oak_core::parser::session::ParseSession::<ElixirLanguage>::default();
     let result = lexer.lex(&source, &[], &mut cache);

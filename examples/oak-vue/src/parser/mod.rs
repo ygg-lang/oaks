@@ -1,81 +1,72 @@
-/// Element types for the Vue language.
 pub mod element_type;
 
 use crate::{
-    language::VueLanguage,
-    lexer::{VueLexer, token_type::VueTokenType},
+    lexer::{
+        VueLexer,
+        token_type::{VueLanguage, VueTokenType},
+    },
+    parser::element_type::VueElementType,
 };
 use oak_core::{
-    GreenNode, TextEdit,
+    GreenNode, OakError, TextEdit,
+    lexer::Lexer,
     parser::{
-        ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer,
+        ParseCache, ParseOutput, ParserState, parse_with_lexer,
         pratt::{Associativity, Pratt, PrattParser, unary},
     },
     source::{Source, SourceText},
 };
 
-/// Parser state type alias.
 pub(crate) type State<'a, S> = ParserState<'a, VueLanguage, S>;
 
-/// Vue parser.
 pub struct VueParser<'config> {
-    pub(crate) config: &'config VueLanguage,
+    _config: &'config VueLanguage,
 }
 
-impl<'config> Parser<VueLanguage> for VueParser<'config> {
-    fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<VueLanguage>) -> ParseOutput<'a, VueLanguage> {
-        let lexer = VueLexer::new(self.config);
-        parse_with_lexer(&lexer, text, edits, cache, |state| {
-            let cp = state.checkpoint();
-            while state.not_at_end() {
-                if state.at(VueTokenType::TemplateStart) {
-                    self.parse_special_block(state, VueTokenType::TemplateStart, "template", true);
-                }
-                else if state.at(VueTokenType::ScriptStart) {
-                    self.parse_special_block(state, VueTokenType::ScriptStart, "script", false);
-                }
-                else if state.at(VueTokenType::StyleStart) {
-                    self.parse_special_block(state, VueTokenType::StyleStart, "style", false);
-                }
-                else {
-                    self.parse_node(state);
-                }
-            }
-            Ok(state.finish_at(cp, crate::parser::element_type::VueElementType::Root))
-        })
-    }
-}
-
-#[allow(dead_code)]
 impl<'config> VueParser<'config> {
-    /// Creates a new Vue parser with the given configuration.
     pub fn new(config: &'config VueLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    /// Parses an expression.
     pub fn parse_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, VueLanguage> {
         PrattParser::parse(state, 0, self)
     }
 
-    /// Parses only an expression.
     pub fn parse_expression_only<'a, S: Source + ?Sized>(&self, source: &'a S, session: &'a mut oak_core::parser::ParseSession<VueLanguage>) -> oak_core::parser::ParseOutput<'a, VueLanguage> {
-        let lexer = VueLexer::new(self.config);
-        oak_core::parser::parse_with_lexer(&lexer, source, &[], session, |state| {
+        let lexer = VueLexer::new(self._config);
+        oak_core::parser::parse_with_lexer(&lexer, source, &[], session, |state: &mut State<'a, S>| {
             let cp = state.checkpoint();
             self.parse_expression(state);
             Ok(state.finish_at(cp, crate::parser::element_type::VueElementType::Root))
         })
     }
 
-    /// Parses only a `v-for` expression.
     pub fn parse_v_for_only<'a, S: Source + ?Sized>(&self, source: &'a S, session: &'a mut oak_core::parser::ParseSession<VueLanguage>) -> oak_core::parser::ParseOutput<'a, VueLanguage> {
-        let lexer = VueLexer::new(self.config);
-        oak_core::parser::parse_with_lexer(&lexer, source, &[], session, |state| {
+        let lexer = VueLexer::new(self._config);
+        oak_core::parser::parse_with_lexer(&lexer, source, &[], session, |state: &mut State<'a, S>| {
             let cp = state.checkpoint();
             self.parse_v_for_expression(state);
             Ok(state.finish_at(cp, crate::parser::element_type::VueElementType::Root))
         })
+    }
+
+    pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, VueLanguage>, OakError> {
+        let cp = state.checkpoint();
+        while state.not_at_end() {
+            if state.at(VueTokenType::TemplateStart) {
+                self.parse_special_block(state, VueTokenType::TemplateStart, "template", true);
+            }
+            else if state.at(VueTokenType::ScriptStart) {
+                self.parse_special_block(state, VueTokenType::ScriptStart, "script", false);
+            }
+            else if state.at(VueTokenType::StyleStart) {
+                self.parse_special_block(state, VueTokenType::StyleStart, "style", false);
+            }
+            else {
+                self.parse_node(state);
+            }
+        }
+        Ok(state.finish_at(cp, crate::parser::element_type::VueElementType::Root))
     }
 
     fn parse_special_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, start_kind: VueTokenType, tag_name: &str, recursive: bool) {
@@ -328,9 +319,9 @@ impl<'config> VueParser<'config> {
             if let Some(text) = state.peek_text() {
                 if text.len() >= 2 {
                     let inner_text = &text[1..text.len() - 1];
-                    let _inner_source = SourceText::new(inner_text.to_string());
+                    let inner_source = SourceText::new(inner_text.to_string());
 
-                    let _lexer = VueLexer::new(self.config);
+                    let _lexer = VueLexer::new(self._config);
                     let mut _temp_cache: oak_core::parser::ParseSession<VueLanguage> = oak_core::parser::ParseSession::default();
                     // let _lex_output = lexer.lex(&inner_source, &[], &mut temp_cache);
 
@@ -349,7 +340,6 @@ impl<'config> VueParser<'config> {
         }
     }
 
-    /// Parses a `v-for` expression.
     pub fn parse_v_for_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let cp = state.checkpoint();
         self.skip_whitespace(state);
@@ -584,5 +574,13 @@ impl<'config> Pratt<VueLanguage> for VueParser<'config> {
 
         state.sink.restore(op_cp.1);
         Some(node)
+    }
+}
+impl<'config> oak_core::parser::Parser<VueLanguage> for VueParser<'config> {
+    fn parse<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<VueLanguage>) -> ParseOutput<'a, VueLanguage> {
+        let lexer = VueLexer::new(self._config);
+        oak_core::parser::parse_with_lexer(&lexer, source, edits, cache, |state: &mut State<'a, S>| {
+            self.parse_root_internal(state)
+        })
     }
 }

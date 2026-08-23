@@ -1,7 +1,7 @@
 mod lexer;
 
 use oak_core::{Lexer, SourceText};
-use oak_stylus::{kind::StylusSyntaxKind, language::StylusLanguage, lexer::StylusLexer};
+use oak_stylus::{TokenType as StylusTokenType, language::StylusLanguage, lexer::StylusLexer};
 
 #[test]
 fn test_lexer_basic() {
@@ -31,8 +31,8 @@ fn test_lexer_identifiers() {
     let tokens = result.result.unwrap();
     assert!(!tokens.is_empty());
 
-    // Should contain identifier token
-    let has_identifier = tokens.iter().any(|t| t.kind == StylusSyntaxKind::Identifier);
+    // 应该包含标识符 token
+    let has_identifier = tokens.iter().any(|t| t.kind == StylusTokenType::Identifier);
     assert!(has_identifier)
 }
 
@@ -49,8 +49,8 @@ fn test_lexer_numbers() {
     let tokens = result.result.unwrap();
     assert!(!tokens.is_empty());
 
-    // Should contain number token
-    let has_number = tokens.iter().any(|t| t.kind == StylusSyntaxKind::Number);
+    // 应该包含数字 token
+    let has_number = tokens.iter().any(|t| t.kind == StylusTokenType::Number);
     assert!(has_number)
 }
 
@@ -65,7 +65,7 @@ fn test_empty_input() {
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
-    // Empty input should only have EOF token
+    // 空输入应该只有 EOF token
     assert_eq!(tokens.len(), 1);
-    assert_eq!(tokens[0].kind, StylusSyntaxKind::Eof)
+    assert_eq!(tokens[0].kind, StylusTokenType::Eof)
 }

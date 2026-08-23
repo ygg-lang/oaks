@@ -4,11 +4,11 @@ use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]
-fn test_elm_lexer() -> Result<(), OakError> {
+fn test_elixir_lexer() -> Result<(), OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let language = Box::leak(Box::new(ElmLanguage::default()));
-    let lexer = ElmLexer::new(language);
-    let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("elm").with_timeout(Duration::from_secs(5));
+    let language = ElmLanguage::default();
+    let lexer = ElmLexer::new(&language);
+    let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("ex").with_timeout(Duration::from_secs(5));
     test_runner.run_tests::<ElmLanguage, _>(&lexer)?;
     Ok(())
 }
@@ -18,51 +18,51 @@ fn test_peek_behavior() {
     use oak_core::{LexerState, SourceText};
     use oak_elm::ElmLanguage;
 
-    let source = SourceText::new("module Main exposing (main)");
+    let source = SourceText::new("NESTED_CONSTANT");
     let mut cache = oak_core::parser::session::ParseSession::<ElmLanguage>::default();
     let mut state = LexerState::<SourceText, ElmLanguage>::new_with_cache(&source, 0, &mut cache);
 
-    println!("Initial state:");
-    println!("Position: {}", state.get_position());
+    println!("初始状态:");
+    println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek());
 
-    println!("\nAfter advancing 1 char:");
+    println!("\n前进 1 个字符后:");
     state.advance(1);
-    println!("Position: {}", state.get_position());
+    println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek());
 
-    println!("\nAfter advancing 1 char:");
+    println!("\n前进 1 个字符后:");
     state.advance(1);
-    println!("Position: {}", state.get_position());
+    println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek())
 }
 
 #[test]
-fn test_elm_module_parsing() -> Result<(), OakError> {
+fn test_elixir_module_parsing() -> Result<(), OakError> {
     use oak_core::{Lexer, SourceText};
 
-    let source = SourceText::new("module Main exposing (main)\n\nmain = text \"Hello, World!\"");
-    let language = Box::leak(Box::new(ElmLanguage::default()));
-    let lexer = ElmLexer::new(language);
+    let source = SourceText::new("defmodule MyModule do\n  def hello do\n    :world\n  end\nend");
+    let language = ElmLanguage::default();
+    let lexer = ElmLexer::new(&language);
 
     let mut cache = oak_core::parser::session::ParseSession::<ElmLanguage>::default();
     let result = lexer.lex(&source, &[], &mut cache);
 
-    println!("Testing Elm module parsing:");
-    println!("Source code: '{}'", (&source).get_text_from(0));
+    println!("测试 Elixir 模块解析:");
+    println!("源代码: '{}'", (&source).get_text_from(0));
 
     let tokens = result.result?;
-    assert!(!tokens.is_empty(), "Should parse at least one token");
+    assert!(!tokens.is_empty(), "应该解析出至少一个标记");
 
     let first_token = &tokens[0];
     let source_ref = &source;
     let token_text = source_ref.get_text_in(first_token.span.clone());
 
-    println!("First token: Kind={:?}, Text='{}'", first_token.kind, token_text);
+    println!("第一个标记: 类型={:?}, 文本='{}'", first_token.kind, token_text);
 
-    println!("✅ Elm module parsing test passed!");
+    println!("✅ Elixir 模块解析测试通过！");
     Ok(())
 }

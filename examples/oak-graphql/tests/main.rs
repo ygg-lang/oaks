@@ -1,5 +1,5 @@
 use oak_core::{ParseSession, SourceText, lexer::Lexer};
-use oak_graphql::{kind::GraphQLSyntaxKind, language::GraphQLLanguage, lexer::GraphQLLexer};
+use oak_graphql::{GraphQLTokenType, language::GraphQLLanguage, lexer::GraphQLLexer};
 use std::fs;
 
 struct GraphQLFileTestSuite {
@@ -53,7 +53,7 @@ fn test_lexer() {
 
             // Check for EOF token
             if let Some(last_token) = tokens.last() {
-                if last_token.kind == GraphQLSyntaxKind::Eof {
+                if last_token.kind == GraphQLTokenType::Eof {
                     println!("✓ Found EOF token");
                 }
                 else {
@@ -85,7 +85,7 @@ fn test_parser() {
                 // Perform lexical analysis first
                 let language = GraphQLLanguage {};
                 let lexer = GraphQLLexer::new(&language);
-                let source = SourceText::new(&content);
+                let source = SourceText::new(content.clone());
                 let mut session = ParseSession::<GraphQLLanguage>::default();
                 let lex_result = lexer.lex(&source, &[], &mut session);
 

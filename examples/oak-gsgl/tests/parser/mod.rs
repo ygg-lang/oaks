@@ -4,7 +4,7 @@ use oak_gsgl::{GsglLanguage, GsglParser};
 #[test]
 fn test_parser_basic() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(language);
+    let parser = GsglParser::new(language.clone());
     let source = SourceText::new(r#"local x = 42"#);
     let mut cache = ParseSession::<GsglLanguage>::default();
 
@@ -16,7 +16,7 @@ fn test_parser_basic() {
 #[test]
 fn test_parser_function_declaration() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(language);
+    let parser = GsglParser::new(language.clone());
     let source = SourceText::new(
         r#"
         function add(a, b)
@@ -34,7 +34,7 @@ fn test_parser_function_declaration() {
 #[test]
 fn test_parser_local_function() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(language);
+    let parser = GsglParser::new(language.clone());
     let source = SourceText::new(
         r#"
         local function factorial(n)
@@ -59,7 +59,7 @@ fn test_parser_local_function() {
 #[test]
 fn test_parser_table_constructor() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(language);
+    let parser = GsglParser::new(language.clone());
     let source = SourceText::new(r#"local t = {a = 1, b = 2, [3] = "three"}"#);
 
     let mut cache = ParseSession::<GsglLanguage>::default();
@@ -71,7 +71,7 @@ fn test_parser_table_constructor() {
 #[test]
 fn test_parser_control_structures() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(language);
+    let parser = GsglParser::new(language.clone());
     let source = SourceText::new(
         r#"
         local x = 10
@@ -109,7 +109,7 @@ fn test_parser_control_structures() {
 #[test]
 fn test_parser_expressions() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(&language);
+    let parser = GsglParser::new(language.clone());
     let source = SourceText::new(
         r#"
         local a = 1 + 2 * 3
@@ -128,7 +128,7 @@ fn test_parser_expressions() {
 #[test]
 fn test_parser_function_calls() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(&language);
+    let parser = GsglParser::new(language.clone());
     let source = SourceText::new(
         r#"
         print("Hello, World!")
@@ -147,7 +147,7 @@ fn test_parser_function_calls() {
 #[test]
 fn test_parser_syntax_error() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(&language);
+    let parser = GsglParser::new(language.clone());
     let source = SourceText::new(r#"local x = "#); // Incomplete assignment
 
     let mut cache = ParseSession::<GsglLanguage>::default();
@@ -160,7 +160,7 @@ fn test_parser_syntax_error() {
 #[test]
 fn test_parser_incomplete_function() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(&language);
+    let parser = GsglParser::new(language.clone());
     let source = SourceText::new(
         r#"
         function incomplete_func(a, b)
@@ -178,7 +178,7 @@ fn test_parser_incomplete_function() {
 #[test]
 fn test_parser_invalid_table_syntax() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(&language);
+    let parser = GsglParser::new(language.clone());
     let source = SourceText::new(r#"local t = {a = 1, b = 2,}"#); // Trailing comma
 
     let mut cache = ParseSession::<GsglLanguage>::default();

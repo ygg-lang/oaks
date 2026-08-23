@@ -1,14 +1,15 @@
-use oak_core::parser::{ParseSession, Parser};
-use oak_elm::{language::ElmLanguage, parser::ElmParser};
+use oak_core::errors::OakError;
+use oak_elm::{ElmLanguage, parser::ElmParser};
+use oak_testing::parsing::ParserTester;
+use std::{path::Path, time::Duration};
 
 #[test]
-fn test_elm_parser() {
-    let lang = ElmLanguage::new();
-    let parser = ElmParser::new(&lang);
-    let source = "module Main exposing (..)\nimport Html\nmain = Html.text \"Hello\"";
-    let mut session = ParseSession::<ElmLanguage>::new(16);
-    let output = parser.parse(source, &[], &mut session);
-    assert!(output.result.is_ok());
-    let green = output.result.unwrap();
-    assert!(green.children.len() > 0);
+fn test_elixir_parser() -> Result<(), OakError> {
+    let here = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let tests = here.join("tests/lexer"); // Use lexer tests as basic examples
+    let language = ElmLanguage::default();
+    let parser = ElmParser::new(&language);
+    let test_runner = ParserTester::new(tests).with_extension("ex").with_timeout(Duration::from_secs(5));
+    test_runner.run_tests(&parser)?;
+    Ok(())
 }

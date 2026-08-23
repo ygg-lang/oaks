@@ -5,8 +5,8 @@ use std::{path::Path, time::Duration};
 #[test]
 fn test_valkyrie_parser() -> Result<(), oak_core::OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let lang = Box::leak(Box::new(ValkyrieLanguage::default()));
-    let parser = ValkyrieParser::new(lang);
+    let lang = ValkyrieLanguage::default();
+    let parser = ValkyrieParser::new(&lang);
     let test_runner = ParserTester::new(here.join("tests").join("parser")).with_extension("valkyrie").with_timeout(Duration::from_secs(5));
     test_runner.run_tests::<ValkyrieLanguage, _>(&parser)
 }
@@ -14,8 +14,8 @@ fn test_valkyrie_parser() -> Result<(), oak_core::OakError> {
 #[test]
 fn test_flags_parser() -> Result<(), oak_core::OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let lang = Box::leak(Box::new(ValkyrieLanguage::default()));
-    let parser = ValkyrieParser::new(lang);
+    let lang = ValkyrieLanguage::default();
+    let parser = ValkyrieParser::new(&lang);
     let test_runner = ParserTester::new(here.join("tests").join("parser").join("flags")).with_extension("valkyrie").with_timeout(Duration::from_secs(5));
 
     // Only run flags related tests

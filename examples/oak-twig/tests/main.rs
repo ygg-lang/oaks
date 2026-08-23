@@ -1,12 +1,12 @@
 mod lexer;
 
 use oak_core::{Lexer, ParseSession, Parser, SourceText};
-use oak_twig::{TwigLanguage, TwigTokenType};
+use oak_twig::{TwigLanguage, TwigTokenType, TwigLexer, TwigParser};
 
 #[test]
 fn test_lexer_basic() {
-    let language = TwigLanguage::new();
-    let lexer = language.lexer();
+    let language = TwigLanguage::default();
+    let lexer = TwigLexer::new(&language);
     let source = SourceText::new("{{ variable }}");
     let mut session = ParseSession::<TwigLanguage>::default();
 
@@ -20,8 +20,8 @@ fn test_lexer_basic() {
 
 #[test]
 fn test_parser_basic() {
-    let language = TwigLanguage::new();
-    let parser = language.parser();
+    let language = TwigLanguage::default();
+    let parser = TwigParser::new(&language);
     let source = SourceText::new("{{ variable }}");
     let mut session = ParseSession::<TwigLanguage>::default();
 
@@ -34,8 +34,8 @@ fn test_parser_basic() {
 
 #[test]
 fn test_lexer_string() {
-    let language = TwigLanguage::new();
-    let lexer = language.lexer();
+    let language = TwigLanguage::default();
+    let lexer = TwigLexer::new(&language);
     let source = SourceText::new(r#"{{ "hello world" }}"#);
     let mut session = ParseSession::<TwigLanguage>::default();
 
@@ -45,15 +45,15 @@ fn test_lexer_string() {
     let tokens = result.result.unwrap();
     assert!(!tokens.is_empty());
 
-    // Check if string kind exists.
+    // 检查是否包含字符串 kind
     let has_string = tokens.iter().any(|t| matches!(t.kind, TwigTokenType::String));
     assert!(has_string, "Should contain a string token")
 }
 
 #[test]
 fn test_lexer_number() {
-    let language = TwigLanguage::new();
-    let lexer = language.lexer();
+    let language = TwigLanguage::default();
+    let lexer = TwigLexer::new(&language);
     let source = SourceText::new("{{ 123 }}");
     let mut session = ParseSession::<TwigLanguage>::default();
 
@@ -63,15 +63,15 @@ fn test_lexer_number() {
     let tokens = result.result.unwrap();
     assert!(!tokens.is_empty());
 
-    // Check if number token exists.
+    // 检查是否包含数字token
     let has_number = tokens.iter().any(|t| matches!(t.kind, TwigTokenType::Number));
     assert!(has_number, "Should contain a number token")
 }
 
 #[test]
 fn test_lexer_boolean() {
-    let language = TwigLanguage::new();
-    let lexer = language.lexer();
+    let language = TwigLanguage::default();
+    let lexer = TwigLexer::new(&language);
     let source = SourceText::new("{{ true }}");
     let mut session = ParseSession::<TwigLanguage>::default();
 
@@ -81,15 +81,15 @@ fn test_lexer_boolean() {
     let tokens = result.result.unwrap();
     assert!(!tokens.is_empty());
 
-    // Check if boolean token exists.
+    // 检查是否包含布尔token
     let has_boolean = tokens.iter().any(|t| matches!(t.kind, TwigTokenType::Boolean));
     assert!(has_boolean, "Should contain a boolean token")
 }
 
 #[test]
 fn test_parser_variable() {
-    let language = TwigLanguage::new();
-    let parser = language.parser();
+    let language = TwigLanguage::default();
+    let parser = TwigParser::new(&language);
     let source = SourceText::new("{{ name }}");
     let mut session = ParseSession::<TwigLanguage>::default();
 
@@ -102,8 +102,8 @@ fn test_parser_variable() {
 
 #[test]
 fn test_parser_block() {
-    let language = TwigLanguage::new();
-    let parser = language.parser();
+    let language = TwigLanguage::default();
+    let parser = TwigParser::new(&language);
     let source = SourceText::new(
         r#"{% if condition %}
     Hello World
@@ -120,17 +120,17 @@ fn test_parser_block() {
 
 #[test]
 fn test_empty_input() {
-    let language = TwigLanguage::new();
-    let lexer = language.lexer();
-    let parser = language.parser();
+    let language = TwigLanguage::default();
+    let lexer = TwigLexer::new(&language);
+    let parser = TwigParser::new(&language);
     let source = SourceText::new("");
     let mut session = ParseSession::<TwigLanguage>::default();
 
-    // Test lexing of empty input
+    // 测试空输入的词法分析
     let lex_result = lexer.lex(&source, &[], &mut session);
     assert!(lex_result.result.is_ok());
 
-    // Test parsing of empty input
+    // 测试空输入的语法分析
     let parse_result = parser.parse(&source, &[], &mut session);
     assert!(parse_result.result.is_ok())
 }
