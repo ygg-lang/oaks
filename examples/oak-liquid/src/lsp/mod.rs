@@ -41,7 +41,11 @@ impl LanguageService for LiquidLanguageService {
         &self.workspace
     }
 
-    fn get_root(&self, _uri: &str) -> impl std::future::Future<Output = Option<oak_core::tree::RedNode<'_, LiquidLanguage>>> + Send + '_ {
-        async move { None }
+    fn with_root<R, F>(&self, _uri: &str, _f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
+        async { None }
     }
 }

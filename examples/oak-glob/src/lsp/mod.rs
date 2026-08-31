@@ -42,13 +42,12 @@ impl<V: Vfs> LanguageService for GlobLanguageService<V> {
         &self.workspace
     }
 
-    fn get_root(&self, uri: &str) -> impl std::future::Future<Output = Option<oak_core::tree::RedNode<'_, Self::Lang>>> + Send + '_ {
-        let source = self.vfs().get_source(uri);
-        async move {
-            let _source = source?;
-            // TODO: Implement actual parsing here if needed
-            None
-        }
+    fn with_root<R, F>(&self, _uri: &str, _f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
+        async { None }
     }
 }
 
