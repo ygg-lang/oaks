@@ -10,5 +10,5 @@ fn test_purescript_parser() {
     let output = parser.parse(source, &[], &mut session);
     assert!(output.result.is_ok());
     let green = output.result.unwrap();
-    assert!(green.children.len() > 0);
+    assert!(!green.children.is_empty());
 }

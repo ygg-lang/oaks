@@ -156,7 +156,9 @@ pub trait LanguageService: Send + Sync {
                     }
                 }
                 vec![]
-            }).await.unwrap_or_default()
+            })
+            .await
+            .unwrap_or_default()
         }
     }
 

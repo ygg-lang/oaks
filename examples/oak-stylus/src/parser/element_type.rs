@@ -92,40 +92,6 @@ impl ElementType for StylusElementType {
 
 impl From<crate::lexer::token_type::StylusTokenType> for StylusElementType {
     fn from(token: crate::lexer::token_type::StylusTokenType) -> Self {
-                match token {
-            crate::lexer::token_type::StylusTokenType::Root => Self::Root,
-            crate::lexer::token_type::StylusTokenType::Document => Self::Document,
-            crate::lexer::token_type::StylusTokenType::Rule => Self::Rule,
-            crate::lexer::token_type::StylusTokenType::Selector => Self::Selector,
-            crate::lexer::token_type::StylusTokenType::Property => Self::Property,
-            crate::lexer::token_type::StylusTokenType::Value => Self::Value,
-            crate::lexer::token_type::StylusTokenType::Block => Self::Block,
-            crate::lexer::token_type::StylusTokenType::Identifier => Self::Identifier,
-            crate::lexer::token_type::StylusTokenType::Number => Self::Number,
-            crate::lexer::token_type::StylusTokenType::String => Self::String,
-            crate::lexer::token_type::StylusTokenType::Color => Self::Color,
-            crate::lexer::token_type::StylusTokenType::LeftBrace => Self::LeftBrace,
-            crate::lexer::token_type::StylusTokenType::RightBrace => Self::RightBrace,
-            crate::lexer::token_type::StylusTokenType::LeftParen => Self::LeftParen,
-            crate::lexer::token_type::StylusTokenType::RightParen => Self::RightParen,
-            crate::lexer::token_type::StylusTokenType::Colon => Self::Colon,
-            crate::lexer::token_type::StylusTokenType::Semicolon => Self::Semicolon,
-            crate::lexer::token_type::StylusTokenType::Comma => Self::Comma,
-            crate::lexer::token_type::StylusTokenType::Dot => Self::Dot,
-            crate::lexer::token_type::StylusTokenType::Hash => Self::Hash,
-            crate::lexer::token_type::StylusTokenType::Ampersand => Self::Ampersand,
-            crate::lexer::token_type::StylusTokenType::Plus => Self::Plus,
-            crate::lexer::token_type::StylusTokenType::Minus => Self::Minus,
-            crate::lexer::token_type::StylusTokenType::Star => Self::Star,
-            crate::lexer::token_type::StylusTokenType::Slash => Self::Slash,
-            crate::lexer::token_type::StylusTokenType::Percent => Self::Percent,
-            crate::lexer::token_type::StylusTokenType::Equal => Self::Equal,
-            crate::lexer::token_type::StylusTokenType::Whitespace => Self::Whitespace,
-            crate::lexer::token_type::StylusTokenType::Newline => Self::Newline,
-            crate::lexer::token_type::StylusTokenType::Comment => Self::Comment,
-            crate::lexer::token_type::StylusTokenType::Eof => Self::Eof,
-            crate::lexer::token_type::StylusTokenType::Error => Self::Error,
-            _ => Self::Error,
-        }
+        unsafe { std::mem::transmute(token) }
     }
 }

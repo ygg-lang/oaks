@@ -15,11 +15,12 @@ impl TokenType for WolframTokenType {
     const END_OF_STREAM: Self = Self::Eof;
 
     fn is_ignored(&self) -> bool {
-        false
+        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }
 
     fn role(&self) -> Self::Role {
-        self.role()
+        // Inherent `role` maps to UniversalTokenRole.
+        WolframTokenType::role(self)
     }
 }
 

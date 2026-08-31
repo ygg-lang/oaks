@@ -14,6 +14,7 @@ oak-core = { workspace = true }
 serde = { workspace = true, optional = true, features = ["derive"] }
 
 [features]
+default = ["serde"]
 serde = ["oak-core/serde", "dep:serde"]
 
 [dev-dependencies]

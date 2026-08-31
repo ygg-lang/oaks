@@ -1,5 +1,5 @@
 use oak_core::{Lexer, ParseSession, Parser, source::SourceText};
-use oak_r::{RLanguage, RLexer, RParser, RElementType};
+use oak_r::{RElementType, RLanguage, RLexer, RParser};
 
 #[test]
 fn test_basic_expression() {

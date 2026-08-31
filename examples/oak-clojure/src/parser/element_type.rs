@@ -1,18 +1,30 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Element types for Clojure AST.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ClojureElementType {
+    /// Generic token element.
     Token,
+    /// List element.
     List,
+    /// Vector element.
     Vector,
+    /// Map element.
     Map,
+    /// Set element.
     Set,
+    /// Anonymous function element.
     AnonFn,
+    /// Quotation element.
+    Quotation,
+    /// Metadata element.
+    Meta,
+    /// Root element.
     Root,
+    /// Source file element.
     SourceFile,
+    /// Error element.
     Error,
 }
 
@@ -24,6 +36,7 @@ impl ElementType for ClojureElementType {
             Self::Root => UniversalElementRole::Root,
             Self::SourceFile => UniversalElementRole::Root,
             Self::Error => UniversalElementRole::Error,
+            Self::List | Self::Vector | Self::Map | Self::Set | Self::AnonFn | Self::Quotation | Self::Meta => UniversalElementRole::Expression,
             _ => UniversalElementRole::None,
         }
     }
@@ -31,38 +44,38 @@ impl ElementType for ClojureElementType {
 
 impl From<crate::lexer::token_type::ClojureTokenType> for ClojureElementType {
     fn from(token: crate::lexer::token_type::ClojureTokenType) -> Self {
-                match token {
-            crate::lexer::token_type::ClojureTokenType::Token => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::List => Self::List,
-            crate::lexer::token_type::ClojureTokenType::Vector => Self::Vector,
-            crate::lexer::token_type::ClojureTokenType::Map => Self::Map,
-            crate::lexer::token_type::ClojureTokenType::Set => Self::Set,
-            crate::lexer::token_type::ClojureTokenType::AnonFn => Self::AnonFn,
-            crate::lexer::token_type::ClojureTokenType::Root => Self::Root,
-            crate::lexer::token_type::ClojureTokenType::SourceFile => Self::SourceFile,
-            crate::lexer::token_type::ClojureTokenType::Error => Self::Error,
-            crate::lexer::token_type::ClojureTokenType::ListStart => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::ListEnd => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::VectorStart => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::VectorEnd => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::MapStart => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::MapEnd => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::SetStart => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::AnonFnStart => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::Quote => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::Unquote => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::UnquoteSplice => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::Meta => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::Whitespace => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::Comment => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::StringLiteral => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::CharacterLiteral => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::NumberLiteral => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::KeywordLiteral => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::Dispatch => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::RegexLiteral => Self::Token,
-            crate::lexer::token_type::ClojureTokenType::Symbol => Self::Token,
-            _ => Self::Error,
+        use crate::lexer::token_type::ClojureTokenType as T;
+        match token {
+            T::Token => Self::Token,
+            T::List => Self::List,
+            T::Vector => Self::Vector,
+            T::Map => Self::Map,
+            T::Set => Self::Set,
+            T::AnonFn => Self::AnonFn,
+            T::Root => Self::Root,
+            T::SourceFile => Self::SourceFile,
+            T::Error => Self::Error,
+            T::ListStart => Self::Token,
+            T::ListEnd => Self::Token,
+            T::VectorStart => Self::Token,
+            T::VectorEnd => Self::Token,
+            T::MapStart => Self::Token,
+            T::MapEnd => Self::Token,
+            T::SetStart => Self::Token,
+            T::AnonFnStart => Self::Token,
+            T::Quote => Self::Token,
+            T::Unquote => Self::Token,
+            T::UnquoteSplice => Self::Token,
+            T::Meta => Self::Token,
+            T::Whitespace => Self::Token,
+            T::Comment => Self::Token,
+            T::StringLiteral => Self::Token,
+            T::CharacterLiteral => Self::Token,
+            T::NumberLiteral => Self::Token,
+            T::KeywordLiteral => Self::Token,
+            T::Dispatch => Self::Token,
+            T::RegexLiteral => Self::Token,
+            T::Symbol => Self::Token,
         }
     }
 }

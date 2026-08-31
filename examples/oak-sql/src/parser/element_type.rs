@@ -1,26 +1,75 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for the SQL language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum SqlElementType {
+    /// Root node.
     Root,
-    Identifier,
-    Expression,
-    ErrorNode,
+    /// EXPLAIN statement.
+    ExplainStatement,
+    /// TRANSACTION statement.
+    TransactionStatement,
+    /// PRAGMA statement.
+    PragmaStatement,
+    /// SHOW statement.
+    ShowStatement,
+    /// SELECT statement.
     SelectStatement,
+    /// VECTOR search clause.
+    VectorSearch,
+    /// Identifier.
+    Identifier,
+    /// Expression.
+    Expression,
+    /// Error node.
+    ErrorNode,
+    /// INSERT statement.
     InsertStatement,
+    /// UPDATE statement.
     UpdateStatement,
+    /// DELETE statement.
     DeleteStatement,
+    /// CREATE statement.
     CreateStatement,
+    /// DROP statement.
     DropStatement,
+    /// ALTER statement.
     AlterStatement,
+    /// JOIN clause.
     JoinClause,
+    /// GROUP BY clause.
     GroupByClause,
+    /// HAVING clause.
     HavingClause,
+    /// ORDER BY clause.
     OrderByClause,
+    /// LIMIT clause.
     LimitClause,
+    /// Table name.
+    TableName,
+    /// Column name.
+    ColumnName,
+    /// Select item.
+    SelectItem,
+    /// Alias.
+    Alias,
+    /// Column definition.
+    ColumnDefinition,
+    /// Value list.
+    ValueList,
+    /// Assignment.
+    Assignment,
+    /// Alter action.
+    AlterAction,
+    /// RETURNING clause.
+    ReturningClause,
+    /// ON CONFLICT clause.
+    ConflictClause,
+    /// Subquery.
+    Subquery,
+    /// Function call.
+    FunctionCall,
 }
 
 impl ElementType for SqlElementType {
@@ -30,20 +79,46 @@ impl ElementType for SqlElementType {
         use UniversalElementRole::*;
         match self {
             Self::Root => Root,
-            Self::Identifier => Name,
-            Self::Expression => Expression,
+            Self::Identifier | Self::TableName | Self::ColumnName | Self::Alias => Name,
+            Self::Expression | Self::FunctionCall => Expression,
             Self::ErrorNode => Error,
-            Self::SelectStatement | Self::InsertStatement | Self::UpdateStatement | Self::DeleteStatement | Self::CreateStatement | Self::DropStatement | Self::AlterStatement => Statement,
-            Self::JoinClause | Self::GroupByClause | Self::HavingClause | Self::OrderByClause | Self::LimitClause => Statement,
+            Self::SelectStatement
+            | Self::InsertStatement
+            | Self::UpdateStatement
+            | Self::DeleteStatement
+            | Self::CreateStatement
+            | Self::DropStatement
+            | Self::AlterStatement
+            | Self::ExplainStatement
+            | Self::TransactionStatement
+            | Self::PragmaStatement
+            | Self::ShowStatement => Statement,
+            Self::JoinClause
+            | Self::GroupByClause
+            | Self::HavingClause
+            | Self::OrderByClause
+            | Self::LimitClause
+            | Self::SelectItem
+            | Self::ColumnDefinition
+            | Self::ValueList
+            | Self::Assignment
+            | Self::AlterAction
+            | Self::ReturningClause
+            | Self::ConflictClause
+            | Self::VectorSearch
+            | Self::Subquery => Statement,
         }
     }
 }
 
 impl From<crate::lexer::token_type::SqlTokenType> for SqlElementType {
     fn from(token: crate::lexer::token_type::SqlTokenType) -> Self {
-                match token {
+        match token {
             crate::lexer::token_type::SqlTokenType::Root => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Statement => Self::Root,
+            crate::lexer::token_type::SqlTokenType::ExplainStatement => Self::ExplainStatement,
+            crate::lexer::token_type::SqlTokenType::TransactionStatement => Self::TransactionStatement,
+            crate::lexer::token_type::SqlTokenType::PragmaStatement => Self::PragmaStatement,
+            crate::lexer::token_type::SqlTokenType::ShowStatement => Self::ShowStatement,
             crate::lexer::token_type::SqlTokenType::SelectStatement => Self::SelectStatement,
             crate::lexer::token_type::SqlTokenType::InsertStatement => Self::InsertStatement,
             crate::lexer::token_type::SqlTokenType::UpdateStatement => Self::UpdateStatement,
@@ -53,141 +128,21 @@ impl From<crate::lexer::token_type::SqlTokenType> for SqlElementType {
             crate::lexer::token_type::SqlTokenType::AlterStatement => Self::AlterStatement,
             crate::lexer::token_type::SqlTokenType::Expression => Self::Expression,
             crate::lexer::token_type::SqlTokenType::Identifier => Self::Identifier,
-            crate::lexer::token_type::SqlTokenType::TableName => Self::Root,
-            crate::lexer::token_type::SqlTokenType::ColumnName => Self::Root,
+            crate::lexer::token_type::SqlTokenType::TableName => Self::TableName,
+            crate::lexer::token_type::SqlTokenType::ColumnName => Self::ColumnName,
             crate::lexer::token_type::SqlTokenType::JoinClause => Self::JoinClause,
             crate::lexer::token_type::SqlTokenType::GroupByClause => Self::GroupByClause,
             crate::lexer::token_type::SqlTokenType::HavingClause => Self::HavingClause,
             crate::lexer::token_type::SqlTokenType::OrderByClause => Self::OrderByClause,
             crate::lexer::token_type::SqlTokenType::LimitClause => Self::LimitClause,
+            crate::lexer::token_type::SqlTokenType::SelectItem => Self::SelectItem,
+            crate::lexer::token_type::SqlTokenType::Alias => Self::Alias,
+            crate::lexer::token_type::SqlTokenType::ColumnDefinition => Self::ColumnDefinition,
+            crate::lexer::token_type::SqlTokenType::ValueList => Self::ValueList,
+            crate::lexer::token_type::SqlTokenType::Assignment => Self::Assignment,
+            crate::lexer::token_type::SqlTokenType::AlterAction => Self::AlterAction,
             crate::lexer::token_type::SqlTokenType::ErrorNode => Self::ErrorNode,
-            crate::lexer::token_type::SqlTokenType::Whitespace => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Newline => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Comment => Self::Root,
-            crate::lexer::token_type::SqlTokenType::LineComment => Self::Root,
-            crate::lexer::token_type::SqlTokenType::BlockComment => Self::Root,
-            crate::lexer::token_type::SqlTokenType::NumberLiteral => Self::Root,
-            crate::lexer::token_type::SqlTokenType::FloatLiteral => Self::Root,
-            crate::lexer::token_type::SqlTokenType::StringLiteral => Self::Root,
-            crate::lexer::token_type::SqlTokenType::BooleanLiteral => Self::Root,
-            crate::lexer::token_type::SqlTokenType::NullLiteral => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Identifier_ => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Select => Self::Root,
-            crate::lexer::token_type::SqlTokenType::From => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Where => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Insert => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Into => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Values => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Update => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Set => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Delete => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Create => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Table => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Drop => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Alter => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Add => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Column => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Primary => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Key => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Foreign => Self::Root,
-            crate::lexer::token_type::SqlTokenType::References => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Index => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Unique => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Not => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Null => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Default => Self::Root,
-            crate::lexer::token_type::SqlTokenType::AutoIncrement => Self::Root,
-            crate::lexer::token_type::SqlTokenType::And => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Or => Self::Root,
-            crate::lexer::token_type::SqlTokenType::In => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Like => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Between => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Is => Self::Root,
-            crate::lexer::token_type::SqlTokenType::As => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Join => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Inner => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Left => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Right => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Full => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Outer => Self::Root,
-            crate::lexer::token_type::SqlTokenType::On => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Group => Self::Root,
-            crate::lexer::token_type::SqlTokenType::By => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Having => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Order => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Asc => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Desc => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Limit => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Offset => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Union => Self::Root,
-            crate::lexer::token_type::SqlTokenType::All => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Distinct => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Count => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Sum => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Avg => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Min => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Max => Self::Root,
-            crate::lexer::token_type::SqlTokenType::View => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Database => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Schema => Self::Root,
-            crate::lexer::token_type::SqlTokenType::True => Self::Root,
-            crate::lexer::token_type::SqlTokenType::False => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Exists => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Case => Self::Root,
-            crate::lexer::token_type::SqlTokenType::When => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Then => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Else => Self::Root,
-            crate::lexer::token_type::SqlTokenType::End => Self::Root,
-            crate::lexer::token_type::SqlTokenType::If => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Begin => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Commit => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Rollback => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Transaction => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Int => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Integer => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Varchar => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Char => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Text => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Date => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Time => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Timestamp => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Decimal => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Float => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Double => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Boolean => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Plus => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Minus => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Star => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Slash => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Percent => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Equal => Self::Root,
-            crate::lexer::token_type::SqlTokenType::NotEqual => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Less => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Greater => Self::Root,
-            crate::lexer::token_type::SqlTokenType::LessEqual => Self::Root,
-            crate::lexer::token_type::SqlTokenType::GreaterEqual => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Assign => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Eq => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Ne => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Lt => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Le => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Gt => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Ge => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Concat => Self::Root,
-            crate::lexer::token_type::SqlTokenType::LeftParen => Self::Root,
-            crate::lexer::token_type::SqlTokenType::RightParen => Self::Root,
-            crate::lexer::token_type::SqlTokenType::LeftBracket => Self::Root,
-            crate::lexer::token_type::SqlTokenType::RightBracket => Self::Root,
-            crate::lexer::token_type::SqlTokenType::LeftBrace => Self::Root,
-            crate::lexer::token_type::SqlTokenType::RightBrace => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Comma => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Semicolon => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Dot => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Colon => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Question => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Error => Self::Root,
-            crate::lexer::token_type::SqlTokenType::Eof => Self::Root,
-            _ => Self::Root,
+            _ => Self::ErrorNode,
         }
     }
 }

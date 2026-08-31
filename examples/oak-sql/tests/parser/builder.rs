@@ -11,19 +11,18 @@ fn test_select_ast() {
     let result = builder.build(source, &[], &mut cache);
 
     if let Err(e) = &result.result {
-        panic!("Build failed: {:?}", e);
+        panic!("Build failed: {e:?}");
     }
     let root = result.result.unwrap();
     assert_eq!(root.statements.len(), 1);
 
-    if let oak_sql::ast::SqlStatement::Select(select) = &root.statements[0] {
-        assert_eq!(select.items.len(), 2);
-        assert!(select.from.is_some());
-        assert!(select.selection.is_some());
-    }
+    let oak_sql::ast::SqlStatement::Select(select) = &root.statements[0]
     else {
         panic!("Expected Select statement");
-    }
+    };
+    assert_eq!(select.items.len(), 2);
+    assert!(select.from.is_some());
+    assert!(select.expr.is_some());
 }
 
 #[test]
@@ -39,20 +38,18 @@ fn test_create_table_ast() {
     let root = result.result.unwrap();
     assert_eq!(root.statements.len(), 1);
 
-    if let oak_sql::ast::SqlStatement::Create(create) = &root.statements[0] {
-        assert_eq!(create.name.name, "users");
-        if let oak_sql::ast::CreateBody::Table { columns } = &create.body {
-            assert_eq!(columns.len(), 2);
-            assert_eq!(columns[0].name.name, "id");
-            assert_eq!(columns[0].data_type, "INT");
-            assert_eq!(columns[1].name.name, "name");
-            assert_eq!(columns[1].data_type, "VARCHAR(255)");
-        }
-        else {
-            panic!("Expected Table body");
-        }
-    }
+    let oak_sql::ast::SqlStatement::Create(create) = &root.statements[0]
     else {
         panic!("Expected Create statement");
-    }
+    };
+    assert_eq!(create.name.name.as_ref(), "users");
+    let oak_sql::ast::CreateBody::Table { columns, .. } = &create.body
+    else {
+        panic!("Expected Table body");
+    };
+    assert_eq!(columns.len(), 2);
+    assert_eq!(columns[0].name.name.as_ref(), "id");
+    assert_eq!(columns[0].data_type.as_ref(), "INT");
+    assert_eq!(columns[1].name.name.as_ref(), "name");
+    assert_eq!(columns[1].data_type.as_ref(), "VARCHAR(255)");
 }

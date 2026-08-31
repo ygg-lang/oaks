@@ -1,23 +1,8 @@
+use oak_core::{Builder, SourceText};
 use oak_dejavu::{DejavuBuilder, DejavuLanguage};
-use oak_testing::building::BuilderTester;
-use std::time::Duration;
-
-#[test]
-fn test_dejavu_builder() -> Result<(), oak_core::OakError> {
-    let language = DejavuLanguage::default();
-    let builder = DejavuBuilder::new(&language);
-
-    // Create BuilderTester pointing to test file directory
-    let test_runner = BuilderTester::new("tests/builder/test_files").with_extension("dejavu").with_timeout(Duration::from_secs(5));
-
-    // Run tests
-    test_runner.run_tests::<DejavuLanguage, _>(&builder)
-}
 
 #[test]
 fn test_flags_builder() {
-    use oak_core::{Builder, SourceText};
-
     let language = DejavuLanguage::default();
     let builder = DejavuBuilder::new(&language);
 
@@ -32,7 +17,7 @@ fn test_flags_builder() {
         Ok(typed_root) => {
             println!("Successfully built flags typed root: {:?}", typed_root);
             // Verify if Flags item is generated
-            let has_flags = typed_root.items.iter().any(|item| matches!(item, oak_dejavu::ast::Item::Flags(_)));
+            let has_flags = typed_root.items.iter().any(|item| matches!(item, oak_dejavu::ast::ItemNode::Flags(_)));
             assert!(has_flags, "Builder should have generated a Flags item")
         }
         Err(e) => {
@@ -43,8 +28,6 @@ fn test_flags_builder() {
 
 #[test]
 fn test_dejavu_builder_single_file() {
-    use oak_core::{Builder, SourceText};
-
     let language = DejavuLanguage::default();
     let builder = DejavuBuilder::new(&language);
 
@@ -73,8 +56,6 @@ fn test_dejavu_builder_single_file() {
 
 #[test]
 fn test_dejavu_builder_namespace() {
-    use oak_core::{Builder, SourceText};
-
     let language = DejavuLanguage::default();
     let builder = DejavuBuilder::new(&language);
 

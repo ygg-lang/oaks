@@ -120,28 +120,34 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
         let uri_clone = uri.to_string();
         async move {
             let uri_clone_for_root = uri_clone.clone();
-            self.with_root(&uri_clone_for_root, move |root| { let uri_clone = uri_clone.clone(); 
+            self.with_root(&uri_clone_for_root, move |root| {
+                let uri_clone = uri_clone.clone();
                 let source = match self.vfs().get_source(&uri_clone) {
                     Some(s) => s,
                     None => return vec![],
                 };
-                
+
                 // In a real implementation this would collect definitions across files using with_roots
                 vec![]
-            }).await.unwrap_or_default()
+            })
+            .await
+            .unwrap_or_default()
         }
     }
     fn references<'a>(&'a self, uri: &'a str, range: Range<usize>) -> impl Future<Output = Vec<oak_lsp::LocationRange>> + Send + 'a {
         let uri_clone = uri.to_string();
         async move {
             let uri_clone_for_root = uri_clone.clone();
-            self.with_root(&uri_clone_for_root, move |root| { let uri_clone = uri_clone.clone(); 
+            self.with_root(&uri_clone_for_root, move |root| {
+                let uri_clone = uri_clone.clone();
                 let source = match self.vfs().get_source(&uri_clone) {
                     Some(s) => s,
                     None => return vec![],
                 };
                 vec![]
-            }).await.unwrap_or_default()
+            })
+            .await
+            .unwrap_or_default()
         }
     }
     fn rename<'a>(&'a self, uri: &'a str, range: Range<usize>, new_name: String) -> impl Future<Output = Option<oak_lsp::WorkspaceEdit>> + Send + 'a {

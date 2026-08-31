@@ -44,7 +44,7 @@ fn test_lexer() {
         match test_suite.read_file_content(&file_path) {
             Ok(content) => {
                 let source = SourceText::new(&*content);
-                let language = CobolLanguage {};
+                let language = CobolLanguage::default();
                 let lexer = CobolLexer::new();
                 let mut session = ParseSession::<CobolLanguage>::new(16);
                 let output = lexer.lex(&source, &[], &mut session);
@@ -100,8 +100,8 @@ fn test_parser() {
             Ok(content) => {
                 // Perform lexical analysis first
                 let source = SourceText::new(&*content);
-                let language = CobolLanguage {};
-                let lexer = CobolLexer::new(&language);
+                let _language = CobolLanguage::default();
+                let lexer = CobolLexer::new();
                 let mut session = ParseSession::<CobolLanguage>::new(16);
                 let output = lexer.lex(&source, &[], &mut session);
 

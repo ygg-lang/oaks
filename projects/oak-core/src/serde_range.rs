@@ -50,10 +50,7 @@ pub mod option {
         T: serde::Serialize,
     {
         match value {
-            Some(range) => serializer.serialize_some(&RangeDefRef {
-                start: &range.start,
-                end: &range.end,
-            }),
+            Some(range) => serializer.serialize_some(&RangeDefRef { start: &range.start, end: &range.end }),
             None => serializer.serialize_none(),
         }
     }
@@ -65,10 +62,6 @@ pub mod option {
         T: serde::Deserialize<'de>,
     {
         let opt = <Option<RangeDef<T>> as serde::Deserialize>::deserialize(deserializer)?;
-        Ok(opt.map(|def| Range {
-            start: def.start,
-            end: def.end,
-        }))
+        Ok(opt.map(|def| Range { start: def.start, end: def.end }))
     }
 }
-

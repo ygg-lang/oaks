@@ -89,31 +89,6 @@ impl ElementType for LLvmElementType {
 
 impl From<crate::lexer::token_type::LLvmTokenType> for LLvmElementType {
     fn from(token: crate::lexer::token_type::LLvmTokenType) -> Self {
-                match token {
-            crate::lexer::token_type::LLvmTokenType::Root => Self::Root,
-            crate::lexer::token_type::LLvmTokenType::Identifier => Self::Identifier,
-            crate::lexer::token_type::LLvmTokenType::Number => Self::Number,
-            crate::lexer::token_type::LLvmTokenType::String => Self::String,
-            crate::lexer::token_type::LLvmTokenType::Comment => Self::Comment,
-            crate::lexer::token_type::LLvmTokenType::Whitespace => Self::Whitespace,
-            crate::lexer::token_type::LLvmTokenType::Newline => Self::Newline,
-            crate::lexer::token_type::LLvmTokenType::Error => Self::Error,
-            crate::lexer::token_type::LLvmTokenType::Eof => Self::Eof,
-            crate::lexer::token_type::LLvmTokenType::LocalVar => Self::LocalVar,
-            crate::lexer::token_type::LLvmTokenType::GlobalVar => Self::GlobalVar,
-            crate::lexer::token_type::LLvmTokenType::Metadata => Self::Metadata,
-            crate::lexer::token_type::LLvmTokenType::Equal => Self::Equal,
-            crate::lexer::token_type::LLvmTokenType::Comma => Self::Comma,
-            crate::lexer::token_type::LLvmTokenType::LParen => Self::LParen,
-            crate::lexer::token_type::LLvmTokenType::RParen => Self::RParen,
-            crate::lexer::token_type::LLvmTokenType::LBracket => Self::LBracket,
-            crate::lexer::token_type::LLvmTokenType::RBracket => Self::RBracket,
-            crate::lexer::token_type::LLvmTokenType::LBrace => Self::LBrace,
-            crate::lexer::token_type::LLvmTokenType::RBrace => Self::RBrace,
-            crate::lexer::token_type::LLvmTokenType::Star => Self::Star,
-            crate::lexer::token_type::LLvmTokenType::Colon => Self::Colon,
-            crate::lexer::token_type::LLvmTokenType::Keyword => Self::Keyword,
-            _ => Self::Error,
-        }
+        unsafe { std::mem::transmute(token) }
     }
 }

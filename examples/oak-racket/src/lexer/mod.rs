@@ -9,6 +9,7 @@ mod token_type;
 pub use token_type::TokenType;
 
 /// Lexer for Racket source code.
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Lexer;
 
 impl CoreLexer<RacketLanguage> for Lexer {

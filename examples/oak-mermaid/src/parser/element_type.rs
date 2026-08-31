@@ -82,17 +82,6 @@ impl ElementType for MermaidElementType {
 
 impl From<crate::lexer::token_type::MermaidTokenType> for MermaidElementType {
     fn from(token: crate::lexer::token_type::MermaidTokenType) -> Self {
-                match token {
-            crate::lexer::token_type::MermaidTokenType::Whitespace => Self::Whitespace,
-            crate::lexer::token_type::MermaidTokenType::Newline => Self::Newline,
-            crate::lexer::token_type::MermaidTokenType::Comment => Self::Comment,
-            crate::lexer::token_type::MermaidTokenType::Graph => Self::Graph,
-            crate::lexer::token_type::MermaidTokenType::Direction => Self::Direction,
-            crate::lexer::token_type::MermaidTokenType::Id => Self::Id,
-            crate::lexer::token_type::MermaidTokenType::Label => Self::Label,
-            crate::lexer::token_type::MermaidTokenType::Arrow => Self::Arrow,
-            crate::lexer::token_type::MermaidTokenType::Error => Self::Error,
-            _ => Self::Error,
-        }
+        unsafe { std::mem::transmute(token) }
     }
 }

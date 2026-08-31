@@ -23,6 +23,9 @@ serde = { workspace = true, optional = true }
 futures = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true }
 
+[dev-dependencies]
+oak-testing = { workspace = true }
+
 [features]
 default = ["serde"]
 serde = ["dep:serde", "oak-core/serde"]

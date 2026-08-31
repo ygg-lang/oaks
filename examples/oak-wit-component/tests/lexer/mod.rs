@@ -1,5 +1,5 @@
 use oak_testing::lexing::LexerTester;
-use oak_wit::{WitLanguage, WitLexer};
+use oak_wit_component::{WitLanguage, WitLexer};
 use std::{path::Path, time::Duration};
 
 #[test]

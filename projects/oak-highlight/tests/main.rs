@@ -2,7 +2,7 @@
 use oak_highlight::{ExportFormat, OakHighlighter, Theme};
 
 mod common;
-use common::{MockLanguage, MockLexer, MockParser};
+use common::{MockLexer, MockParser};
 
 #[test]
 fn test_mock_highlighting() {
@@ -16,12 +16,8 @@ fn test_mock_highlighting() {
     assert_eq!(result.source, code);
     assert!(!result.segments.is_empty());
 
-    // k -> Keyword, i -> Identifier, s -> String, space -> Whitespace
-    // Verify segments match expectations roughly
-    let segments: Vec<_> = result.segments.iter().map(|s| s.text).collect();
-    // Assuming highlighter preserves whitespace or token structure
     for segment in &result.segments {
-        println!("{:?}: {:?}", segment.span, segment.text)
+        println!("{:?}: {:?}", segment.span, segment.text.clone())
     }
 }
 
