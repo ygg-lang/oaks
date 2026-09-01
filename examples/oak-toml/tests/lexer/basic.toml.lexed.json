@@ -1,526 +1,604 @@
 {
     "success": true,
-    "count": 100,
+    "count": 838,
     "tokens": [
         {
             "kind": "BareKey",
             "text": "title",
-            "start": 141,
-            "end": 146
+            "start": 137,
+            "end": 142
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 147,
-            "end": 148
+            "start": 143,
+            "end": 144
         },
         {
             "kind": "BasicString",
             "text": "\"TOML Example\"",
-            "start": 149,
-            "end": 163
+            "start": 145,
+            "end": 159
         },
         {
             "kind": "BareKey",
             "text": "description",
-            "start": 165,
-            "end": 176
+            "start": 160,
+            "end": 171
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 177,
-            "end": 178
+            "start": 172,
+            "end": 173
         },
         {
             "kind": "BasicString",
             "text": "\"A comprehensive TOML test file\"",
-            "start": 179,
-            "end": 211
+            "start": 174,
+            "end": 206
         },
         {
             "kind": "BareKey",
             "text": "version",
-            "start": 213,
-            "end": 220
+            "start": 207,
+            "end": 214
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 221,
-            "end": 222
+            "start": 215,
+            "end": 216
         },
         {
             "kind": "BasicString",
             "text": "\"1.0.0\"",
-            "start": 223,
-            "end": 230
+            "start": 217,
+            "end": 224
         },
         {
             "kind": "BareKey",
             "text": "basic_string",
-            "start": 245,
-            "end": 257
+            "start": 236,
+            "end": 248
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 258,
-            "end": 259
+            "start": 249,
+            "end": 250
         },
         {
             "kind": "BasicString",
             "text": "\"I'm a string\"",
-            "start": 260,
-            "end": 274
+            "start": 251,
+            "end": 265
         },
         {
             "kind": "BareKey",
             "text": "multiline_basic_string",
-            "start": 276,
-            "end": 298
+            "start": 266,
+            "end": 288
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 299,
-            "end": 300
+            "start": 289,
+            "end": 290
         },
         {
             "kind": "BasicString",
             "text": "\"\"",
-            "start": 301,
-            "end": 303
+            "start": 291,
+            "end": 293
         },
         {
             "kind": "BasicString",
-            "text": "\"\r\nRoses are red\r\nViolets are blue\"",
-            "start": 303,
-            "end": 338
+            "text": "\"\nRoses are red\nViolets are blue\"",
+            "start": 293,
+            "end": 326
         },
         {
             "kind": "BasicString",
             "text": "\"\"",
-            "start": 338,
-            "end": 340
+            "start": 326,
+            "end": 328
         },
         {
             "kind": "BareKey",
             "text": "literal_string",
-            "start": 344,
-            "end": 358
+            "start": 330,
+            "end": 344
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 359,
-            "end": 360
+            "start": 345,
+            "end": 346
         },
         {
             "kind": "LiteralString",
             "text": "'C:\\Users\\nodejs\\templates'",
-            "start": 361,
-            "end": 388
+            "start": 347,
+            "end": 374
         },
         {
             "kind": "BareKey",
             "text": "multiline_literal_string",
-            "start": 390,
-            "end": 414
+            "start": 375,
+            "end": 399
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 415,
-            "end": 416
+            "start": 400,
+            "end": 401
         },
         {
             "kind": "LiteralString",
             "text": "''",
-            "start": 417,
-            "end": 419
+            "start": 402,
+            "end": 404
         },
         {
             "kind": "LiteralString",
-            "text": "'\r\nThe first newline is\r\ntrimmed in raw strings.\r\n   All other whitespace\r\n   is preserved.\r\n'",
-            "start": 419,
-            "end": 513
+            "text": "'\nThe first newline is\ntrimmed in raw strings.\n      All other whitespace\n      is preserved.\n'",
+            "start": 404,
+            "end": 499
         },
         {
             "kind": "LiteralString",
             "text": "''",
-            "start": 513,
-            "end": 515
+            "start": 499,
+            "end": 501
         },
         {
             "kind": "BareKey",
             "text": "int1",
-            "start": 531,
-            "end": 535
+            "start": 514,
+            "end": 518
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 536,
-            "end": 537
+            "start": 519,
+            "end": 520
         },
         {
             "kind": "Integer",
             "text": "+99",
-            "start": 538,
-            "end": 541
+            "start": 521,
+            "end": 524
         },
         {
             "kind": "BareKey",
             "text": "int2",
-            "start": 543,
-            "end": 547
+            "start": 525,
+            "end": 529
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 548,
-            "end": 549
+            "start": 530,
+            "end": 531
         },
         {
             "kind": "Integer",
             "text": "42",
-            "start": 550,
-            "end": 552
+            "start": 532,
+            "end": 534
         },
         {
             "kind": "BareKey",
             "text": "int3",
-            "start": 554,
-            "end": 558
+            "start": 535,
+            "end": 539
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 559,
-            "end": 560
+            "start": 540,
+            "end": 541
         },
         {
             "kind": "Integer",
             "text": "0",
-            "start": 561,
-            "end": 562
+            "start": 542,
+            "end": 543
         },
         {
             "kind": "BareKey",
             "text": "int4",
-            "start": 564,
-            "end": 568
+            "start": 544,
+            "end": 548
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 569,
-            "end": 570
+            "start": 549,
+            "end": 550
         },
         {
             "kind": "Integer",
             "text": "-17",
-            "start": 571,
-            "end": 574
+            "start": 551,
+            "end": 554
         },
         {
             "kind": "BareKey",
             "text": "int5",
-            "start": 576,
-            "end": 580
+            "start": 555,
+            "end": 559
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 581,
-            "end": 582
+            "start": 560,
+            "end": 561
         },
         {
             "kind": "Integer",
             "text": "1",
-            "start": 583,
-            "end": 584
+            "start": 562,
+            "end": 563
         },
         {
             "kind": "BareKey",
             "text": "_000",
-            "start": 584,
-            "end": 588
+            "start": 563,
+            "end": 567
         },
         {
             "kind": "BareKey",
             "text": "int6",
-            "start": 590,
-            "end": 594
+            "start": 568,
+            "end": 572
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 595,
-            "end": 596
+            "start": 573,
+            "end": 574
         },
         {
             "kind": "Integer",
             "text": "5",
-            "start": 597,
-            "end": 598
+            "start": 575,
+            "end": 576
         },
         {
             "kind": "BareKey",
             "text": "_349_221",
-            "start": 598,
-            "end": 606
+            "start": 576,
+            "end": 584
         },
         {
             "kind": "BareKey",
             "text": "int7",
-            "start": 608,
-            "end": 612
+            "start": 585,
+            "end": 589
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 613,
-            "end": 614
+            "start": 590,
+            "end": 591
         },
         {
             "kind": "Integer",
             "text": "53",
-            "start": 615,
-            "end": 617
+            "start": 592,
+            "end": 594
         },
         {
             "kind": "BareKey",
             "text": "_49_221",
-            "start": 617,
-            "end": 624
+            "start": 594,
+            "end": 601
         },
         {
             "kind": "BareKey",
             "text": "int8",
-            "start": 659,
-            "end": 663
+            "start": 635,
+            "end": 639
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 664,
-            "end": 665
+            "start": 640,
+            "end": 641
         },
         {
             "kind": "Integer",
             "text": "1",
-            "start": 666,
-            "end": 667
+            "start": 642,
+            "end": 643
         },
         {
             "kind": "BareKey",
             "text": "_2_3_4_5",
-            "start": 667,
-            "end": 675
+            "start": 643,
+            "end": 651
         },
         {
             "kind": "BareKey",
             "text": "hex1",
-            "start": 726,
-            "end": 730
+            "start": 699,
+            "end": 703
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 731,
-            "end": 732
+            "start": 704,
+            "end": 705
         },
         {
             "kind": "Integer",
             "text": "0",
-            "start": 733,
-            "end": 734
+            "start": 706,
+            "end": 707
         },
         {
             "kind": "BareKey",
             "text": "xDEADBEEF",
-            "start": 734,
-            "end": 743
+            "start": 707,
+            "end": 716
         },
         {
             "kind": "BareKey",
             "text": "hex2",
-            "start": 745,
-            "end": 749
+            "start": 717,
+            "end": 721
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 750,
-            "end": 751
+            "start": 722,
+            "end": 723
         },
         {
             "kind": "Integer",
             "text": "0",
-            "start": 752,
-            "end": 753
+            "start": 724,
+            "end": 725
         },
         {
             "kind": "BareKey",
             "text": "xdeadbeef",
-            "start": 753,
-            "end": 762
+            "start": 725,
+            "end": 734
         },
         {
             "kind": "BareKey",
             "text": "hex3",
-            "start": 764,
-            "end": 768
+            "start": 735,
+            "end": 739
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 769,
-            "end": 770
+            "start": 740,
+            "end": 741
         },
         {
             "kind": "Integer",
             "text": "0",
-            "start": 771,
-            "end": 772
+            "start": 742,
+            "end": 743
         },
         {
             "kind": "BareKey",
             "text": "xdead_beef",
-            "start": 772,
-            "end": 782
+            "start": 743,
+            "end": 753
         },
         {
             "kind": "BareKey",
             "text": "oct1",
-            "start": 784,
-            "end": 788
+            "start": 754,
+            "end": 758
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 789,
-            "end": 790
+            "start": 759,
+            "end": 760
         },
         {
             "kind": "Integer",
             "text": "0",
-            "start": 791,
-            "end": 792
+            "start": 761,
+            "end": 762
         },
         {
             "kind": "BareKey",
             "text": "o01234567",
-            "start": 792,
-            "end": 801
+            "start": 762,
+            "end": 771
         },
         {
             "kind": "BareKey",
             "text": "oct2",
-            "start": 803,
-            "end": 807
+            "start": 772,
+            "end": 776
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 808,
-            "end": 809
+            "start": 777,
+            "end": 778
         },
         {
             "kind": "Integer",
             "text": "0",
-            "start": 810,
-            "end": 811
+            "start": 779,
+            "end": 780
         },
         {
             "kind": "BareKey",
             "text": "o755",
-            "start": 811,
-            "end": 815
+            "start": 780,
+            "end": 784
         },
         {
             "kind": "BareKey",
             "text": "bin1",
-            "start": 852,
-            "end": 856
+            "start": 820,
+            "end": 824
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 857,
-            "end": 858
+            "start": 825,
+            "end": 826
         },
         {
             "kind": "Integer",
             "text": "0",
-            "start": 859,
-            "end": 860
+            "start": 827,
+            "end": 828
         },
         {
             "kind": "BareKey",
             "text": "b11010110",
-            "start": 860,
-            "end": 869
+            "start": 828,
+            "end": 837
         },
         {
             "kind": "BareKey",
             "text": "flt1",
-            "start": 883,
-            "end": 887
+            "start": 848,
+            "end": 852
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 888,
-            "end": 889
+            "start": 853,
+            "end": 854
         },
         {
             "kind": "Float",
             "text": "+1.0",
-            "start": 890,
-            "end": 894
+            "start": 855,
+            "end": 859
         },
         {
             "kind": "BareKey",
             "text": "flt2",
-            "start": 896,
-            "end": 900
+            "start": 860,
+            "end": 864
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 901,
-            "end": 902
+            "start": 865,
+            "end": 866
         },
         {
             "kind": "Float",
             "text": "3.1415926535897932384626433832795",
-            "start": 903,
-            "end": 936
+            "start": 867,
+            "end": 900
         },
         {
             "kind": "BareKey",
             "text": "flt3",
-            "start": 938,
-            "end": 942
+            "start": 901,
+            "end": 905
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 943,
-            "end": 944
+            "start": 906,
+            "end": 907
         },
         {
             "kind": "Float",
             "text": "-0.01",
-            "start": 945,
-            "end": 950
+            "start": 908,
+            "end": 913
         },
         {
             "kind": "BareKey",
             "text": "flt4",
+            "start": 914,
+            "end": 918
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 919,
+            "end": 920
+        },
+        {
+            "kind": "Integer",
+            "text": "5",
+            "start": 921,
+            "end": 922
+        },
+        {
+            "kind": "BareKey",
+            "text": "e",
+            "start": 922,
+            "end": 923
+        },
+        {
+            "kind": "Integer",
+            "text": "+22",
+            "start": 923,
+            "end": 926
+        },
+        {
+            "kind": "BareKey",
+            "text": "flt5",
+            "start": 927,
+            "end": 931
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 932,
+            "end": 933
+        },
+        {
+            "kind": "Integer",
+            "text": "1",
+            "start": 934,
+            "end": 935
+        },
+        {
+            "kind": "BareKey",
+            "text": "e06",
+            "start": 935,
+            "end": 938
+        },
+        {
+            "kind": "BareKey",
+            "text": "flt6",
+            "start": 939,
+            "end": 943
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 944,
+            "end": 945
+        },
+        {
+            "kind": "Integer",
+            "text": "-2",
+            "start": 946,
+            "end": 948
+        },
+        {
+            "kind": "BareKey",
+            "text": "E-2",
+            "start": 948,
+            "end": 951
+        },
+        {
+            "kind": "BareKey",
+            "text": "flt7",
             "start": 952,
             "end": 956
         },
@@ -531,76 +609,4426 @@
             "end": 958
         },
         {
-            "kind": "Integer",
-            "text": "5",
+            "kind": "Float",
+            "text": "6.626",
             "start": 959,
-            "end": 960
-        },
-        {
-            "kind": "BareKey",
-            "text": "e",
-            "start": 960,
-            "end": 961
-        },
-        {
-            "kind": "Integer",
-            "text": "+22",
-            "start": 961,
             "end": 964
         },
         {
             "kind": "BareKey",
-            "text": "flt5",
-            "start": 966,
-            "end": 970
+            "text": "e-34",
+            "start": 964,
+            "end": 968
+        },
+        {
+            "kind": "BareKey",
+            "text": "flt8",
+            "start": 969,
+            "end": 973
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 971,
-            "end": 972
+            "start": 974,
+            "end": 975
         },
         {
             "kind": "Integer",
-            "text": "1",
-            "start": 973,
-            "end": 974
+            "text": "224",
+            "start": 976,
+            "end": 979
         },
         {
             "kind": "BareKey",
-            "text": "e06",
-            "start": 974,
-            "end": 977
-        },
-        {
-            "kind": "BareKey",
-            "text": "flt6",
+            "text": "_617",
             "start": 979,
             "end": 983
         },
         {
-            "kind": "Equal",
-            "text": "=",
-            "start": 984,
-            "end": 985
+            "kind": "Dot",
+            "text": ".",
+            "start": 983,
+            "end": 984
         },
         {
             "kind": "Integer",
-            "text": "-2",
-            "start": 986,
-            "end": 988
+            "text": "445",
+            "start": 984,
+            "end": 987
         },
         {
             "kind": "BareKey",
-            "text": "E-2",
-            "start": 988,
-            "end": 991
+            "text": "_991_228",
+            "start": 987,
+            "end": 995
         },
         {
             "kind": "BareKey",
-            "text": "flt7",
-            "start": 993,
-            "end": 997
+            "text": "sf1",
+            "start": 1016,
+            "end": 1019
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1020,
+            "end": 1021
+        },
+        {
+            "kind": "BareKey",
+            "text": "inf",
+            "start": 1022,
+            "end": 1025
+        },
+        {
+            "kind": "BareKey",
+            "text": "sf2",
+            "start": 1047,
+            "end": 1050
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1051,
+            "end": 1052
+        },
+        {
+            "kind": "Integer",
+            "text": "+",
+            "start": 1053,
+            "end": 1054
+        },
+        {
+            "kind": "BareKey",
+            "text": "inf",
+            "start": 1054,
+            "end": 1057
+        },
+        {
+            "kind": "BareKey",
+            "text": "sf3",
+            "start": 1078,
+            "end": 1081
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1082,
+            "end": 1083
+        },
+        {
+            "kind": "Integer",
+            "text": "-",
+            "start": 1084,
+            "end": 1085
+        },
+        {
+            "kind": "BareKey",
+            "text": "inf",
+            "start": 1085,
+            "end": 1088
+        },
+        {
+            "kind": "BareKey",
+            "text": "sf4",
+            "start": 1109,
+            "end": 1112
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1113,
+            "end": 1114
+        },
+        {
+            "kind": "BareKey",
+            "text": "nan",
+            "start": 1115,
+            "end": 1118
+        },
+        {
+            "kind": "BareKey",
+            "text": "sf5",
+            "start": 1175,
+            "end": 1178
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1179,
+            "end": 1180
+        },
+        {
+            "kind": "Integer",
+            "text": "+",
+            "start": 1181,
+            "end": 1182
+        },
+        {
+            "kind": "BareKey",
+            "text": "nan",
+            "start": 1182,
+            "end": 1185
+        },
+        {
+            "kind": "BareKey",
+            "text": "sf6",
+            "start": 1202,
+            "end": 1205
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1206,
+            "end": 1207
+        },
+        {
+            "kind": "Integer",
+            "text": "-",
+            "start": 1208,
+            "end": 1209
+        },
+        {
+            "kind": "BareKey",
+            "text": "nan",
+            "start": 1209,
+            "end": 1212
+        },
+        {
+            "kind": "BareKey",
+            "text": "bool1",
+            "start": 1277,
+            "end": 1282
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1283,
+            "end": 1284
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 1285,
+            "end": 1289
+        },
+        {
+            "kind": "BareKey",
+            "text": "bool2",
+            "start": 1290,
+            "end": 1295
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1296,
+            "end": 1297
+        },
+        {
+            "kind": "Boolean",
+            "text": "false",
+            "start": 1298,
+            "end": 1303
+        },
+        {
+            "kind": "BareKey",
+            "text": "odt1",
+            "start": 1316,
+            "end": 1320
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1321,
+            "end": 1322
+        },
+        {
+            "kind": "Integer",
+            "text": "1979",
+            "start": 1323,
+            "end": 1327
+        },
+        {
+            "kind": "Integer",
+            "text": "-05",
+            "start": 1327,
+            "end": 1330
+        },
+        {
+            "kind": "Integer",
+            "text": "-27",
+            "start": 1330,
+            "end": 1333
+        },
+        {
+            "kind": "BareKey",
+            "text": "T07",
+            "start": 1333,
+            "end": 1336
+        },
+        {
+            "kind": "Integer",
+            "text": "32",
+            "start": 1337,
+            "end": 1339
+        },
+        {
+            "kind": "Integer",
+            "text": "00",
+            "start": 1340,
+            "end": 1342
+        },
+        {
+            "kind": "BareKey",
+            "text": "Z",
+            "start": 1342,
+            "end": 1343
+        },
+        {
+            "kind": "BareKey",
+            "text": "odt2",
+            "start": 1344,
+            "end": 1348
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1349,
+            "end": 1350
+        },
+        {
+            "kind": "Integer",
+            "text": "1979",
+            "start": 1351,
+            "end": 1355
+        },
+        {
+            "kind": "Integer",
+            "text": "-05",
+            "start": 1355,
+            "end": 1358
+        },
+        {
+            "kind": "Integer",
+            "text": "-27",
+            "start": 1358,
+            "end": 1361
+        },
+        {
+            "kind": "BareKey",
+            "text": "T00",
+            "start": 1361,
+            "end": 1364
+        },
+        {
+            "kind": "Integer",
+            "text": "32",
+            "start": 1365,
+            "end": 1367
+        },
+        {
+            "kind": "Integer",
+            "text": "00",
+            "start": 1368,
+            "end": 1370
+        },
+        {
+            "kind": "Integer",
+            "text": "-07",
+            "start": 1370,
+            "end": 1373
+        },
+        {
+            "kind": "Integer",
+            "text": "00",
+            "start": 1374,
+            "end": 1376
+        },
+        {
+            "kind": "BareKey",
+            "text": "odt3",
+            "start": 1377,
+            "end": 1381
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1382,
+            "end": 1383
+        },
+        {
+            "kind": "Integer",
+            "text": "1979",
+            "start": 1384,
+            "end": 1388
+        },
+        {
+            "kind": "Integer",
+            "text": "-05",
+            "start": 1388,
+            "end": 1391
+        },
+        {
+            "kind": "Integer",
+            "text": "-27",
+            "start": 1391,
+            "end": 1394
+        },
+        {
+            "kind": "BareKey",
+            "text": "T00",
+            "start": 1394,
+            "end": 1397
+        },
+        {
+            "kind": "Integer",
+            "text": "32",
+            "start": 1398,
+            "end": 1400
+        },
+        {
+            "kind": "Float",
+            "text": "00.999999",
+            "start": 1401,
+            "end": 1410
+        },
+        {
+            "kind": "Integer",
+            "text": "-07",
+            "start": 1410,
+            "end": 1413
+        },
+        {
+            "kind": "Integer",
+            "text": "00",
+            "start": 1414,
+            "end": 1416
+        },
+        {
+            "kind": "BareKey",
+            "text": "ldt1",
+            "start": 1417,
+            "end": 1421
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1422,
+            "end": 1423
+        },
+        {
+            "kind": "Integer",
+            "text": "1979",
+            "start": 1424,
+            "end": 1428
+        },
+        {
+            "kind": "Integer",
+            "text": "-05",
+            "start": 1428,
+            "end": 1431
+        },
+        {
+            "kind": "Integer",
+            "text": "-27",
+            "start": 1431,
+            "end": 1434
+        },
+        {
+            "kind": "BareKey",
+            "text": "T07",
+            "start": 1434,
+            "end": 1437
+        },
+        {
+            "kind": "Integer",
+            "text": "32",
+            "start": 1438,
+            "end": 1440
+        },
+        {
+            "kind": "Integer",
+            "text": "00",
+            "start": 1441,
+            "end": 1443
+        },
+        {
+            "kind": "BareKey",
+            "text": "ldt2",
+            "start": 1444,
+            "end": 1448
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1449,
+            "end": 1450
+        },
+        {
+            "kind": "Integer",
+            "text": "1979",
+            "start": 1451,
+            "end": 1455
+        },
+        {
+            "kind": "Integer",
+            "text": "-05",
+            "start": 1455,
+            "end": 1458
+        },
+        {
+            "kind": "Integer",
+            "text": "-27",
+            "start": 1458,
+            "end": 1461
+        },
+        {
+            "kind": "BareKey",
+            "text": "T00",
+            "start": 1461,
+            "end": 1464
+        },
+        {
+            "kind": "Integer",
+            "text": "32",
+            "start": 1465,
+            "end": 1467
+        },
+        {
+            "kind": "Float",
+            "text": "00.999999",
+            "start": 1468,
+            "end": 1477
+        },
+        {
+            "kind": "BareKey",
+            "text": "ld1",
+            "start": 1478,
+            "end": 1481
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1482,
+            "end": 1483
+        },
+        {
+            "kind": "Integer",
+            "text": "1979",
+            "start": 1484,
+            "end": 1488
+        },
+        {
+            "kind": "Integer",
+            "text": "-05",
+            "start": 1488,
+            "end": 1491
+        },
+        {
+            "kind": "Integer",
+            "text": "-27",
+            "start": 1491,
+            "end": 1494
+        },
+        {
+            "kind": "BareKey",
+            "text": "lt1",
+            "start": 1495,
+            "end": 1498
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1499,
+            "end": 1500
+        },
+        {
+            "kind": "Integer",
+            "text": "07",
+            "start": 1501,
+            "end": 1503
+        },
+        {
+            "kind": "Integer",
+            "text": "32",
+            "start": 1504,
+            "end": 1506
+        },
+        {
+            "kind": "Integer",
+            "text": "00",
+            "start": 1507,
+            "end": 1509
+        },
+        {
+            "kind": "BareKey",
+            "text": "lt2",
+            "start": 1510,
+            "end": 1513
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1514,
+            "end": 1515
+        },
+        {
+            "kind": "Integer",
+            "text": "00",
+            "start": 1516,
+            "end": 1518
+        },
+        {
+            "kind": "Integer",
+            "text": "32",
+            "start": 1519,
+            "end": 1521
+        },
+        {
+            "kind": "Float",
+            "text": "00.999999",
+            "start": 1522,
+            "end": 1531
+        },
+        {
+            "kind": "BareKey",
+            "text": "integers",
+            "start": 1542,
+            "end": 1550
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1551,
+            "end": 1552
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1553,
+            "end": 1554
+        },
+        {
+            "kind": "Integer",
+            "text": "1",
+            "start": 1555,
+            "end": 1556
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1556,
+            "end": 1557
+        },
+        {
+            "kind": "Integer",
+            "text": "2",
+            "start": 1558,
+            "end": 1559
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1559,
+            "end": 1560
+        },
+        {
+            "kind": "Integer",
+            "text": "3",
+            "start": 1561,
+            "end": 1562
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1563,
+            "end": 1564
+        },
+        {
+            "kind": "BareKey",
+            "text": "colors",
+            "start": 1565,
+            "end": 1571
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1572,
+            "end": 1573
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1574,
+            "end": 1575
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"red\"",
+            "start": 1576,
+            "end": 1581
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1581,
+            "end": 1582
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"yellow\"",
+            "start": 1583,
+            "end": 1591
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1591,
+            "end": 1592
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"green\"",
+            "start": 1593,
+            "end": 1600
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1601,
+            "end": 1602
+        },
+        {
+            "kind": "BareKey",
+            "text": "nested_arrays_of_ints",
+            "start": 1603,
+            "end": 1624
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1625,
+            "end": 1626
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1627,
+            "end": 1628
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1629,
+            "end": 1630
+        },
+        {
+            "kind": "Integer",
+            "text": "1",
+            "start": 1631,
+            "end": 1632
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1632,
+            "end": 1633
+        },
+        {
+            "kind": "Integer",
+            "text": "2",
+            "start": 1634,
+            "end": 1635
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1636,
+            "end": 1637
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1637,
+            "end": 1638
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1639,
+            "end": 1640
+        },
+        {
+            "kind": "Integer",
+            "text": "3",
+            "start": 1640,
+            "end": 1641
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1641,
+            "end": 1642
+        },
+        {
+            "kind": "Integer",
+            "text": "4",
+            "start": 1643,
+            "end": 1644
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1644,
+            "end": 1645
+        },
+        {
+            "kind": "Integer",
+            "text": "5",
+            "start": 1646,
+            "end": 1647
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1647,
+            "end": 1648
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1649,
+            "end": 1650
+        },
+        {
+            "kind": "BareKey",
+            "text": "nested_mixed_array",
+            "start": 1651,
+            "end": 1669
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1670,
+            "end": 1671
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1672,
+            "end": 1673
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1674,
+            "end": 1675
+        },
+        {
+            "kind": "Integer",
+            "text": "1",
+            "start": 1676,
+            "end": 1677
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1677,
+            "end": 1678
+        },
+        {
+            "kind": "Integer",
+            "text": "2",
+            "start": 1679,
+            "end": 1680
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1681,
+            "end": 1682
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1682,
+            "end": 1683
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1684,
+            "end": 1685
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"a\"",
+            "start": 1685,
+            "end": 1688
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1688,
+            "end": 1689
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"b\"",
+            "start": 1690,
+            "end": 1693
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1693,
+            "end": 1694
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"c\"",
+            "start": 1695,
+            "end": 1698
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1698,
+            "end": 1699
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1700,
+            "end": 1701
+        },
+        {
+            "kind": "BareKey",
+            "text": "string_array",
+            "start": 1702,
+            "end": 1714
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1715,
+            "end": 1716
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1717,
+            "end": 1718
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"all\"",
+            "start": 1719,
+            "end": 1724
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1724,
+            "end": 1725
+        },
+        {
+            "kind": "LiteralString",
+            "text": "'strings'",
+            "start": 1726,
+            "end": 1735
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1735,
+            "end": 1736
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"\"",
+            "start": 1737,
+            "end": 1739
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"are the same\"",
+            "start": 1739,
+            "end": 1753
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"\"",
+            "start": 1753,
+            "end": 1755
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1755,
+            "end": 1756
+        },
+        {
+            "kind": "LiteralString",
+            "text": "''",
+            "start": 1757,
+            "end": 1759
+        },
+        {
+            "kind": "LiteralString",
+            "text": "'type'",
+            "start": 1759,
+            "end": 1765
+        },
+        {
+            "kind": "LiteralString",
+            "text": "''",
+            "start": 1765,
+            "end": 1767
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1768,
+            "end": 1769
+        },
+        {
+            "kind": "BareKey",
+            "text": "numbers",
+            "start": 1803,
+            "end": 1810
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1811,
+            "end": 1812
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1813,
+            "end": 1814
+        },
+        {
+            "kind": "Float",
+            "text": "0.1",
+            "start": 1815,
+            "end": 1818
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1818,
+            "end": 1819
+        },
+        {
+            "kind": "Float",
+            "text": "0.2",
+            "start": 1820,
+            "end": 1823
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1823,
+            "end": 1824
+        },
+        {
+            "kind": "Float",
+            "text": "0.5",
+            "start": 1825,
+            "end": 1828
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1828,
+            "end": 1829
+        },
+        {
+            "kind": "Integer",
+            "text": "1",
+            "start": 1830,
+            "end": 1831
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1831,
+            "end": 1832
+        },
+        {
+            "kind": "Integer",
+            "text": "2",
+            "start": 1833,
+            "end": 1834
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1834,
+            "end": 1835
+        },
+        {
+            "kind": "Integer",
+            "text": "5",
+            "start": 1836,
+            "end": 1837
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1838,
+            "end": 1839
+        },
+        {
+            "kind": "BareKey",
+            "text": "contributors",
+            "start": 1840,
+            "end": 1852
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1853,
+            "end": 1854
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1855,
+            "end": 1856
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"Foo Bar <foo@example.com>\"",
+            "start": 1861,
+            "end": 1888
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1888,
+            "end": 1889
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1894,
+            "end": 1895
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 1896,
+            "end": 1900
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1901,
+            "end": 1902
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"Baz Qux\"",
+            "start": 1903,
+            "end": 1912
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1912,
+            "end": 1913
+        },
+        {
+            "kind": "BareKey",
+            "text": "email",
+            "start": 1914,
+            "end": 1919
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1920,
+            "end": 1921
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"bazqux@example.com\"",
+            "start": 1922,
+            "end": 1942
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1942,
+            "end": 1943
+        },
+        {
+            "kind": "BareKey",
+            "text": "url",
+            "start": 1944,
+            "end": 1947
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1948,
+            "end": 1949
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"https://example.com/bazqux\"",
+            "start": 1950,
+            "end": 1978
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1979,
+            "end": 1980
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1981,
+            "end": 1982
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1993,
+            "end": 1994
+        },
+        {
+            "kind": "BareKey",
+            "text": "owner",
+            "start": 1994,
+            "end": 1999
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1999,
+            "end": 2000
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 2001,
+            "end": 2005
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2006,
+            "end": 2007
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"Tom Preston-Werner\"",
+            "start": 2008,
+            "end": 2028
+        },
+        {
+            "kind": "BareKey",
+            "text": "dob",
+            "start": 2029,
+            "end": 2032
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2033,
+            "end": 2034
+        },
+        {
+            "kind": "Integer",
+            "text": "1979",
+            "start": 2035,
+            "end": 2039
+        },
+        {
+            "kind": "Integer",
+            "text": "-05",
+            "start": 2039,
+            "end": 2042
+        },
+        {
+            "kind": "Integer",
+            "text": "-27",
+            "start": 2042,
+            "end": 2045
+        },
+        {
+            "kind": "BareKey",
+            "text": "T07",
+            "start": 2045,
+            "end": 2048
+        },
+        {
+            "kind": "Integer",
+            "text": "32",
+            "start": 2049,
+            "end": 2051
+        },
+        {
+            "kind": "Integer",
+            "text": "00",
+            "start": 2052,
+            "end": 2054
+        },
+        {
+            "kind": "Integer",
+            "text": "-08",
+            "start": 2054,
+            "end": 2057
+        },
+        {
+            "kind": "Integer",
+            "text": "00",
+            "start": 2058,
+            "end": 2060
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2062,
+            "end": 2063
+        },
+        {
+            "kind": "BareKey",
+            "text": "database",
+            "start": 2063,
+            "end": 2071
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2071,
+            "end": 2072
+        },
+        {
+            "kind": "BareKey",
+            "text": "enabled",
+            "start": 2073,
+            "end": 2080
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2081,
+            "end": 2082
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 2083,
+            "end": 2087
+        },
+        {
+            "kind": "BareKey",
+            "text": "ports",
+            "start": 2088,
+            "end": 2093
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2094,
+            "end": 2095
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2096,
+            "end": 2097
+        },
+        {
+            "kind": "Integer",
+            "text": "8000",
+            "start": 2098,
+            "end": 2102
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2102,
+            "end": 2103
+        },
+        {
+            "kind": "Integer",
+            "text": "8001",
+            "start": 2104,
+            "end": 2108
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2108,
+            "end": 2109
+        },
+        {
+            "kind": "Integer",
+            "text": "8002",
+            "start": 2110,
+            "end": 2114
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2115,
+            "end": 2116
+        },
+        {
+            "kind": "BareKey",
+            "text": "data",
+            "start": 2117,
+            "end": 2121
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2122,
+            "end": 2123
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2124,
+            "end": 2125
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2126,
+            "end": 2127
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"delta\"",
+            "start": 2127,
+            "end": 2134
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2134,
+            "end": 2135
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"phi\"",
+            "start": 2136,
+            "end": 2141
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2141,
+            "end": 2142
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2142,
+            "end": 2143
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2144,
+            "end": 2145
+        },
+        {
+            "kind": "Float",
+            "text": "3.14",
+            "start": 2145,
+            "end": 2149
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2149,
+            "end": 2150
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2151,
+            "end": 2152
+        },
+        {
+            "kind": "BareKey",
+            "text": "temp_targets",
+            "start": 2153,
+            "end": 2165
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2166,
+            "end": 2167
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2168,
+            "end": 2169
+        },
+        {
+            "kind": "BareKey",
+            "text": "cpu",
+            "start": 2170,
+            "end": 2173
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2174,
+            "end": 2175
+        },
+        {
+            "kind": "Float",
+            "text": "79.5",
+            "start": 2176,
+            "end": 2180
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2180,
+            "end": 2181
+        },
+        {
+            "kind": "BareKey",
+            "text": "case",
+            "start": 2182,
+            "end": 2186
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2187,
+            "end": 2188
+        },
+        {
+            "kind": "Float",
+            "text": "72.0",
+            "start": 2189,
+            "end": 2193
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2194,
+            "end": 2195
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2213,
+            "end": 2214
+        },
+        {
+            "kind": "BareKey",
+            "text": "servers",
+            "start": 2214,
+            "end": 2221
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2221,
+            "end": 2222
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2224,
+            "end": 2225
+        },
+        {
+            "kind": "BareKey",
+            "text": "servers",
+            "start": 2225,
+            "end": 2232
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2232,
+            "end": 2233
+        },
+        {
+            "kind": "BareKey",
+            "text": "alpha",
+            "start": 2233,
+            "end": 2238
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2238,
+            "end": 2239
+        },
+        {
+            "kind": "BareKey",
+            "text": "ip",
+            "start": 2240,
+            "end": 2242
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2243,
+            "end": 2244
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"10.0.0.1\"",
+            "start": 2245,
+            "end": 2255
+        },
+        {
+            "kind": "BareKey",
+            "text": "role",
+            "start": 2256,
+            "end": 2260
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2261,
+            "end": 2262
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"frontend\"",
+            "start": 2263,
+            "end": 2273
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2275,
+            "end": 2276
+        },
+        {
+            "kind": "BareKey",
+            "text": "servers",
+            "start": 2276,
+            "end": 2283
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2283,
+            "end": 2284
+        },
+        {
+            "kind": "BareKey",
+            "text": "beta",
+            "start": 2284,
+            "end": 2288
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2288,
+            "end": 2289
+        },
+        {
+            "kind": "BareKey",
+            "text": "ip",
+            "start": 2290,
+            "end": 2292
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2293,
+            "end": 2294
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"10.0.0.2\"",
+            "start": 2295,
+            "end": 2305
+        },
+        {
+            "kind": "BareKey",
+            "text": "role",
+            "start": 2306,
+            "end": 2310
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2311,
+            "end": 2312
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"backend\"",
+            "start": 2313,
+            "end": 2322
+        },
+        {
+            "kind": "DoubleLeftBracket",
+            "text": "[[",
+            "start": 2342,
+            "end": 2344
+        },
+        {
+            "kind": "BareKey",
+            "text": "products",
+            "start": 2344,
+            "end": 2352
+        },
+        {
+            "kind": "DoubleRightBracket",
+            "text": "]]",
+            "start": 2352,
+            "end": 2354
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 2355,
+            "end": 2359
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2360,
+            "end": 2361
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"Hammer\"",
+            "start": 2362,
+            "end": 2370
+        },
+        {
+            "kind": "BareKey",
+            "text": "sku",
+            "start": 2371,
+            "end": 2374
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2375,
+            "end": 2376
+        },
+        {
+            "kind": "Integer",
+            "text": "738594937",
+            "start": 2377,
+            "end": 2386
+        },
+        {
+            "kind": "DoubleLeftBracket",
+            "text": "[[",
+            "start": 2388,
+            "end": 2390
+        },
+        {
+            "kind": "BareKey",
+            "text": "products",
+            "start": 2390,
+            "end": 2398
+        },
+        {
+            "kind": "DoubleRightBracket",
+            "text": "]]",
+            "start": 2398,
+            "end": 2400
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 2401,
+            "end": 2405
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2406,
+            "end": 2407
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"Nail\"",
+            "start": 2408,
+            "end": 2414
+        },
+        {
+            "kind": "BareKey",
+            "text": "sku",
+            "start": 2415,
+            "end": 2418
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2419,
+            "end": 2420
+        },
+        {
+            "kind": "Integer",
+            "text": "284758393",
+            "start": 2421,
+            "end": 2430
+        },
+        {
+            "kind": "BareKey",
+            "text": "color",
+            "start": 2431,
+            "end": 2436
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2437,
+            "end": 2438
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"gray\"",
+            "start": 2439,
+            "end": 2445
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 2463,
+            "end": 2467
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2468,
+            "end": 2469
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2470,
+            "end": 2471
+        },
+        {
+            "kind": "BareKey",
+            "text": "first",
+            "start": 2472,
+            "end": 2477
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2478,
+            "end": 2479
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"Tom\"",
+            "start": 2480,
+            "end": 2485
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2485,
+            "end": 2486
+        },
+        {
+            "kind": "BareKey",
+            "text": "last",
+            "start": 2487,
+            "end": 2491
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2492,
+            "end": 2493
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"Preston-Werner\"",
+            "start": 2494,
+            "end": 2510
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2511,
+            "end": 2512
+        },
+        {
+            "kind": "BareKey",
+            "text": "point",
+            "start": 2513,
+            "end": 2518
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2519,
+            "end": 2520
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2521,
+            "end": 2522
+        },
+        {
+            "kind": "BareKey",
+            "text": "x",
+            "start": 2523,
+            "end": 2524
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2525,
+            "end": 2526
+        },
+        {
+            "kind": "Integer",
+            "text": "1",
+            "start": 2527,
+            "end": 2528
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2528,
+            "end": 2529
+        },
+        {
+            "kind": "BareKey",
+            "text": "y",
+            "start": 2530,
+            "end": 2531
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2532,
+            "end": 2533
+        },
+        {
+            "kind": "Integer",
+            "text": "2",
+            "start": 2534,
+            "end": 2535
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2536,
+            "end": 2537
+        },
+        {
+            "kind": "BareKey",
+            "text": "animal",
+            "start": 2538,
+            "end": 2544
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2545,
+            "end": 2546
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2547,
+            "end": 2548
+        },
+        {
+            "kind": "BareKey",
+            "text": "type",
+            "start": 2549,
+            "end": 2553
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2553,
+            "end": 2554
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 2554,
+            "end": 2558
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2559,
+            "end": 2560
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"pug\"",
+            "start": 2561,
+            "end": 2566
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2567,
+            "end": 2568
+        },
+        {
+            "kind": "BareKey",
+            "text": "physical",
+            "start": 2584,
+            "end": 2592
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2592,
+            "end": 2593
+        },
+        {
+            "kind": "BareKey",
+            "text": "color",
+            "start": 2593,
+            "end": 2598
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2599,
+            "end": 2600
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"orange\"",
+            "start": 2601,
+            "end": 2609
+        },
+        {
+            "kind": "BareKey",
+            "text": "physical",
+            "start": 2610,
+            "end": 2618
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2618,
+            "end": 2619
+        },
+        {
+            "kind": "BareKey",
+            "text": "shape",
+            "start": 2619,
+            "end": 2624
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2625,
+            "end": 2626
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"round\"",
+            "start": 2627,
+            "end": 2634
+        },
+        {
+            "kind": "BareKey",
+            "text": "site",
+            "start": 2635,
+            "end": 2639
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2639,
+            "end": 2640
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"google.com\"",
+            "start": 2640,
+            "end": 2652
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2653,
+            "end": 2654
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 2655,
+            "end": 2659
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2688,
+            "end": 2689
+        },
+        {
+            "kind": "BareKey",
+            "text": "fruit",
+            "start": 2689,
+            "end": 2694
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2694,
+            "end": 2695
+        },
+        {
+            "kind": "BareKey",
+            "text": "apple",
+            "start": 2696,
+            "end": 2701
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2701,
+            "end": 2702
+        },
+        {
+            "kind": "BareKey",
+            "text": "color",
+            "start": 2702,
+            "end": 2707
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2708,
+            "end": 2709
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"red\"",
+            "start": 2710,
+            "end": 2715
+        },
+        {
+            "kind": "BareKey",
+            "text": "apple",
+            "start": 2716,
+            "end": 2721
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2721,
+            "end": 2722
+        },
+        {
+            "kind": "BareKey",
+            "text": "taste",
+            "start": 2722,
+            "end": 2727
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2727,
+            "end": 2728
+        },
+        {
+            "kind": "BareKey",
+            "text": "sweet",
+            "start": 2728,
+            "end": 2733
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2734,
+            "end": 2735
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 2736,
+            "end": 2740
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2742,
+            "end": 2743
+        },
+        {
+            "kind": "BareKey",
+            "text": "fruit",
+            "start": 2743,
+            "end": 2748
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2748,
+            "end": 2749
+        },
+        {
+            "kind": "BareKey",
+            "text": "apple",
+            "start": 2749,
+            "end": 2754
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2754,
+            "end": 2755
+        },
+        {
+            "kind": "BareKey",
+            "text": "texture",
+            "start": 2755,
+            "end": 2762
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2762,
+            "end": 2763
+        },
+        {
+            "kind": "BareKey",
+            "text": "smooth",
+            "start": 2764,
+            "end": 2770
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2771,
+            "end": 2772
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 2773,
+            "end": 2777
+        },
+        {
+            "kind": "DoubleLeftBracket",
+            "text": "[[",
+            "start": 2810,
+            "end": 2812
+        },
+        {
+            "kind": "BareKey",
+            "text": "fruit",
+            "start": 2812,
+            "end": 2817
+        },
+        {
+            "kind": "DoubleRightBracket",
+            "text": "]]",
+            "start": 2817,
+            "end": 2819
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 2820,
+            "end": 2824
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2825,
+            "end": 2826
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"apple\"",
+            "start": 2827,
+            "end": 2834
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2836,
+            "end": 2837
+        },
+        {
+            "kind": "BareKey",
+            "text": "fruit",
+            "start": 2837,
+            "end": 2842
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2842,
+            "end": 2843
+        },
+        {
+            "kind": "BareKey",
+            "text": "physical",
+            "start": 2843,
+            "end": 2851
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2851,
+            "end": 2852
+        },
+        {
+            "kind": "BareKey",
+            "text": "color",
+            "start": 2865,
+            "end": 2870
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2871,
+            "end": 2872
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"red\"",
+            "start": 2873,
+            "end": 2878
+        },
+        {
+            "kind": "BareKey",
+            "text": "shape",
+            "start": 2879,
+            "end": 2884
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2885,
+            "end": 2886
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"round\"",
+            "start": 2887,
+            "end": 2894
+        },
+        {
+            "kind": "DoubleLeftBracket",
+            "text": "[[",
+            "start": 2896,
+            "end": 2898
+        },
+        {
+            "kind": "BareKey",
+            "text": "fruit",
+            "start": 2898,
+            "end": 2903
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2903,
+            "end": 2904
+        },
+        {
+            "kind": "BareKey",
+            "text": "variety",
+            "start": 2904,
+            "end": 2911
+        },
+        {
+            "kind": "DoubleRightBracket",
+            "text": "]]",
+            "start": 2911,
+            "end": 2913
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 2940,
+            "end": 2944
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2945,
+            "end": 2946
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"red delicious\"",
+            "start": 2947,
+            "end": 2962
+        },
+        {
+            "kind": "DoubleLeftBracket",
+            "text": "[[",
+            "start": 2964,
+            "end": 2966
+        },
+        {
+            "kind": "BareKey",
+            "text": "fruit",
+            "start": 2966,
+            "end": 2971
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2971,
+            "end": 2972
+        },
+        {
+            "kind": "BareKey",
+            "text": "variety",
+            "start": 2972,
+            "end": 2979
+        },
+        {
+            "kind": "DoubleRightBracket",
+            "text": "]]",
+            "start": 2979,
+            "end": 2981
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 2982,
+            "end": 2986
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2987,
+            "end": 2988
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"granny smith\"",
+            "start": 2989,
+            "end": 3003
+        },
+        {
+            "kind": "DoubleLeftBracket",
+            "text": "[[",
+            "start": 3005,
+            "end": 3007
+        },
+        {
+            "kind": "BareKey",
+            "text": "fruit",
+            "start": 3007,
+            "end": 3012
+        },
+        {
+            "kind": "DoubleRightBracket",
+            "text": "]]",
+            "start": 3012,
+            "end": 3014
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 3015,
+            "end": 3019
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3020,
+            "end": 3021
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"banana\"",
+            "start": 3022,
+            "end": 3030
+        },
+        {
+            "kind": "DoubleLeftBracket",
+            "text": "[[",
+            "start": 3032,
+            "end": 3034
+        },
+        {
+            "kind": "BareKey",
+            "text": "fruit",
+            "start": 3034,
+            "end": 3039
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 3039,
+            "end": 3040
+        },
+        {
+            "kind": "BareKey",
+            "text": "variety",
+            "start": 3040,
+            "end": 3047
+        },
+        {
+            "kind": "DoubleRightBracket",
+            "text": "]]",
+            "start": 3047,
+            "end": 3049
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 3050,
+            "end": 3054
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3055,
+            "end": 3056
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"plantain\"",
+            "start": 3057,
+            "end": 3067
+        },
+        {
+            "kind": "BareKey",
+            "text": "unicode_key",
+            "start": 3087,
+            "end": 3098
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3099,
+            "end": 3100
+        },
+        {
+            "kind": "BasicString",
+            "text": "",
+            "start": 3101,
+            "end": 3113
+        },
+        {
+            "kind": "BasicString",
+            "text": "",
+            "start": 3113,
+            "end": 3115
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"\n\"",
+            "start": 3115,
+            "end": 3118
+        },
+        {
+            "kind": "BasicString",
+            "text": "",
+            "start": 3123,
+            "end": 3125
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3126,
+            "end": 3127
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"value\"",
+            "start": 3128,
+            "end": 3135
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"127.0.0.1\"",
+            "start": 3166,
+            "end": 3177
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3178,
+            "end": 3179
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"localhost\"",
+            "start": 3180,
+            "end": 3191
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"character encoding\"",
+            "start": 3192,
+            "end": 3212
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3213,
+            "end": 3214
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"UTF-8\"",
+            "start": 3215,
+            "end": 3222
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"ʎǝʞ",
+            "start": 3223,
+            "end": 3230
+        },
+        {
+            "kind": "BasicString",
+            "text": "\" = \"",
+            "start": 3230,
+            "end": 3235
+        },
+        {
+            "kind": "BareKey",
+            "text": "value",
+            "start": 3235,
+            "end": 3240
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"\n'key2' = \"",
+            "start": 3240,
+            "end": 3252
+        },
+        {
+            "kind": "BareKey",
+            "text": "value",
+            "start": 3252,
+            "end": 3257
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"\n'quoted \"",
+            "start": 3257,
+            "end": 3268
+        },
+        {
+            "kind": "BareKey",
+            "text": "value",
+            "start": 3268,
+            "end": 3273
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"' = \"",
+            "start": 3273,
+            "end": 3279
+        },
+        {
+            "kind": "BareKey",
+            "text": "value",
+            "start": 3279,
+            "end": 3284
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"\n\n# Comments\n# This is a full-line comment\nkey = \"",
+            "start": 3284,
+            "end": 3335
+        },
+        {
+            "kind": "BareKey",
+            "text": "value",
+            "start": 3335,
+            "end": 3340
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"  # This is a comment at the end of a line\nanother = # This is also a comment\n\"",
+            "start": 3340,
+            "end": 3420
+        },
+        {
+            "kind": "BareKey",
+            "text": "empty_string",
+            "start": 3461,
+            "end": 3473
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3474,
+            "end": 3475
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"\"",
+            "start": 3476,
+            "end": 3478
+        },
+        {
+            "kind": "BareKey",
+            "text": "empty_array",
+            "start": 3479,
+            "end": 3490
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3491,
+            "end": 3492
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 3493,
+            "end": 3494
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 3494,
+            "end": 3495
+        },
+        {
+            "kind": "BareKey",
+            "text": "empty_table",
+            "start": 3496,
+            "end": 3507
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3508,
+            "end": 3509
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 3510,
+            "end": 3511
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 3511,
+            "end": 3512
+        },
+        {
+            "kind": "BareKey",
+            "text": "escape_sequences",
+            "start": 3544,
+            "end": 3560
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3561,
+            "end": 3562
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"\\\" \\\\ \\b \\f \\n \\r \\t \\u0041 \\U00000041\"",
+            "start": 3563,
+            "end": 3603
+        },
+        {
+            "kind": "BareKey",
+            "text": "large_int",
+            "start": 3621,
+            "end": 3630
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3631,
+            "end": 3632
+        },
+        {
+            "kind": "Integer",
+            "text": "9",
+            "start": 3633,
+            "end": 3634
+        },
+        {
+            "kind": "BareKey",
+            "text": "_223_372_036_854_775_807",
+            "start": 3634,
+            "end": 3658
+        },
+        {
+            "kind": "BareKey",
+            "text": "large_float",
+            "start": 3659,
+            "end": 3670
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3671,
+            "end": 3672
+        },
+        {
+            "kind": "Float",
+            "text": "1.7976931348623157",
+            "start": 3673,
+            "end": 3691
+        },
+        {
+            "kind": "BareKey",
+            "text": "e",
+            "start": 3691,
+            "end": 3692
+        },
+        {
+            "kind": "Integer",
+            "text": "+308",
+            "start": 3692,
+            "end": 3696
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 3722,
+            "end": 3723
+        },
+        {
+            "kind": "BareKey",
+            "text": "database",
+            "start": 3723,
+            "end": 3731
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 3731,
+            "end": 3732
+        },
+        {
+            "kind": "BareKey",
+            "text": "connection",
+            "start": 3732,
+            "end": 3742
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 3742,
+            "end": 3743
+        },
+        {
+            "kind": "BareKey",
+            "text": "server",
+            "start": 3744,
+            "end": 3750
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3751,
+            "end": 3752
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"192.168.1.1\"",
+            "start": 3753,
+            "end": 3766
+        },
+        {
+            "kind": "BareKey",
+            "text": "ports",
+            "start": 3767,
+            "end": 3772
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3773,
+            "end": 3774
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 3775,
+            "end": 3776
+        },
+        {
+            "kind": "Integer",
+            "text": "8001",
+            "start": 3777,
+            "end": 3781
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3781,
+            "end": 3782
+        },
+        {
+            "kind": "Integer",
+            "text": "8001",
+            "start": 3783,
+            "end": 3787
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3787,
+            "end": 3788
+        },
+        {
+            "kind": "Integer",
+            "text": "8002",
+            "start": 3789,
+            "end": 3793
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 3794,
+            "end": 3795
+        },
+        {
+            "kind": "BareKey",
+            "text": "connection_max",
+            "start": 3796,
+            "end": 3810
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3811,
+            "end": 3812
+        },
+        {
+            "kind": "Integer",
+            "text": "5000",
+            "start": 3813,
+            "end": 3817
+        },
+        {
+            "kind": "BareKey",
+            "text": "enabled",
+            "start": 3818,
+            "end": 3825
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3826,
+            "end": 3827
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 3828,
+            "end": 3832
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 3834,
+            "end": 3835
+        },
+        {
+            "kind": "BareKey",
+            "text": "database",
+            "start": 3835,
+            "end": 3843
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 3843,
+            "end": 3844
+        },
+        {
+            "kind": "BareKey",
+            "text": "credentials",
+            "start": 3844,
+            "end": 3855
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 3855,
+            "end": 3856
+        },
+        {
+            "kind": "BareKey",
+            "text": "username",
+            "start": 3857,
+            "end": 3865
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3866,
+            "end": 3867
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"admin\"",
+            "start": 3868,
+            "end": 3875
+        },
+        {
+            "kind": "BareKey",
+            "text": "password",
+            "start": 3876,
+            "end": 3884
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3885,
+            "end": 3886
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"secret123\"",
+            "start": 3887,
+            "end": 3898
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 3900,
+            "end": 3901
+        },
+        {
+            "kind": "BareKey",
+            "text": "logging",
+            "start": 3901,
+            "end": 3908
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 3908,
+            "end": 3909
+        },
+        {
+            "kind": "BareKey",
+            "text": "level",
+            "start": 3910,
+            "end": 3915
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3916,
+            "end": 3917
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"info\"",
+            "start": 3918,
+            "end": 3924
+        },
+        {
+            "kind": "BareKey",
+            "text": "file",
+            "start": 3925,
+            "end": 3929
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3930,
+            "end": 3931
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"/var/log/app.log\"",
+            "start": 3932,
+            "end": 3950
+        },
+        {
+            "kind": "BareKey",
+            "text": "max_size",
+            "start": 3951,
+            "end": 3959
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3960,
+            "end": 3961
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"10MB\"",
+            "start": 3962,
+            "end": 3968
+        },
+        {
+            "kind": "BareKey",
+            "text": "rotate",
+            "start": 3969,
+            "end": 3975
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3976,
+            "end": 3977
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 3978,
+            "end": 3982
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 3984,
+            "end": 3985
+        },
+        {
+            "kind": "BareKey",
+            "text": "features",
+            "start": 3985,
+            "end": 3993
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 3993,
+            "end": 3994
+        },
+        {
+            "kind": "BareKey",
+            "text": "feature_a",
+            "start": 3995,
+            "end": 4004
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4005,
+            "end": 4006
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 4007,
+            "end": 4011
+        },
+        {
+            "kind": "BareKey",
+            "text": "feature_b",
+            "start": 4012,
+            "end": 4021
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4022,
+            "end": 4023
+        },
+        {
+            "kind": "Boolean",
+            "text": "false",
+            "start": 4024,
+            "end": 4029
+        },
+        {
+            "kind": "BareKey",
+            "text": "experimental",
+            "start": 4030,
+            "end": 4042
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4043,
+            "end": 4044
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 4045,
+            "end": 4046
+        },
+        {
+            "kind": "BareKey",
+            "text": "enabled",
+            "start": 4047,
+            "end": 4054
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4055,
+            "end": 4056
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 4057,
+            "end": 4061
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4061,
+            "end": 4062
+        },
+        {
+            "kind": "BareKey",
+            "text": "version",
+            "start": 4063,
+            "end": 4070
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4071,
+            "end": 4072
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"beta\"",
+            "start": 4073,
+            "end": 4079
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 4080,
+            "end": 4081
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4114,
+            "end": 4115
+        },
+        {
+            "kind": "BareKey",
+            "text": "development",
+            "start": 4115,
+            "end": 4126
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4126,
+            "end": 4127
+        },
+        {
+            "kind": "BareKey",
+            "text": "debug",
+            "start": 4128,
+            "end": 4133
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4134,
+            "end": 4135
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 4136,
+            "end": 4140
+        },
+        {
+            "kind": "BareKey",
+            "text": "hot_reload",
+            "start": 4141,
+            "end": 4151
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4152,
+            "end": 4153
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 4154,
+            "end": 4158
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4160,
+            "end": 4161
+        },
+        {
+            "kind": "BareKey",
+            "text": "production",
+            "start": 4161,
+            "end": 4171
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4171,
+            "end": 4172
+        },
+        {
+            "kind": "BareKey",
+            "text": "debug",
+            "start": 4173,
+            "end": 4178
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4179,
+            "end": 4180
+        },
+        {
+            "kind": "Boolean",
+            "text": "false",
+            "start": 4181,
+            "end": 4186
+        },
+        {
+            "kind": "BareKey",
+            "text": "optimize",
+            "start": 4187,
+            "end": 4195
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4196,
+            "end": 4197
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 4198,
+            "end": 4202
+        },
+        {
+            "kind": "BareKey",
+            "text": "cache_ttl",
+            "start": 4203,
+            "end": 4212
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4213,
+            "end": 4214
+        },
+        {
+            "kind": "Integer",
+            "text": "3600",
+            "start": 4215,
+            "end": 4219
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4241,
+            "end": 4242
+        },
+        {
+            "kind": "BareKey",
+            "text": "api",
+            "start": 4242,
+            "end": 4245
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4245,
+            "end": 4246
+        },
+        {
+            "kind": "BareKey",
+            "text": "base_url",
+            "start": 4247,
+            "end": 4255
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4256,
+            "end": 4257
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"https://api.example.com\"",
+            "start": 4258,
+            "end": 4283
+        },
+        {
+            "kind": "BareKey",
+            "text": "version",
+            "start": 4284,
+            "end": 4291
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4292,
+            "end": 4293
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"v1\"",
+            "start": 4294,
+            "end": 4298
+        },
+        {
+            "kind": "BareKey",
+            "text": "timeout",
+            "start": 4299,
+            "end": 4306
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4307,
+            "end": 4308
+        },
+        {
+            "kind": "Integer",
+            "text": "30",
+            "start": 4309,
+            "end": 4311
+        },
+        {
+            "kind": "BareKey",
+            "text": "retry_attempts",
+            "start": 4312,
+            "end": 4326
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4327,
+            "end": 4328
+        },
+        {
+            "kind": "Integer",
+            "text": "3",
+            "start": 4329,
+            "end": 4330
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4332,
+            "end": 4333
+        },
+        {
+            "kind": "BareKey",
+            "text": "api",
+            "start": 4333,
+            "end": 4336
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4336,
+            "end": 4337
+        },
+        {
+            "kind": "BareKey",
+            "text": "endpoints",
+            "start": 4337,
+            "end": 4346
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4346,
+            "end": 4347
+        },
+        {
+            "kind": "BareKey",
+            "text": "users",
+            "start": 4348,
+            "end": 4353
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4354,
+            "end": 4355
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"/users\"",
+            "start": 4356,
+            "end": 4364
+        },
+        {
+            "kind": "BareKey",
+            "text": "posts",
+            "start": 4365,
+            "end": 4370
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4371,
+            "end": 4372
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"/posts\"",
+            "start": 4373,
+            "end": 4381
+        },
+        {
+            "kind": "BareKey",
+            "text": "comments",
+            "start": 4382,
+            "end": 4390
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4391,
+            "end": 4392
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"/comments\"",
+            "start": 4393,
+            "end": 4404
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4426,
+            "end": 4427
+        },
+        {
+            "kind": "BareKey",
+            "text": "security",
+            "start": 4427,
+            "end": 4435
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4435,
+            "end": 4436
+        },
+        {
+            "kind": "BareKey",
+            "text": "encryption",
+            "start": 4437,
+            "end": 4447
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4448,
+            "end": 4449
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"AES-256\"",
+            "start": 4450,
+            "end": 4459
+        },
+        {
+            "kind": "BareKey",
+            "text": "hash_algorithm",
+            "start": 4460,
+            "end": 4474
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4475,
+            "end": 4476
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"SHA-256\"",
+            "start": 4477,
+            "end": 4486
+        },
+        {
+            "kind": "BareKey",
+            "text": "session_timeout",
+            "start": 4487,
+            "end": 4502
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4503,
+            "end": 4504
+        },
+        {
+            "kind": "Integer",
+            "text": "1800",
+            "start": 4505,
+            "end": 4509
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4511,
+            "end": 4512
+        },
+        {
+            "kind": "BareKey",
+            "text": "security",
+            "start": 4512,
+            "end": 4520
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4520,
+            "end": 4521
+        },
+        {
+            "kind": "BareKey",
+            "text": "cors",
+            "start": 4521,
+            "end": 4525
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4525,
+            "end": 4526
+        },
+        {
+            "kind": "BareKey",
+            "text": "allowed_origins",
+            "start": 4527,
+            "end": 4542
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4543,
+            "end": 4544
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4545,
+            "end": 4546
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"https://example.com\"",
+            "start": 4546,
+            "end": 4567
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4567,
+            "end": 4568
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"https://app.example.com\"",
+            "start": 4569,
+            "end": 4594
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4594,
+            "end": 4595
+        },
+        {
+            "kind": "BareKey",
+            "text": "allowed_methods",
+            "start": 4596,
+            "end": 4611
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4612,
+            "end": 4613
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4614,
+            "end": 4615
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"GET\"",
+            "start": 4615,
+            "end": 4620
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4620,
+            "end": 4621
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"POST\"",
+            "start": 4622,
+            "end": 4628
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4628,
+            "end": 4629
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"PUT\"",
+            "start": 4630,
+            "end": 4635
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4635,
+            "end": 4636
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"DELETE\"",
+            "start": 4637,
+            "end": 4645
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4645,
+            "end": 4646
+        },
+        {
+            "kind": "BareKey",
+            "text": "allowed_headers",
+            "start": 4647,
+            "end": 4662
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4663,
+            "end": 4664
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4665,
+            "end": 4666
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"Content-Type\"",
+            "start": 4666,
+            "end": 4680
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4680,
+            "end": 4681
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"Authorization\"",
+            "start": 4682,
+            "end": 4697
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4697,
+            "end": 4698
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4725,
+            "end": 4726
+        },
+        {
+            "kind": "BareKey",
+            "text": "monitoring",
+            "start": 4726,
+            "end": 4736
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4736,
+            "end": 4737
+        },
+        {
+            "kind": "BareKey",
+            "text": "enabled",
+            "start": 4738,
+            "end": 4745
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4746,
+            "end": 4747
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 4748,
+            "end": 4752
+        },
+        {
+            "kind": "BareKey",
+            "text": "interval",
+            "start": 4753,
+            "end": 4761
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4762,
+            "end": 4763
+        },
+        {
+            "kind": "Integer",
+            "text": "60",
+            "start": 4764,
+            "end": 4766
+        },
+        {
+            "kind": "BareKey",
+            "text": "metrics",
+            "start": 4767,
+            "end": 4774
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4775,
+            "end": 4776
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4777,
+            "end": 4778
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"cpu\"",
+            "start": 4778,
+            "end": 4783
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4783,
+            "end": 4784
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"memory\"",
+            "start": 4785,
+            "end": 4793
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4793,
+            "end": 4794
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"disk\"",
+            "start": 4795,
+            "end": 4801
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4801,
+            "end": 4802
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"network\"",
+            "start": 4803,
+            "end": 4812
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4812,
+            "end": 4813
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4815,
+            "end": 4816
+        },
+        {
+            "kind": "BareKey",
+            "text": "monitoring",
+            "start": 4816,
+            "end": 4826
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4826,
+            "end": 4827
+        },
+        {
+            "kind": "BareKey",
+            "text": "alerts",
+            "start": 4827,
+            "end": 4833
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4833,
+            "end": 4834
+        },
+        {
+            "kind": "BareKey",
+            "text": "cpu_threshold",
+            "start": 4835,
+            "end": 4848
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4849,
+            "end": 4850
+        },
+        {
+            "kind": "Float",
+            "text": "80.0",
+            "start": 4851,
+            "end": 4855
+        },
+        {
+            "kind": "BareKey",
+            "text": "memory_threshold",
+            "start": 4856,
+            "end": 4872
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4873,
+            "end": 4874
+        },
+        {
+            "kind": "Float",
+            "text": "85.0",
+            "start": 4875,
+            "end": 4879
+        },
+        {
+            "kind": "BareKey",
+            "text": "disk_threshold",
+            "start": 4880,
+            "end": 4894
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4895,
+            "end": 4896
+        },
+        {
+            "kind": "Float",
+            "text": "90.0",
+            "start": 4897,
+            "end": 4901
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4934,
+            "end": 4935
+        },
+        {
+            "kind": "BareKey",
+            "text": "app",
+            "start": 4935,
+            "end": 4938
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4938,
+            "end": 4939
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 4940,
+            "end": 4944
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4945,
+            "end": 4946
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"MyApp\"",
+            "start": 4947,
+            "end": 4954
+        },
+        {
+            "kind": "BareKey",
+            "text": "version",
+            "start": 4955,
+            "end": 4962
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4963,
+            "end": 4964
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"2.1.0\"",
+            "start": 4965,
+            "end": 4972
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4974,
+            "end": 4975
+        },
+        {
+            "kind": "BareKey",
+            "text": "app",
+            "start": 4975,
+            "end": 4978
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4978,
+            "end": 4979
+        },
+        {
+            "kind": "BareKey",
+            "text": "server",
+            "start": 4979,
+            "end": 4985
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4985,
+            "end": 4986
+        },
+        {
+            "kind": "BareKey",
+            "text": "host",
+            "start": 4987,
+            "end": 4991
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4992,
+            "end": 4993
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"0.0.0.0\"",
+            "start": 4994,
+            "end": 5003
+        },
+        {
+            "kind": "BareKey",
+            "text": "port",
+            "start": 5004,
+            "end": 5008
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5009,
+            "end": 5010
+        },
+        {
+            "kind": "Integer",
+            "text": "8080",
+            "start": 5011,
+            "end": 5015
+        },
+        {
+            "kind": "BareKey",
+            "text": "workers",
+            "start": 5016,
+            "end": 5023
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5024,
+            "end": 5025
+        },
+        {
+            "kind": "Integer",
+            "text": "4",
+            "start": 5026,
+            "end": 5027
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 5029,
+            "end": 5030
+        },
+        {
+            "kind": "BareKey",
+            "text": "app",
+            "start": 5030,
+            "end": 5033
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 5033,
+            "end": 5034
+        },
+        {
+            "kind": "BareKey",
+            "text": "server",
+            "start": 5034,
+            "end": 5040
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 5040,
+            "end": 5041
+        },
+        {
+            "kind": "BareKey",
+            "text": "ssl",
+            "start": 5041,
+            "end": 5044
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 5044,
+            "end": 5045
+        },
+        {
+            "kind": "BareKey",
+            "text": "enabled",
+            "start": 5046,
+            "end": 5053
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5054,
+            "end": 5055
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 5056,
+            "end": 5060
+        },
+        {
+            "kind": "BareKey",
+            "text": "cert_file",
+            "start": 5061,
+            "end": 5070
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5071,
+            "end": 5072
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"/etc/ssl/certs/app.crt\"",
+            "start": 5073,
+            "end": 5097
+        },
+        {
+            "kind": "BareKey",
+            "text": "key_file",
+            "start": 5098,
+            "end": 5106
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5107,
+            "end": 5108
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"/etc/ssl/private/app.key\"",
+            "start": 5109,
+            "end": 5135
+        },
+        {
+            "kind": "DoubleLeftBracket",
+            "text": "[[",
+            "start": 5161,
+            "end": 5163
+        },
+        {
+            "kind": "BareKey",
+            "text": "environments",
+            "start": 5163,
+            "end": 5175
+        },
+        {
+            "kind": "DoubleRightBracket",
+            "text": "]]",
+            "start": 5175,
+            "end": 5177
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 5178,
+            "end": 5182
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5183,
+            "end": 5184
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"development\"",
+            "start": 5185,
+            "end": 5198
+        },
+        {
+            "kind": "BareKey",
+            "text": "url",
+            "start": 5199,
+            "end": 5202
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5203,
+            "end": 5204
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"http://localhost:3000\"",
+            "start": 5205,
+            "end": 5228
+        },
+        {
+            "kind": "BareKey",
+            "text": "debug",
+            "start": 5229,
+            "end": 5234
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5235,
+            "end": 5236
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 5237,
+            "end": 5241
+        },
+        {
+            "kind": "DoubleLeftBracket",
+            "text": "[[",
+            "start": 5243,
+            "end": 5245
+        },
+        {
+            "kind": "BareKey",
+            "text": "environments",
+            "start": 5245,
+            "end": 5257
+        },
+        {
+            "kind": "DoubleRightBracket",
+            "text": "]]",
+            "start": 5257,
+            "end": 5259
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 5260,
+            "end": 5264
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5265,
+            "end": 5266
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"staging\"",
+            "start": 5267,
+            "end": 5276
+        },
+        {
+            "kind": "BareKey",
+            "text": "url",
+            "start": 5277,
+            "end": 5280
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5281,
+            "end": 5282
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"https://staging.example.com\"",
+            "start": 5283,
+            "end": 5312
+        },
+        {
+            "kind": "BareKey",
+            "text": "debug",
+            "start": 5313,
+            "end": 5318
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5319,
+            "end": 5320
+        },
+        {
+            "kind": "Boolean",
+            "text": "false",
+            "start": 5321,
+            "end": 5326
+        },
+        {
+            "kind": "DoubleLeftBracket",
+            "text": "[[",
+            "start": 5328,
+            "end": 5330
+        },
+        {
+            "kind": "BareKey",
+            "text": "environments",
+            "start": 5330,
+            "end": 5342
+        },
+        {
+            "kind": "DoubleRightBracket",
+            "text": "]]",
+            "start": 5342,
+            "end": 5344
+        },
+        {
+            "kind": "BareKey",
+            "text": "name",
+            "start": 5345,
+            "end": 5349
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5350,
+            "end": 5351
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"production\"",
+            "start": 5352,
+            "end": 5364
+        },
+        {
+            "kind": "BareKey",
+            "text": "url",
+            "start": 5365,
+            "end": 5368
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5369,
+            "end": 5370
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"https://example.com\"",
+            "start": 5371,
+            "end": 5392
+        },
+        {
+            "kind": "BareKey",
+            "text": "debug",
+            "start": 5393,
+            "end": 5398
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 5399,
+            "end": 5400
+        },
+        {
+            "kind": "Boolean",
+            "text": "false",
+            "start": 5401,
+            "end": 5406
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 5406,
+            "end": 5406
         }
     ],
     "errors": []

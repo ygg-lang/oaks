@@ -13,9 +13,12 @@ use oak_core::{errors::OakError, source::SourceText};
 use std::{fs::File, path::Path};
 
 /// Reads source text from a file path.
+///
+/// Normalizes `\r\n` to `\n` so golden files stay stable across platforms
+/// (e.g. Windows `core.autocrlf=true` checkouts).
 pub fn source_from_path(path: &Path) -> Result<SourceText, OakError> {
     match std::fs::read_to_string(path) {
-        Ok(o) => Ok(SourceText::new(o)),
+        Ok(o) => Ok(SourceText::new(o.replace("\r\n", "\n").replace('\r', "\n"))),
         Err(e) => Err(OakError::io_error(e, 0)),
     }
 }

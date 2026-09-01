@@ -1,606 +1,7332 @@
 {
     "success": true,
-    "count": 100,
+    "count": 1221,
     "tokens": [
+        {
+            "kind": "Comment",
+            "text": "#!/usr/bin/env tclsh",
+            "start": 0,
+            "end": 20
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 20,
+            "end": 21
+        },
+        {
+            "kind": "Comment",
+            "text": "# TCL test file for lexer testing",
+            "start": 21,
+            "end": 54
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 54,
+            "end": 55
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 55,
+            "end": 56
+        },
+        {
+            "kind": "Comment",
+            "text": "# Basic variables and data types",
+            "start": 56,
+            "end": 88
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 88,
+            "end": 89
+        },
         {
             "kind": "Set",
             "text": "set",
-            "start": 93,
-            "end": 96
+            "start": 89,
+            "end": 92
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 92,
+            "end": 93
         },
         {
             "kind": "Identifier",
             "text": "name",
+            "start": 93,
+            "end": 97
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
             "start": 97,
-            "end": 101
+            "end": 98
         },
         {
             "kind": "StringLiteral",
             "text": "\"John Doe\"",
-            "start": 102,
-            "end": 112
+            "start": 98,
+            "end": 108
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 108,
+            "end": 109
         },
         {
             "kind": "Set",
             "text": "set",
-            "start": 114,
-            "end": 117
+            "start": 109,
+            "end": 112
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 112,
+            "end": 113
         },
         {
             "kind": "Identifier",
             "text": "age",
-            "start": 118,
-            "end": 121
+            "start": 113,
+            "end": 116
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 116,
+            "end": 117
         },
         {
             "kind": "Number",
             "text": "30",
-            "start": 122,
-            "end": 124
+            "start": 117,
+            "end": 119
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 119,
+            "end": 120
         },
         {
             "kind": "Set",
             "text": "set",
-            "start": 126,
-            "end": 129
+            "start": 120,
+            "end": 123
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 123,
+            "end": 124
         },
         {
             "kind": "Identifier",
             "text": "height",
+            "start": 124,
+            "end": 130
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
             "start": 130,
-            "end": 136
+            "end": 131
         },
         {
             "kind": "Number",
             "text": "5",
-            "start": 137,
-            "end": 138
+            "start": 131,
+            "end": 132
         },
         {
             "kind": "Number",
             "text": "9",
-            "start": 139,
-            "end": 140
+            "start": 133,
+            "end": 134
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 134,
+            "end": 135
         },
         {
             "kind": "Set",
             "text": "set",
-            "start": 142,
-            "end": 145
+            "start": 135,
+            "end": 138
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 138,
+            "end": 139
         },
         {
             "kind": "Identifier",
             "text": "is_student",
-            "start": 146,
-            "end": 156
+            "start": 139,
+            "end": 149
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 149,
+            "end": 150
         },
         {
             "kind": "Identifier",
             "text": "true",
-            "start": 157,
-            "end": 161
+            "start": 150,
+            "end": 154
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 154,
+            "end": 155
         },
         {
             "kind": "Set",
             "text": "set",
-            "start": 163,
-            "end": 166
+            "start": 155,
+            "end": 158
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 158,
+            "end": 159
         },
         {
             "kind": "Identifier",
             "text": "empty_var",
-            "start": 167,
-            "end": 176
+            "start": 159,
+            "end": 168
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 168,
+            "end": 169
         },
         {
             "kind": "StringLiteral",
             "text": "\"\"",
-            "start": 177,
-            "end": 179
+            "start": 169,
+            "end": 171
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 171,
+            "end": 172
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 172,
+            "end": 173
+        },
+        {
+            "kind": "Comment",
+            "text": "# Lists",
+            "start": 173,
+            "end": 180
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 180,
+            "end": 181
         },
         {
             "kind": "Set",
             "text": "set",
-            "start": 192,
-            "end": 195
+            "start": 181,
+            "end": 184
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 184,
+            "end": 185
         },
         {
             "kind": "Identifier",
             "text": "fruits",
-            "start": 196,
-            "end": 202
+            "start": 185,
+            "end": 191
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 191,
+            "end": 192
         },
         {
             "kind": "StringLiteral",
             "text": "{apple banana cherry date elderberry}",
-            "start": 203,
-            "end": 240
+            "start": 192,
+            "end": 229
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 229,
+            "end": 230
         },
         {
             "kind": "Set",
             "text": "set",
-            "start": 242,
-            "end": 245
+            "start": 230,
+            "end": 233
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 233,
+            "end": 234
         },
         {
             "kind": "Identifier",
             "text": "numbers",
-            "start": 246,
-            "end": 253
+            "start": 234,
+            "end": 241
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 241,
+            "end": 242
         },
         {
             "kind": "StringLiteral",
             "text": "{1 2 3 4 5}",
-            "start": 254,
-            "end": 265
+            "start": 242,
+            "end": 253
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 253,
+            "end": 254
         },
         {
             "kind": "Set",
             "text": "set",
-            "start": 267,
-            "end": 270
+            "start": 254,
+            "end": 257
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 257,
+            "end": 258
         },
         {
             "kind": "Identifier",
             "text": "mixed_list",
-            "start": 271,
-            "end": 281
+            "start": 258,
+            "end": 268
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 268,
+            "end": 269
         },
         {
             "kind": "StringLiteral",
             "text": "{hello 42 3.14 world}",
-            "start": 282,
-            "end": 303
+            "start": 269,
+            "end": 290
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 290,
+            "end": 291
         },
         {
             "kind": "Set",
             "text": "set",
-            "start": 305,
-            "end": 308
+            "start": 291,
+            "end": 294
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 294,
+            "end": 295
         },
         {
             "kind": "Identifier",
             "text": "nested_list",
-            "start": 309,
-            "end": 320
+            "start": 295,
+            "end": 306
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 306,
+            "end": 307
         },
         {
             "kind": "StringLiteral",
             "text": "{{a b c} {1 2 3} {x y z}}",
-            "start": 321,
-            "end": 346
+            "start": 307,
+            "end": 332
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 332,
+            "end": 333
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 333,
+            "end": 334
+        },
+        {
+            "kind": "Comment",
+            "text": "# Arrays (associative arrays)",
+            "start": 334,
+            "end": 363
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 363,
+            "end": 364
         },
         {
             "kind": "Identifier",
             "text": "array",
-            "start": 381,
-            "end": 386
+            "start": 364,
+            "end": 369
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 369,
+            "end": 370
         },
         {
             "kind": "Set",
             "text": "set",
-            "start": 387,
-            "end": 390
+            "start": 370,
+            "end": 373
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 373,
+            "end": 374
         },
         {
             "kind": "Identifier",
             "text": "person",
-            "start": 391,
-            "end": 397
+            "start": 374,
+            "end": 380
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 380,
+            "end": 381
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    name \"Alice Smith\"\r\n    age 25\r\n    city \"New York\"\r\n    occupation \"Engineer\"\r\n}",
-            "start": 398,
-            "end": 486
+            "text": "{\n    name \"Alice Smith\"\n    age 25\n    city \"New York\"\n    occupation \"Engineer\"\n}",
+            "start": 381,
+            "end": 464
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 464,
+            "end": 465
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 465,
+            "end": 466
         },
         {
             "kind": "Identifier",
             "text": "array",
-            "start": 490,
-            "end": 495
+            "start": 466,
+            "end": 471
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 471,
+            "end": 472
         },
         {
             "kind": "Set",
             "text": "set",
-            "start": 496,
-            "end": 499
+            "start": 472,
+            "end": 475
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 475,
+            "end": 476
         },
         {
             "kind": "Identifier",
             "text": "colors",
-            "start": 500,
-            "end": 506
+            "start": 476,
+            "end": 482
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 482,
+            "end": 483
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    red \"#FF0000\"\r\n    green \"#00FF00\"\r\n    blue \"#0000FF\"\r\n    yellow \"#FFFF00\"\r\n}",
-            "start": 507,
-            "end": 593
+            "text": "{\n    red \"#FF0000\"\n    green \"#00FF00\"\n    blue \"#0000FF\"\n    yellow \"#FFFF00\"\n}",
+            "start": 483,
+            "end": 564
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 564,
+            "end": 565
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 565,
+            "end": 566
+        },
+        {
+            "kind": "Comment",
+            "text": "# Dictionary (Tcl 8.5+)",
+            "start": 566,
+            "end": 589
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 589,
+            "end": 590
         },
         {
             "kind": "Set",
             "text": "set",
-            "start": 622,
-            "end": 625
+            "start": 590,
+            "end": 593
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 593,
+            "end": 594
         },
         {
             "kind": "Identifier",
             "text": "config",
-            "start": 626,
-            "end": 632
+            "start": 594,
+            "end": 600
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 600,
+            "end": 601
         },
         {
             "kind": "LeftBracket",
             "text": "[",
-            "start": 633,
-            "end": 634
+            "start": 601,
+            "end": 602
         },
         {
             "kind": "Identifier",
             "text": "dict",
-            "start": 634,
-            "end": 638
+            "start": 602,
+            "end": 606
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 606,
+            "end": 607
         },
         {
             "kind": "Identifier",
             "text": "create",
-            "start": 639,
-            "end": 645
+            "start": 607,
+            "end": 613
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 613,
+            "end": 614
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 615,
+            "end": 616
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 616,
+            "end": 620
         },
         {
             "kind": "Identifier",
             "text": "host",
-            "start": 653,
-            "end": 657
+            "start": 620,
+            "end": 624
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 624,
+            "end": 625
         },
         {
             "kind": "StringLiteral",
             "text": "\"localhost\"",
-            "start": 658,
-            "end": 669
+            "start": 625,
+            "end": 636
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 636,
+            "end": 637
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 638,
+            "end": 639
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 639,
+            "end": 643
         },
         {
             "kind": "Identifier",
             "text": "port",
-            "start": 677,
-            "end": 681
+            "start": 643,
+            "end": 647
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 647,
+            "end": 648
         },
         {
             "kind": "Number",
             "text": "8080",
-            "start": 682,
-            "end": 686
+            "start": 648,
+            "end": 652
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 652,
+            "end": 653
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 654,
+            "end": 655
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 655,
+            "end": 659
         },
         {
             "kind": "Identifier",
             "text": "timeout",
-            "start": 694,
-            "end": 701
+            "start": 659,
+            "end": 666
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 666,
+            "end": 667
         },
         {
             "kind": "Number",
             "text": "30",
-            "start": 702,
-            "end": 704
+            "start": 667,
+            "end": 669
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 669,
+            "end": 670
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 671,
+            "end": 672
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 672,
+            "end": 676
         },
         {
             "kind": "Identifier",
             "text": "ssl_enabled",
-            "start": 712,
-            "end": 723
+            "start": 676,
+            "end": 687
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 687,
+            "end": 688
         },
         {
             "kind": "Identifier",
             "text": "true",
-            "start": 724,
-            "end": 728
+            "start": 688,
+            "end": 692
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 692,
+            "end": 693
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 694,
+            "end": 695
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 695,
+            "end": 699
         },
         {
             "kind": "Identifier",
             "text": "max_connections",
-            "start": 736,
-            "end": 751
+            "start": 699,
+            "end": 714
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 714,
+            "end": 715
         },
         {
             "kind": "Number",
             "text": "100",
-            "start": 752,
-            "end": 755
+            "start": 715,
+            "end": 718
         },
         {
             "kind": "RightBracket",
             "text": "]",
-            "start": 755,
-            "end": 756
+            "start": 718,
+            "end": 719
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 719,
+            "end": 720
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 720,
+            "end": 721
+        },
+        {
+            "kind": "Comment",
+            "text": "# Procedures (functions)",
+            "start": 721,
+            "end": 745
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 745,
+            "end": 746
         },
         {
             "kind": "Proc",
             "text": "proc",
-            "start": 786,
-            "end": 790
+            "start": 746,
+            "end": 750
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 750,
+            "end": 751
         },
         {
             "kind": "Identifier",
             "text": "greet",
-            "start": 791,
-            "end": 796
+            "start": 751,
+            "end": 756
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 756,
+            "end": 757
         },
         {
             "kind": "StringLiteral",
             "text": "{name}",
-            "start": 797,
-            "end": 803
+            "start": 757,
+            "end": 763
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 763,
+            "end": 764
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    return \"Hello, $name!\"\r\n}",
-            "start": 804,
-            "end": 836
+            "text": "{\n    return \"Hello, $name!\"\n}",
+            "start": 764,
+            "end": 794
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 794,
+            "end": 795
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 795,
+            "end": 796
         },
         {
             "kind": "Proc",
             "text": "proc",
-            "start": 840,
-            "end": 844
+            "start": 796,
+            "end": 800
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 800,
+            "end": 801
         },
         {
             "kind": "Identifier",
             "text": "add",
-            "start": 845,
-            "end": 848
+            "start": 801,
+            "end": 804
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 804,
+            "end": 805
         },
         {
             "kind": "StringLiteral",
             "text": "{a b}",
-            "start": 849,
-            "end": 854
+            "start": 805,
+            "end": 810
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 810,
+            "end": 811
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    return [expr {$a + $b}]\r\n}",
-            "start": 855,
-            "end": 888
+            "text": "{\n    return [terms {$a + $b}]\n}",
+            "start": 811,
+            "end": 843
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 843,
+            "end": 844
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 844,
+            "end": 845
         },
         {
             "kind": "Proc",
             "text": "proc",
-            "start": 892,
-            "end": 896
+            "start": 845,
+            "end": 849
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 849,
+            "end": 850
         },
         {
             "kind": "Identifier",
             "text": "multiply",
-            "start": 897,
-            "end": 905
+            "start": 850,
+            "end": 858
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 858,
+            "end": 859
         },
         {
             "kind": "StringLiteral",
             "text": "{a b}",
-            "start": 906,
-            "end": 911
+            "start": 859,
+            "end": 864
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 864,
+            "end": 865
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    return [expr {$a * $b}]\r\n}",
-            "start": 912,
-            "end": 945
+            "text": "{\n    return [terms {$a * $b}]\n}",
+            "start": 865,
+            "end": 897
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 897,
+            "end": 898
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 898,
+            "end": 899
         },
         {
             "kind": "Proc",
             "text": "proc",
-            "start": 949,
-            "end": 953
+            "start": 899,
+            "end": 903
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 903,
+            "end": 904
         },
         {
             "kind": "Identifier",
             "text": "factorial",
-            "start": 954,
-            "end": 963
+            "start": 904,
+            "end": 913
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 913,
+            "end": 914
         },
         {
             "kind": "StringLiteral",
             "text": "{n}",
-            "start": 964,
-            "end": 967
+            "start": 914,
+            "end": 917
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 917,
+            "end": 918
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    if {$n <= 1} {\r\n        return 1\r\n    } else {\r\n        return [expr {$n * [factorial [expr {$n - 1}]]}]\r\n    }\r\n}",
-            "start": 968,
-            "end": 1089
+            "text": "{\n    if {$n <= 1} {\n        return 1\n    } else {\n        return [terms {$n * [factorial [terms {$n - 1}]]}]\n    }\n}",
+            "start": 918,
+            "end": 1035
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1035,
+            "end": 1036
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1036,
+            "end": 1037
         },
         {
             "kind": "Proc",
             "text": "proc",
-            "start": 1093,
-            "end": 1097
+            "start": 1037,
+            "end": 1041
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1041,
+            "end": 1042
         },
         {
             "kind": "Identifier",
             "text": "fibonacci",
-            "start": 1098,
-            "end": 1107
+            "start": 1042,
+            "end": 1051
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1051,
+            "end": 1052
         },
         {
             "kind": "StringLiteral",
             "text": "{n}",
-            "start": 1108,
-            "end": 1111
+            "start": 1052,
+            "end": 1055
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1055,
+            "end": 1056
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    if {$n <= 1} {\r\n        return $n\r\n    } else {\r\n        return [expr {[fibonacci [expr {$n - 1}]] + [fibonacci [expr {$n - 2}]]}]\r\n    }\r\n}",
-            "start": 1112,
-            "end": 1259
+            "text": "{\n    if {$n <= 1} {\n        return $n\n    } else {\n        return [terms {[fibonacci [terms {$n - 1}]] + [fibonacci [terms {$n - 2}]]}]\n    }\n}",
+            "start": 1056,
+            "end": 1200
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1200,
+            "end": 1201
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1201,
+            "end": 1202
         },
         {
             "kind": "Proc",
             "text": "proc",
-            "start": 1263,
-            "end": 1267
+            "start": 1202,
+            "end": 1206
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1206,
+            "end": 1207
         },
         {
             "kind": "Identifier",
             "text": "sum_list",
-            "start": 1268,
-            "end": 1276
+            "start": 1207,
+            "end": 1215
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1215,
+            "end": 1216
         },
         {
             "kind": "StringLiteral",
             "text": "{lst}",
-            "start": 1277,
-            "end": 1282
+            "start": 1216,
+            "end": 1221
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1221,
+            "end": 1222
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    set total 0\r\n    foreach item $lst {\r\n        set total [expr {$total + $item}]\r\n    }\r\n    return $total\r\n}",
-            "start": 1283,
-            "end": 1398
+            "text": "{\n    set total 0\n    foreach item $lst {\n        set total [terms {$total + $item}]\n    }\n    return $total\n}",
+            "start": 1222,
+            "end": 1332
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1332,
+            "end": 1333
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1333,
+            "end": 1334
         },
         {
             "kind": "Proc",
             "text": "proc",
-            "start": 1402,
-            "end": 1406
+            "start": 1334,
+            "end": 1338
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1338,
+            "end": 1339
         },
         {
             "kind": "Identifier",
             "text": "find_max",
-            "start": 1407,
-            "end": 1415
+            "start": 1339,
+            "end": 1347
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1347,
+            "end": 1348
         },
         {
             "kind": "StringLiteral",
             "text": "{lst}",
-            "start": 1416,
-            "end": 1421
+            "start": 1348,
+            "end": 1353
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1353,
+            "end": 1354
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    set max [lindex $lst 0]\r\n    foreach item $lst {\r\n        if {$item > $max} {\r\n            set max $item\r\n        }\r\n    }\r\n    return $max\r\n}",
-            "start": 1422,
-            "end": 1571
+            "text": "{\n    set max [lindex $lst 0]\n    foreach item $lst {\n        if {$item > $max} {\n            set max $item\n        }\n    }\n    return $max\n}",
+            "start": 1354,
+            "end": 1495
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1495,
+            "end": 1496
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1496,
+            "end": 1497
         },
         {
             "kind": "Proc",
             "text": "proc",
-            "start": 1575,
-            "end": 1579
+            "start": 1497,
+            "end": 1501
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1501,
+            "end": 1502
         },
         {
             "kind": "Identifier",
             "text": "is_prime",
-            "start": 1580,
-            "end": 1588
+            "start": 1502,
+            "end": 1510
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1510,
+            "end": 1511
         },
         {
             "kind": "StringLiteral",
             "text": "{n}",
-            "start": 1589,
-            "end": 1592
+            "start": 1511,
+            "end": 1514
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1514,
+            "end": 1515
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    if {$n < 2} {\r\n        return 0\r\n    }\r\n    if {$n == 2} {\r\n        return 1\r\n    }\r\n    if {$n % 2 == 0} {\r\n        return 0\r\n    }\r\n    for {set i 3} {$i * $i <= $n} {incr i 2} {\r\n        if {$n % $i == 0} {\r\n            return 0\r\n        }\r\n    }\r\n    return 1\r\n}",
-            "start": 1593,
-            "end": 1866
+            "text": "{\n    if {$n < 2} {\n        return 0\n    }\n    if {$n == 2} {\n        return 1\n    }\n    if {$n % 2 == 0} {\n        return 0\n    }\n    for {set i 3} {$i * $i <= $n} {incr i 2} {\n        if {$n % $i == 0} {\n            return 0\n        }\n    }\n    return 1\n}",
+            "start": 1515,
+            "end": 1772
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1772,
+            "end": 1773
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1773,
+            "end": 1774
         },
         {
             "kind": "Proc",
             "text": "proc",
-            "start": 1870,
-            "end": 1874
+            "start": 1774,
+            "end": 1778
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1778,
+            "end": 1779
         },
         {
             "kind": "Identifier",
             "text": "reverse_string",
-            "start": 1875,
-            "end": 1889
+            "start": 1779,
+            "end": 1793
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1793,
+            "end": 1794
         },
         {
             "kind": "StringLiteral",
             "text": "{str}",
-            "start": 1890,
-            "end": 1895
+            "start": 1794,
+            "end": 1799
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1799,
+            "end": 1800
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    set result \"\"\r\n    for {set i [expr {[string length $str] - 1}]} {$i >= 0} {incr i -1} {\r\n        append result [string index $str $i]\r\n    }\r\n    return $result\r\n}",
-            "start": 1896,
-            "end": 2067
+            "text": "{\n    set result \"\"\n    for {set i [terms {[string length $str] - 1}]} {$i >= 0} {incr i -1} {\n        append result [string index $str $i]\n    }\n    return $result\n}",
+            "start": 1800,
+            "end": 1966
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1966,
+            "end": 1967
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1967,
+            "end": 1968
         },
         {
             "kind": "Proc",
             "text": "proc",
-            "start": 2071,
-            "end": 2075
+            "start": 1968,
+            "end": 1972
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1972,
+            "end": 1973
         },
         {
             "kind": "Identifier",
             "text": "count_words",
-            "start": 2076,
-            "end": 2087
+            "start": 1973,
+            "end": 1984
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1984,
+            "end": 1985
         },
         {
             "kind": "StringLiteral",
             "text": "{text}",
-            "start": 2088,
-            "end": 2094
+            "start": 1985,
+            "end": 1991
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 1991,
+            "end": 1992
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    return [llength [split $text]]\r\n}",
-            "start": 2095,
-            "end": 2135
+            "text": "{\n    return [llength [split $text]]\n}",
+            "start": 1992,
+            "end": 2030
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2030,
+            "end": 2031
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2031,
+            "end": 2032
+        },
+        {
+            "kind": "Comment",
+            "text": "# Procedure with variable arguments",
+            "start": 2032,
+            "end": 2067
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2067,
+            "end": 2068
         },
         {
             "kind": "Proc",
             "text": "proc",
-            "start": 2176,
-            "end": 2180
+            "start": 2068,
+            "end": 2072
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2072,
+            "end": 2073
         },
         {
             "kind": "Identifier",
             "text": "print_all",
-            "start": 2181,
-            "end": 2190
+            "start": 2073,
+            "end": 2082
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2082,
+            "end": 2083
         },
         {
             "kind": "StringLiteral",
             "text": "{args}",
-            "start": 2191,
-            "end": 2197
+            "start": 2083,
+            "end": 2089
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2089,
+            "end": 2090
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    foreach arg $args {\r\n        puts $arg\r\n    }\r\n}",
-            "start": 2198,
-            "end": 2253
+            "text": "{\n    foreach arg $args {\n        puts $arg\n    }\n}",
+            "start": 2090,
+            "end": 2141
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2141,
+            "end": 2142
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2142,
+            "end": 2143
+        },
+        {
+            "kind": "Comment",
+            "text": "# Procedure with optional arguments",
+            "start": 2143,
+            "end": 2178
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2178,
+            "end": 2179
         },
         {
             "kind": "Proc",
             "text": "proc",
-            "start": 2294,
-            "end": 2298
+            "start": 2179,
+            "end": 2183
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2183,
+            "end": 2184
         },
         {
             "kind": "Identifier",
             "text": "connect_db",
-            "start": 2299,
-            "end": 2309
+            "start": 2184,
+            "end": 2194
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2194,
+            "end": 2195
         },
         {
             "kind": "StringLiteral",
             "text": "{host {port 5432} {database \"mydb\"}}",
-            "start": 2310,
-            "end": 2346
+            "start": 2195,
+            "end": 2231
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2231,
+            "end": 2232
         },
         {
             "kind": "StringLiteral",
-            "text": "{\r\n    puts \"Connecting to $host:$port/$database\"\r\n}",
-            "start": 2347,
-            "end": 2399
+            "text": "{\n    puts \"Connecting to $host:$port/$database\"\n}",
+            "start": 2232,
+            "end": 2282
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2282,
+            "end": 2283
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2283,
+            "end": 2284
+        },
+        {
+            "kind": "Comment",
+            "text": "# Procedure with upvar (reference parameters)",
+            "start": 2284,
+            "end": 2329
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2329,
+            "end": 2330
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 2330,
+            "end": 2334
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2334,
+            "end": 2335
+        },
+        {
+            "kind": "Identifier",
+            "text": "increment",
+            "start": 2335,
+            "end": 2344
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2344,
+            "end": 2345
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{varname}",
+            "start": 2345,
+            "end": 2354
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2354,
+            "end": 2355
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    upvar $varname var\n    incr var\n}",
+            "start": 2355,
+            "end": 2394
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2394,
+            "end": 2395
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2395,
+            "end": 2396
+        },
+        {
+            "kind": "Comment",
+            "text": "# Procedure with global variables",
+            "start": 2396,
+            "end": 2429
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2429,
+            "end": 2430
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 2430,
+            "end": 2433
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2433,
+            "end": 2434
+        },
+        {
+            "kind": "Identifier",
+            "text": "global_counter",
+            "start": 2434,
+            "end": 2448
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2448,
+            "end": 2449
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 2449,
+            "end": 2450
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2450,
+            "end": 2451
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2451,
+            "end": 2452
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 2452,
+            "end": 2456
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2456,
+            "end": 2457
+        },
+        {
+            "kind": "Identifier",
+            "text": "increment_global",
+            "start": 2457,
+            "end": 2473
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2473,
+            "end": 2474
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{}",
+            "start": 2474,
+            "end": 2476
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2476,
+            "end": 2477
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    global global_counter\n    incr global_counter\n}",
+            "start": 2477,
+            "end": 2530
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2530,
+            "end": 2531
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2531,
+            "end": 2532
+        },
+        {
+            "kind": "Comment",
+            "text": "# Control structures",
+            "start": 2532,
+            "end": 2552
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2552,
+            "end": 2553
+        },
+        {
+            "kind": "Comment",
+            "text": "# If-else statements",
+            "start": 2553,
+            "end": 2573
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2573,
+            "end": 2574
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 2574,
+            "end": 2577
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2577,
+            "end": 2578
+        },
+        {
+            "kind": "Identifier",
+            "text": "score",
+            "start": 2578,
+            "end": 2583
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2583,
+            "end": 2584
+        },
+        {
+            "kind": "Number",
+            "text": "85",
+            "start": 2584,
+            "end": 2586
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2586,
+            "end": 2587
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 2587,
+            "end": 2589
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2589,
+            "end": 2590
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{$score >= 90}",
+            "start": 2590,
+            "end": 2604
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2604,
+            "end": 2605
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    set grade \"A\"\n}",
+            "start": 2605,
+            "end": 2626
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2626,
+            "end": 2627
+        },
+        {
+            "kind": "ElseIf",
+            "text": "elseif",
+            "start": 2627,
+            "end": 2633
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2633,
+            "end": 2634
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{$score >= 80}",
+            "start": 2634,
+            "end": 2648
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2648,
+            "end": 2649
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    set grade \"B\"\n}",
+            "start": 2649,
+            "end": 2670
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2670,
+            "end": 2671
+        },
+        {
+            "kind": "ElseIf",
+            "text": "elseif",
+            "start": 2671,
+            "end": 2677
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2677,
+            "end": 2678
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{$score >= 70}",
+            "start": 2678,
+            "end": 2692
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2692,
+            "end": 2693
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    set grade \"C\"\n}",
+            "start": 2693,
+            "end": 2714
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2714,
+            "end": 2715
+        },
+        {
+            "kind": "ElseIf",
+            "text": "elseif",
+            "start": 2715,
+            "end": 2721
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2721,
+            "end": 2722
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{$score >= 60}",
+            "start": 2722,
+            "end": 2736
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2736,
+            "end": 2737
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    set grade \"D\"\n}",
+            "start": 2737,
+            "end": 2758
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2758,
+            "end": 2759
+        },
+        {
+            "kind": "Else",
+            "text": "else",
+            "start": 2759,
+            "end": 2763
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2763,
+            "end": 2764
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    set grade \"F\"\n}",
+            "start": 2764,
+            "end": 2785
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2785,
+            "end": 2786
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2786,
+            "end": 2787
+        },
+        {
+            "kind": "Comment",
+            "text": "# Switch statement",
+            "start": 2787,
+            "end": 2805
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2805,
+            "end": 2806
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 2806,
+            "end": 2809
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2809,
+            "end": 2810
+        },
+        {
+            "kind": "Identifier",
+            "text": "day",
+            "start": 2810,
+            "end": 2813
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2813,
+            "end": 2814
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Monday\"",
+            "start": 2814,
+            "end": 2822
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2822,
+            "end": 2823
+        },
+        {
+            "kind": "Identifier",
+            "text": "switch",
+            "start": 2823,
+            "end": 2829
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2829,
+            "end": 2830
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 2830,
+            "end": 2831
+        },
+        {
+            "kind": "Identifier",
+            "text": "day",
+            "start": 2831,
+            "end": 2834
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 2834,
+            "end": 2835
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    \"Monday\" {\n        set mood \"Tired\"\n    }\n    \"Tuesday\" {\n        set mood \"Getting better\"\n    }\n    \"Wednesday\" {\n        set mood \"Hump day\"\n    }\n    \"Thursday\" {\n        set mood \"Almost there\"\n    }\n    \"Friday\" {\n        set mood \"TGIF!\"\n    }\n    \"Saturday\" -\n    \"Sunday\" {\n        set mood \"Weekend!\"\n    }\n    default {\n        set mood \"Unknown day\"\n    }\n}",
+            "start": 2835,
+            "end": 3210
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3210,
+            "end": 3211
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3211,
+            "end": 3212
+        },
+        {
+            "kind": "Comment",
+            "text": "# For loops",
+            "start": 3212,
+            "end": 3223
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3223,
+            "end": 3224
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 3224,
+            "end": 3228
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3228,
+            "end": 3229
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Counting from 1 to 10:\"",
+            "start": 3229,
+            "end": 3253
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3253,
+            "end": 3254
+        },
+        {
+            "kind": "For",
+            "text": "for",
+            "start": 3254,
+            "end": 3257
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3257,
+            "end": 3258
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{set i 1}",
+            "start": 3258,
+            "end": 3267
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3267,
+            "end": 3268
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{$i <= 10}",
+            "start": 3268,
+            "end": 3278
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3278,
+            "end": 3279
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{incr i}",
+            "start": 3279,
+            "end": 3287
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3287,
+            "end": 3288
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts $i\n}",
+            "start": 3288,
+            "end": 3303
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3303,
+            "end": 3304
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3304,
+            "end": 3305
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 3305,
+            "end": 3309
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3309,
+            "end": 3310
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Counting down from 10 to 1:\"",
+            "start": 3310,
+            "end": 3339
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3339,
+            "end": 3340
+        },
+        {
+            "kind": "For",
+            "text": "for",
+            "start": 3340,
+            "end": 3343
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3343,
+            "end": 3344
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{set i 10}",
+            "start": 3344,
+            "end": 3354
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3354,
+            "end": 3355
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{$i >= 1}",
+            "start": 3355,
+            "end": 3364
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3364,
+            "end": 3365
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{incr i -1}",
+            "start": 3365,
+            "end": 3376
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3376,
+            "end": 3377
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts $i\n}",
+            "start": 3377,
+            "end": 3392
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3392,
+            "end": 3393
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3393,
+            "end": 3394
+        },
+        {
+            "kind": "Comment",
+            "text": "# While loop",
+            "start": 3394,
+            "end": 3406
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3406,
+            "end": 3407
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 3407,
+            "end": 3410
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3410,
+            "end": 3411
+        },
+        {
+            "kind": "Identifier",
+            "text": "count",
+            "start": 3411,
+            "end": 3416
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3416,
+            "end": 3417
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 3417,
+            "end": 3418
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3418,
+            "end": 3419
+        },
+        {
+            "kind": "While",
+            "text": "while",
+            "start": 3419,
+            "end": 3424
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3424,
+            "end": 3425
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{$count < 5}",
+            "start": 3425,
+            "end": 3437
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3437,
+            "end": 3438
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"Count: $count\"\n    incr count\n}",
+            "start": 3438,
+            "end": 3481
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3481,
+            "end": 3482
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3482,
+            "end": 3483
+        },
+        {
+            "kind": "Comment",
+            "text": "# Foreach loop",
+            "start": 3483,
+            "end": 3497
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3497,
+            "end": 3498
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 3498,
+            "end": 3502
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3502,
+            "end": 3503
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Fruits:\"",
+            "start": 3503,
+            "end": 3512
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3512,
+            "end": 3513
+        },
+        {
+            "kind": "ForEach",
+            "text": "foreach",
+            "start": 3513,
+            "end": 3520
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3520,
+            "end": 3521
+        },
+        {
+            "kind": "Identifier",
+            "text": "fruit",
+            "start": 3521,
+            "end": 3526
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3526,
+            "end": 3527
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 3527,
+            "end": 3528
+        },
+        {
+            "kind": "Identifier",
+            "text": "fruits",
+            "start": 3528,
+            "end": 3534
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3534,
+            "end": 3535
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"- $fruit\"\n}",
+            "start": 3535,
+            "end": 3558
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3558,
+            "end": 3559
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3559,
+            "end": 3560
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 3560,
+            "end": 3564
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3564,
+            "end": 3565
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Numbers and their squares:\"",
+            "start": 3565,
+            "end": 3593
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3593,
+            "end": 3594
+        },
+        {
+            "kind": "ForEach",
+            "text": "foreach",
+            "start": 3594,
+            "end": 3601
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3601,
+            "end": 3602
+        },
+        {
+            "kind": "Identifier",
+            "text": "num",
+            "start": 3602,
+            "end": 3605
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3605,
+            "end": 3606
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 3606,
+            "end": 3607
+        },
+        {
+            "kind": "Identifier",
+            "text": "numbers",
+            "start": 3607,
+            "end": 3614
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3614,
+            "end": 3615
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"$num squared is [expr {$num * $num}]\"\n}",
+            "start": 3615,
+            "end": 3666
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3666,
+            "end": 3667
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3667,
+            "end": 3668
+        },
+        {
+            "kind": "Comment",
+            "text": "# Foreach with multiple variables",
+            "start": 3668,
+            "end": 3701
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3701,
+            "end": 3702
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 3702,
+            "end": 3705
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3705,
+            "end": 3706
+        },
+        {
+            "kind": "Identifier",
+            "text": "pairs",
+            "start": 3706,
+            "end": 3711
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3711,
+            "end": 3712
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{{name Alice} {age 25} {city \"New York\"}}",
+            "start": 3712,
+            "end": 3753
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3753,
+            "end": 3754
+        },
+        {
+            "kind": "ForEach",
+            "text": "foreach",
+            "start": 3754,
+            "end": 3761
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3761,
+            "end": 3762
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{key value}",
+            "start": 3762,
+            "end": 3773
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3773,
+            "end": 3774
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 3774,
+            "end": 3775
+        },
+        {
+            "kind": "Identifier",
+            "text": "pairs",
+            "start": 3775,
+            "end": 3780
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3780,
+            "end": 3781
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"$key: $value\"\n}",
+            "start": 3781,
+            "end": 3808
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3808,
+            "end": 3809
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3809,
+            "end": 3810
+        },
+        {
+            "kind": "Comment",
+            "text": "# Array iteration",
+            "start": 3810,
+            "end": 3827
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3827,
+            "end": 3828
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 3828,
+            "end": 3832
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3832,
+            "end": 3833
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Person information:\"",
+            "start": 3833,
+            "end": 3854
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3854,
+            "end": 3855
+        },
+        {
+            "kind": "ForEach",
+            "text": "foreach",
+            "start": 3855,
+            "end": 3862
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3862,
+            "end": 3863
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{key value}",
+            "start": 3863,
+            "end": 3874
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3874,
+            "end": 3875
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 3875,
+            "end": 3876
+        },
+        {
+            "kind": "Identifier",
+            "text": "array",
+            "start": 3876,
+            "end": 3881
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3881,
+            "end": 3882
+        },
+        {
+            "kind": "Identifier",
+            "text": "get",
+            "start": 3882,
+            "end": 3885
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3885,
+            "end": 3886
+        },
+        {
+            "kind": "Identifier",
+            "text": "person",
+            "start": 3886,
+            "end": 3892
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 3892,
+            "end": 3893
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3893,
+            "end": 3894
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"$key: $value\"\n}",
+            "start": 3894,
+            "end": 3921
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3921,
+            "end": 3922
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3922,
+            "end": 3923
+        },
+        {
+            "kind": "Comment",
+            "text": "# String operations",
+            "start": 3923,
+            "end": 3942
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3942,
+            "end": 3943
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 3943,
+            "end": 3946
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3946,
+            "end": 3947
+        },
+        {
+            "kind": "Identifier",
+            "text": "text",
+            "start": 3947,
+            "end": 3951
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3951,
+            "end": 3952
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello, World!\"",
+            "start": 3952,
+            "end": 3967
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3967,
+            "end": 3968
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 3968,
+            "end": 3972
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3972,
+            "end": 3973
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Original: $text\"",
+            "start": 3973,
+            "end": 3990
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 3990,
+            "end": 3991
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 3991,
+            "end": 3995
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 3995,
+            "end": 3996
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Length: [string length $text]\"",
+            "start": 3996,
+            "end": 4027
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4027,
+            "end": 4028
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 4028,
+            "end": 4032
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4032,
+            "end": 4033
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Uppercase: [string toupper $text]\"",
+            "start": 4033,
+            "end": 4068
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4068,
+            "end": 4069
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 4069,
+            "end": 4073
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4073,
+            "end": 4074
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Lowercase: [string tolower $text]\"",
+            "start": 4074,
+            "end": 4109
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4109,
+            "end": 4110
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 4110,
+            "end": 4114
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4114,
+            "end": 4115
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"First 5 chars: [string range $text 0 4]\"",
+            "start": 4115,
+            "end": 4156
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4156,
+            "end": 4157
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 4157,
+            "end": 4161
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4161,
+            "end": 4162
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Last 6 chars: [string range $text end-5 end]\"",
+            "start": 4162,
+            "end": 4208
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4208,
+            "end": 4209
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 4209,
+            "end": 4213
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4213,
+            "end": 4214
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Index of 'World': [string first \"",
+            "start": 4214,
+            "end": 4248
+        },
+        {
+            "kind": "Identifier",
+            "text": "World",
+            "start": 4248,
+            "end": 4253
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\" $text]\"",
+            "start": 4253,
+            "end": 4262
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4262,
+            "end": 4263
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 4263,
+            "end": 4267
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4267,
+            "end": 4268
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Replace 'World' with 'TCL': [string map {\"",
+            "start": 4268,
+            "end": 4311
+        },
+        {
+            "kind": "Identifier",
+            "text": "World",
+            "start": 4311,
+            "end": 4316
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\" \"",
+            "start": 4316,
+            "end": 4319
+        },
+        {
+            "kind": "Identifier",
+            "text": "TCL",
+            "start": 4319,
+            "end": 4322
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"} $text]\"",
+            "start": 4322,
+            "end": 4332
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4332,
+            "end": 4333
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4333,
+            "end": 4334
+        },
+        {
+            "kind": "Comment",
+            "text": "# Regular expressions",
+            "start": 4334,
+            "end": 4355
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4355,
+            "end": 4356
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 4356,
+            "end": 4359
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4359,
+            "end": 4360
+        },
+        {
+            "kind": "Identifier",
+            "text": "email",
+            "start": 4360,
+            "end": 4365
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4365,
+            "end": 4366
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"user@example.com\"",
+            "start": 4366,
+            "end": 4384
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4384,
+            "end": 4385
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 4385,
+            "end": 4387
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4387,
+            "end": 4388
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{[regexp {^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$} $email]}",
+            "start": 4388,
+            "end": 4456
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4456,
+            "end": 4457
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"$email is a valid email address\"\n}",
+            "start": 4457,
+            "end": 4503
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4503,
+            "end": 4504
+        },
+        {
+            "kind": "Else",
+            "text": "else",
+            "start": 4504,
+            "end": 4508
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4508,
+            "end": 4509
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"$email is not a valid email address\"\n}",
+            "start": 4509,
+            "end": 4559
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4559,
+            "end": 4560
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4560,
+            "end": 4561
+        },
+        {
+            "kind": "Comment",
+            "text": "# Extract parts using regexp",
+            "start": 4561,
+            "end": 4589
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4589,
+            "end": 4590
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 4590,
+            "end": 4593
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4593,
+            "end": 4594
+        },
+        {
+            "kind": "Identifier",
+            "text": "phone",
+            "start": 4594,
+            "end": 4599
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4599,
+            "end": 4600
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"123-456-7890\"",
+            "start": 4600,
+            "end": 4614
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4614,
+            "end": 4615
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 4615,
+            "end": 4617
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4617,
+            "end": 4618
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{[regexp {(\\d{3})-(\\d{3})-(\\d{4})} $phone match area exchange number]}",
+            "start": 4618,
+            "end": 4688
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4688,
+            "end": 4689
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"Area code: $area\"\n    puts \"Exchange: $exchange\"\n    puts \"Number: $number\"\n}",
+            "start": 4689,
+            "end": 4778
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4778,
+            "end": 4779
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4779,
+            "end": 4780
+        },
+        {
+            "kind": "Comment",
+            "text": "# List operations",
+            "start": 4780,
+            "end": 4797
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4797,
+            "end": 4798
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 4798,
+            "end": 4801
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4801,
+            "end": 4802
+        },
+        {
+            "kind": "Identifier",
+            "text": "original_list",
+            "start": 4802,
+            "end": 4815
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4815,
+            "end": 4816
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{1 2 3 4 5}",
+            "start": 4816,
+            "end": 4827
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4827,
+            "end": 4828
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 4828,
+            "end": 4832
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4832,
+            "end": 4833
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Original list: $original_list\"",
+            "start": 4833,
+            "end": 4864
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4864,
+            "end": 4865
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 4865,
+            "end": 4869
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4869,
+            "end": 4870
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Length: [llength $original_list]\"",
+            "start": 4870,
+            "end": 4904
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4904,
+            "end": 4905
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 4905,
+            "end": 4909
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4909,
+            "end": 4910
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"First element: [lindex $original_list 0]\"",
+            "start": 4910,
+            "end": 4952
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 4952,
+            "end": 4953
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 4953,
+            "end": 4957
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 4957,
+            "end": 4958
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Last element: [lindex $original_list end]\"",
+            "start": 4958,
+            "end": 5001
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5001,
+            "end": 5002
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 5002,
+            "end": 5006
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5006,
+            "end": 5007
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Range 1-3: [lrange $original_list 1 3]\"",
+            "start": 5007,
+            "end": 5047
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5047,
+            "end": 5048
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5048,
+            "end": 5049
+        },
+        {
+            "kind": "Comment",
+            "text": "# Append to list",
+            "start": 5049,
+            "end": 5065
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5065,
+            "end": 5066
+        },
+        {
+            "kind": "Identifier",
+            "text": "lappend",
+            "start": 5066,
+            "end": 5073
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5073,
+            "end": 5074
+        },
+        {
+            "kind": "Identifier",
+            "text": "original_list",
+            "start": 5074,
+            "end": 5087
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5087,
+            "end": 5088
+        },
+        {
+            "kind": "Number",
+            "text": "6",
+            "start": 5088,
+            "end": 5089
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5089,
+            "end": 5090
+        },
+        {
+            "kind": "Number",
+            "text": "7",
+            "start": 5090,
+            "end": 5091
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5091,
+            "end": 5092
+        },
+        {
+            "kind": "Number",
+            "text": "8",
+            "start": 5092,
+            "end": 5093
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5093,
+            "end": 5094
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 5094,
+            "end": 5098
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5098,
+            "end": 5099
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"After append: $original_list\"",
+            "start": 5099,
+            "end": 5129
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5129,
+            "end": 5130
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5130,
+            "end": 5131
+        },
+        {
+            "kind": "Comment",
+            "text": "# Insert into list",
+            "start": 5131,
+            "end": 5149
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5149,
+            "end": 5150
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 5150,
+            "end": 5153
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5153,
+            "end": 5154
+        },
+        {
+            "kind": "Identifier",
+            "text": "original_list",
+            "start": 5154,
+            "end": 5167
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5167,
+            "end": 5168
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 5168,
+            "end": 5169
+        },
+        {
+            "kind": "Identifier",
+            "text": "linsert",
+            "start": 5169,
+            "end": 5176
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5176,
+            "end": 5177
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 5177,
+            "end": 5178
+        },
+        {
+            "kind": "Identifier",
+            "text": "original_list",
+            "start": 5178,
+            "end": 5191
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5191,
+            "end": 5192
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 5192,
+            "end": 5193
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5193,
+            "end": 5194
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 5194,
+            "end": 5195
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 5195,
+            "end": 5196
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5196,
+            "end": 5197
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 5197,
+            "end": 5201
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5201,
+            "end": 5202
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"After insert at beginning: $original_list\"",
+            "start": 5202,
+            "end": 5245
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5245,
+            "end": 5246
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5246,
+            "end": 5247
+        },
+        {
+            "kind": "Comment",
+            "text": "# Replace in list",
+            "start": 5247,
+            "end": 5264
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5264,
+            "end": 5265
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 5265,
+            "end": 5268
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5268,
+            "end": 5269
+        },
+        {
+            "kind": "Identifier",
+            "text": "original_list",
+            "start": 5269,
+            "end": 5282
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5282,
+            "end": 5283
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 5283,
+            "end": 5284
+        },
+        {
+            "kind": "Identifier",
+            "text": "lreplace",
+            "start": 5284,
+            "end": 5292
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5292,
+            "end": 5293
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 5293,
+            "end": 5294
+        },
+        {
+            "kind": "Identifier",
+            "text": "original_list",
+            "start": 5294,
+            "end": 5307
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5307,
+            "end": 5308
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 5308,
+            "end": 5309
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5309,
+            "end": 5310
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 5310,
+            "end": 5311
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5311,
+            "end": 5312
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"THREE\"",
+            "start": 5312,
+            "end": 5319
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 5319,
+            "end": 5320
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5320,
+            "end": 5321
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 5321,
+            "end": 5325
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5325,
+            "end": 5326
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"After replace: $original_list\"",
+            "start": 5326,
+            "end": 5357
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5357,
+            "end": 5358
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5358,
+            "end": 5359
+        },
+        {
+            "kind": "Comment",
+            "text": "# Sort list",
+            "start": 5359,
+            "end": 5370
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5370,
+            "end": 5371
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 5371,
+            "end": 5374
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5374,
+            "end": 5375
+        },
+        {
+            "kind": "Identifier",
+            "text": "unsorted",
+            "start": 5375,
+            "end": 5383
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5383,
+            "end": 5384
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{banana apple cherry date}",
+            "start": 5384,
+            "end": 5410
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5410,
+            "end": 5411
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 5411,
+            "end": 5414
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5414,
+            "end": 5415
+        },
+        {
+            "kind": "Identifier",
+            "text": "sorted",
+            "start": 5415,
+            "end": 5421
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5421,
+            "end": 5422
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 5422,
+            "end": 5423
+        },
+        {
+            "kind": "Identifier",
+            "text": "lsort",
+            "start": 5423,
+            "end": 5428
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5428,
+            "end": 5429
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 5429,
+            "end": 5430
+        },
+        {
+            "kind": "Identifier",
+            "text": "unsorted",
+            "start": 5430,
+            "end": 5438
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 5438,
+            "end": 5439
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5439,
+            "end": 5440
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 5440,
+            "end": 5444
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5444,
+            "end": 5445
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Unsorted: $unsorted\"",
+            "start": 5445,
+            "end": 5466
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5466,
+            "end": 5467
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 5467,
+            "end": 5471
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5471,
+            "end": 5472
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Sorted: $sorted\"",
+            "start": 5472,
+            "end": 5489
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5489,
+            "end": 5490
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5490,
+            "end": 5491
+        },
+        {
+            "kind": "Comment",
+            "text": "# Sort numerically",
+            "start": 5491,
+            "end": 5509
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5509,
+            "end": 5510
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 5510,
+            "end": 5513
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5513,
+            "end": 5514
+        },
+        {
+            "kind": "Identifier",
+            "text": "numbers_unsorted",
+            "start": 5514,
+            "end": 5530
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5530,
+            "end": 5531
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{10 2 30 4 5}",
+            "start": 5531,
+            "end": 5544
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5544,
+            "end": 5545
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 5545,
+            "end": 5548
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5548,
+            "end": 5549
+        },
+        {
+            "kind": "Identifier",
+            "text": "numbers_sorted",
+            "start": 5549,
+            "end": 5563
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5563,
+            "end": 5564
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 5564,
+            "end": 5565
+        },
+        {
+            "kind": "Identifier",
+            "text": "lsort",
+            "start": 5565,
+            "end": 5570
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5570,
+            "end": 5571
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 5571,
+            "end": 5572
+        },
+        {
+            "kind": "Identifier",
+            "text": "integer",
+            "start": 5572,
+            "end": 5579
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5579,
+            "end": 5580
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 5580,
+            "end": 5581
+        },
+        {
+            "kind": "Identifier",
+            "text": "numbers_unsorted",
+            "start": 5581,
+            "end": 5597
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 5597,
+            "end": 5598
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5598,
+            "end": 5599
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 5599,
+            "end": 5603
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5603,
+            "end": 5604
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Numbers unsorted: $numbers_unsorted\"",
+            "start": 5604,
+            "end": 5641
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5641,
+            "end": 5642
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 5642,
+            "end": 5646
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5646,
+            "end": 5647
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Numbers sorted: $numbers_sorted\"",
+            "start": 5647,
+            "end": 5680
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5680,
+            "end": 5681
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5681,
+            "end": 5682
+        },
+        {
+            "kind": "Comment",
+            "text": "# Dictionary operations (Tcl 8.5+)",
+            "start": 5682,
+            "end": 5716
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5716,
+            "end": 5717
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 5717,
+            "end": 5721
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5721,
+            "end": 5722
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Configuration:\"",
+            "start": 5722,
+            "end": 5738
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5738,
+            "end": 5739
+        },
+        {
+            "kind": "Identifier",
+            "text": "dict",
+            "start": 5739,
+            "end": 5743
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5743,
+            "end": 5744
+        },
+        {
+            "kind": "For",
+            "text": "for",
+            "start": 5744,
+            "end": 5747
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5747,
+            "end": 5748
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{key value}",
+            "start": 5748,
+            "end": 5759
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5759,
+            "end": 5760
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 5760,
+            "end": 5761
+        },
+        {
+            "kind": "Identifier",
+            "text": "config",
+            "start": 5761,
+            "end": 5767
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5767,
+            "end": 5768
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"$key: $value\"\n}",
+            "start": 5768,
+            "end": 5795
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5795,
+            "end": 5796
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5796,
+            "end": 5797
+        },
+        {
+            "kind": "Comment",
+            "text": "# Add to dictionary",
+            "start": 5797,
+            "end": 5816
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5816,
+            "end": 5817
+        },
+        {
+            "kind": "Identifier",
+            "text": "dict",
+            "start": 5817,
+            "end": 5821
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5821,
+            "end": 5822
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 5822,
+            "end": 5825
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5825,
+            "end": 5826
+        },
+        {
+            "kind": "Identifier",
+            "text": "config",
+            "start": 5826,
+            "end": 5832
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5832,
+            "end": 5833
+        },
+        {
+            "kind": "Identifier",
+            "text": "debug_mode",
+            "start": 5833,
+            "end": 5843
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5843,
+            "end": 5844
+        },
+        {
+            "kind": "Identifier",
+            "text": "true",
+            "start": 5844,
+            "end": 5848
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5848,
+            "end": 5849
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 5849,
+            "end": 5853
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5853,
+            "end": 5854
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"After adding debug_mode: [dict get $config debug_mode]\"",
+            "start": 5854,
+            "end": 5910
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5910,
+            "end": 5911
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5911,
+            "end": 5912
+        },
+        {
+            "kind": "Comment",
+            "text": "# Check if key exists",
+            "start": 5912,
+            "end": 5933
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 5933,
+            "end": 5934
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 5934,
+            "end": 5936
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5936,
+            "end": 5937
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{[dict exists $config ssl_enabled]}",
+            "start": 5937,
+            "end": 5972
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 5972,
+            "end": 5973
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"SSL is [expr {[dict get $config ssl_enabled] ? \"enabled\" : \"disabled\"}]\"\n}",
+            "start": 5973,
+            "end": 6059
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6059,
+            "end": 6060
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6060,
+            "end": 6061
+        },
+        {
+            "kind": "Comment",
+            "text": "# File operations",
+            "start": 6061,
+            "end": 6078
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6078,
+            "end": 6079
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 6079,
+            "end": 6082
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6082,
+            "end": 6083
+        },
+        {
+            "kind": "Identifier",
+            "text": "filename",
+            "start": 6083,
+            "end": 6091
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6091,
+            "end": 6092
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"test.txt\"",
+            "start": 6092,
+            "end": 6102
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6102,
+            "end": 6103
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6103,
+            "end": 6104
+        },
+        {
+            "kind": "Comment",
+            "text": "# Write to file",
+            "start": 6104,
+            "end": 6119
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6119,
+            "end": 6120
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 6120,
+            "end": 6123
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6123,
+            "end": 6124
+        },
+        {
+            "kind": "Identifier",
+            "text": "file",
+            "start": 6124,
+            "end": 6128
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6128,
+            "end": 6129
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 6129,
+            "end": 6130
+        },
+        {
+            "kind": "Identifier",
+            "text": "open",
+            "start": 6130,
+            "end": 6134
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6134,
+            "end": 6135
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 6135,
+            "end": 6136
+        },
+        {
+            "kind": "Identifier",
+            "text": "filename",
+            "start": 6136,
+            "end": 6144
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6144,
+            "end": 6145
+        },
+        {
+            "kind": "Identifier",
+            "text": "w",
+            "start": 6145,
+            "end": 6146
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 6146,
+            "end": 6147
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6147,
+            "end": 6148
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 6148,
+            "end": 6152
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6152,
+            "end": 6153
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 6153,
+            "end": 6154
+        },
+        {
+            "kind": "Identifier",
+            "text": "file",
+            "start": 6154,
+            "end": 6158
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6158,
+            "end": 6159
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"This is a test file\"",
+            "start": 6159,
+            "end": 6180
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6180,
+            "end": 6181
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 6181,
+            "end": 6185
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6185,
+            "end": 6186
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 6186,
+            "end": 6187
+        },
+        {
+            "kind": "Identifier",
+            "text": "file",
+            "start": 6187,
+            "end": 6191
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6191,
+            "end": 6192
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Line 2\"",
+            "start": 6192,
+            "end": 6200
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6200,
+            "end": 6201
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 6201,
+            "end": 6205
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6205,
+            "end": 6206
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 6206,
+            "end": 6207
+        },
+        {
+            "kind": "Identifier",
+            "text": "file",
+            "start": 6207,
+            "end": 6211
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6211,
+            "end": 6212
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Line 3\"",
+            "start": 6212,
+            "end": 6220
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6220,
+            "end": 6221
+        },
+        {
+            "kind": "Identifier",
+            "text": "close",
+            "start": 6221,
+            "end": 6226
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6226,
+            "end": 6227
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 6227,
+            "end": 6228
+        },
+        {
+            "kind": "Identifier",
+            "text": "file",
+            "start": 6228,
+            "end": 6232
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6232,
+            "end": 6233
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6233,
+            "end": 6234
+        },
+        {
+            "kind": "Comment",
+            "text": "# Read from file",
+            "start": 6234,
+            "end": 6250
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6250,
+            "end": 6251
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 6251,
+            "end": 6253
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6253,
+            "end": 6254
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{[file exists $filename]}",
+            "start": 6254,
+            "end": 6279
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6279,
+            "end": 6280
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    set file [open $filename r]\n    set content [read $file]\n    close $file\n    puts \"File content:\"\n    puts $content\n}",
+            "start": 6280,
+            "end": 6403
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6403,
+            "end": 6404
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6404,
+            "end": 6405
+        },
+        {
+            "kind": "Comment",
+            "text": "# Read file line by line",
+            "start": 6405,
+            "end": 6429
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6429,
+            "end": 6430
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 6430,
+            "end": 6432
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6432,
+            "end": 6433
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{[file exists $filename]}",
+            "start": 6433,
+            "end": 6458
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6458,
+            "end": 6459
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    set file [open $filename r]\n    set line_number 1\n    while {[gets $file line] >= 0} {\n        puts \"Line $line_number: $line\"\n        incr line_number\n    }\n    close $file\n}",
+            "start": 6459,
+            "end": 6640
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6640,
+            "end": 6641
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6641,
+            "end": 6642
+        },
+        {
+            "kind": "Comment",
+            "text": "# File information",
+            "start": 6642,
+            "end": 6660
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6660,
+            "end": 6661
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 6661,
+            "end": 6663
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6663,
+            "end": 6664
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{[file exists $filename]}",
+            "start": 6664,
+            "end": 6689
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6689,
+            "end": 6690
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"File size: [file size $filename] bytes\"\n    puts \"File type: [file type $filename]\"\n    puts \"File readable: [file readable $filename]\"\n    puts \"File writable: [file writable $filename]\"\n    puts \"File executable: [file executable $filename]\"\n}",
+            "start": 6690,
+            "end": 6947
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6947,
+            "end": 6948
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6948,
+            "end": 6949
+        },
+        {
+            "kind": "Comment",
+            "text": "# Delete file",
+            "start": 6949,
+            "end": 6962
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 6962,
+            "end": 6963
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 6963,
+            "end": 6965
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6965,
+            "end": 6966
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{[file exists $filename]}",
+            "start": 6966,
+            "end": 6991
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 6991,
+            "end": 6992
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    file delete $filename\n    puts \"File deleted\"\n}",
+            "start": 6992,
+            "end": 7045
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7045,
+            "end": 7046
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7046,
+            "end": 7047
+        },
+        {
+            "kind": "Comment",
+            "text": "# Error handling",
+            "start": 7047,
+            "end": 7063
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7063,
+            "end": 7064
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 7064,
+            "end": 7068
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7068,
+            "end": 7069
+        },
+        {
+            "kind": "Identifier",
+            "text": "safe_divide",
+            "start": 7069,
+            "end": 7080
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7080,
+            "end": 7081
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{a b}",
+            "start": 7081,
+            "end": 7086
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7086,
+            "end": 7087
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    if {[catch {terms {$a / $b}} result]} {\n        return \"Error: Division by zero or invalid input\"\n    } else {\n        return $result\n    }\n}",
+            "start": 7087,
+            "end": 7234
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7234,
+            "end": 7235
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7235,
+            "end": 7236
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 7236,
+            "end": 7240
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7240,
+            "end": 7241
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"10 / 2 = [safe_divide 10 2]\"",
+            "start": 7241,
+            "end": 7270
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7270,
+            "end": 7271
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 7271,
+            "end": 7275
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7275,
+            "end": 7276
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"10 / 0 = [safe_divide 10 0]\"",
+            "start": 7276,
+            "end": 7305
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7305,
+            "end": 7306
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7306,
+            "end": 7307
+        },
+        {
+            "kind": "Comment",
+            "text": "# Try-catch equivalent",
+            "start": 7307,
+            "end": 7329
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7329,
+            "end": 7330
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 7330,
+            "end": 7332
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7332,
+            "end": 7333
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{[catch {\n    set result [terms {10 / 0}]\n    puts \"Result: $result\"\n} error_msg]}",
+            "start": 7333,
+            "end": 7415
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7415,
+            "end": 7416
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"Caught error: $error_msg\"\n}",
+            "start": 7416,
+            "end": 7455
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7455,
+            "end": 7456
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7456,
+            "end": 7457
+        },
+        {
+            "kind": "Comment",
+            "text": "# Namespace example",
+            "start": 7457,
+            "end": 7476
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7476,
+            "end": 7477
+        },
+        {
+            "kind": "Identifier",
+            "text": "namespace",
+            "start": 7477,
+            "end": 7486
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7486,
+            "end": 7487
+        },
+        {
+            "kind": "Identifier",
+            "text": "eval",
+            "start": 7487,
+            "end": 7491
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7491,
+            "end": 7492
+        },
+        {
+            "kind": "Identifier",
+            "text": "math",
+            "start": 7494,
+            "end": 7498
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7498,
+            "end": 7499
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    variable pi 3.14159\n    \n    proc circle_area {radius} {\n        variable pi\n        return [terms {$pi * $radius * $radius}]\n    }\n    \n    proc circle_circumference {radius} {\n        variable pi\n        return [terms {2 * $pi * $radius}]\n    }\n}",
+            "start": 7499,
+            "end": 7753
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7753,
+            "end": 7754
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7754,
+            "end": 7755
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 7755,
+            "end": 7759
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7759,
+            "end": 7760
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Circle area (r=5): [::math::circle_area 5]\"",
+            "start": 7760,
+            "end": 7804
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7804,
+            "end": 7805
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 7805,
+            "end": 7809
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7809,
+            "end": 7810
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Circle circumference (r=5): [::math::circle_circumference 5]\"",
+            "start": 7810,
+            "end": 7872
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7872,
+            "end": 7873
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7873,
+            "end": 7874
+        },
+        {
+            "kind": "Comment",
+            "text": "# Object-oriented programming with TclOO (Tcl 8.6+)",
+            "start": 7874,
+            "end": 7925
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 7925,
+            "end": 7926
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 7926,
+            "end": 7928
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7928,
+            "end": 7929
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{[info commands oo::class] ne \"\"}",
+            "start": 7929,
+            "end": 7962
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 7962,
+            "end": 7963
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    oo::class create Person {\n        variable name age\n        \n        constructor {person_name person_age} {\n            set name $person_name\n            set age $person_age\n        }\n        \n        method get_name {} {\n            return $name\n        }\n        \n        method get_age {} {\n            return $age\n        }\n        \n        method set_age {new_age} {\n            set age $new_age\n        }\n        \n        method introduce {} {\n            return \"Hi, I'm $name and I'm $age years old.\"\n        }\n        \n        method birthday {} {\n            incr age\n            return \"Happy birthday! I'm now $age years old.\"\n        }\n    }\n    \n    # Create instances\n    set person1 [Person new \"Alice\" 25]\n    set person2 [Person new \"Bob\" 30]\n    \n    puts [$person1 introduce]\n    puts [$person2 introduce]\n    \n    puts [$person1 birthday]\n    puts \"Alice's new age: [$person1 get_age]\"\n    \n    # Cleanup\n    $person1 destroy\n    $person2 destroy\n}",
+            "start": 7963,
+            "end": 8938
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 8938,
+            "end": 8939
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 8939,
+            "end": 8940
+        },
+        {
+            "kind": "Comment",
+            "text": "# Advanced list processing",
+            "start": 8940,
+            "end": 8966
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 8966,
+            "end": 8967
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 8967,
+            "end": 8971
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 8971,
+            "end": 8972
+        },
+        {
+            "kind": "Identifier",
+            "text": "map",
+            "start": 8972,
+            "end": 8975
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 8975,
+            "end": 8976
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{func list}",
+            "start": 8976,
+            "end": 8987
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 8987,
+            "end": 8988
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    set result {}\n    foreach item $list {\n        lappend result [$func $item]\n    }\n    return $result\n}",
+            "start": 8988,
+            "end": 9096
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9096,
+            "end": 9097
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9097,
+            "end": 9098
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 9098,
+            "end": 9102
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9102,
+            "end": 9103
+        },
+        {
+            "kind": "Identifier",
+            "text": "filter",
+            "start": 9103,
+            "end": 9109
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9109,
+            "end": 9110
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{predicate list}",
+            "start": 9110,
+            "end": 9126
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9126,
+            "end": 9127
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    set result {}\n    foreach item $list {\n        if {[$predicate $item]} {\n            lappend result $item\n        }\n    }\n    return $result\n}",
+            "start": 9127,
+            "end": 9275
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9275,
+            "end": 9276
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9276,
+            "end": 9277
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 9277,
+            "end": 9281
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9281,
+            "end": 9282
+        },
+        {
+            "kind": "Identifier",
+            "text": "square",
+            "start": 9282,
+            "end": 9288
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9288,
+            "end": 9289
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{x}",
+            "start": 9289,
+            "end": 9292
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9292,
+            "end": 9293
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    return [terms {$x * $x}]\n}",
+            "start": 9293,
+            "end": 9325
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9325,
+            "end": 9326
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9326,
+            "end": 9327
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 9327,
+            "end": 9331
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9331,
+            "end": 9332
+        },
+        {
+            "kind": "Identifier",
+            "text": "is_even",
+            "start": 9332,
+            "end": 9339
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9339,
+            "end": 9340
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{x}",
+            "start": 9340,
+            "end": 9343
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9343,
+            "end": 9344
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    return [terms {$x % 2 == 0}]\n}",
+            "start": 9344,
+            "end": 9380
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9380,
+            "end": 9381
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9381,
+            "end": 9382
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 9382,
+            "end": 9385
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9385,
+            "end": 9386
+        },
+        {
+            "kind": "Identifier",
+            "text": "test_numbers",
+            "start": 9386,
+            "end": 9398
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9398,
+            "end": 9399
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{1 2 3 4 5 6 7 8 9 10}",
+            "start": 9399,
+            "end": 9421
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9421,
+            "end": 9422
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 9422,
+            "end": 9426
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9426,
+            "end": 9427
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Original numbers: $test_numbers\"",
+            "start": 9427,
+            "end": 9460
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9460,
+            "end": 9461
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 9461,
+            "end": 9465
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9465,
+            "end": 9466
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Squared: [map square $test_numbers]\"",
+            "start": 9466,
+            "end": 9503
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9503,
+            "end": 9504
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 9504,
+            "end": 9508
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9508,
+            "end": 9509
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Even numbers: [filter is_even $test_numbers]\"",
+            "start": 9509,
+            "end": 9555
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9555,
+            "end": 9556
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9556,
+            "end": 9557
+        },
+        {
+            "kind": "Comment",
+            "text": "# Time and date",
+            "start": 9557,
+            "end": 9572
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9572,
+            "end": 9573
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 9573,
+            "end": 9577
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9577,
+            "end": 9578
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Current time: [clock format [clock seconds]]\"",
+            "start": 9578,
+            "end": 9624
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9624,
+            "end": 9625
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 9625,
+            "end": 9629
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9629,
+            "end": 9630
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Current time (ISO): [clock format [clock seconds] -format \"",
+            "start": 9630,
+            "end": 9690
+        },
+        {
+            "kind": "Percent",
+            "text": "%",
+            "start": 9690,
+            "end": 9691
+        },
+        {
+            "kind": "Identifier",
+            "text": "Y",
+            "start": 9691,
+            "end": 9692
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 9692,
+            "end": 9693
+        },
+        {
+            "kind": "Percent",
+            "text": "%",
+            "start": 9693,
+            "end": 9694
+        },
+        {
+            "kind": "Identifier",
+            "text": "m",
+            "start": 9694,
+            "end": 9695
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 9695,
+            "end": 9696
+        },
+        {
+            "kind": "Percent",
+            "text": "%",
+            "start": 9696,
+            "end": 9697
+        },
+        {
+            "kind": "Identifier",
+            "text": "d",
+            "start": 9697,
+            "end": 9698
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9698,
+            "end": 9699
+        },
+        {
+            "kind": "Percent",
+            "text": "%",
+            "start": 9699,
+            "end": 9700
+        },
+        {
+            "kind": "Identifier",
+            "text": "H",
+            "start": 9700,
+            "end": 9701
+        },
+        {
+            "kind": "Percent",
+            "text": "%",
+            "start": 9702,
+            "end": 9703
+        },
+        {
+            "kind": "Identifier",
+            "text": "M",
+            "start": 9703,
+            "end": 9704
+        },
+        {
+            "kind": "Percent",
+            "text": "%",
+            "start": 9705,
+            "end": 9706
+        },
+        {
+            "kind": "Identifier",
+            "text": "S",
+            "start": 9706,
+            "end": 9707
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"]\"",
+            "start": 9707,
+            "end": 9710
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9710,
+            "end": 9711
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 9711,
+            "end": 9715
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9715,
+            "end": 9716
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Timestamp: [clock seconds]\"",
+            "start": 9716,
+            "end": 9744
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9744,
+            "end": 9745
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9745,
+            "end": 9746
+        },
+        {
+            "kind": "Comment",
+            "text": "# Parse date",
+            "start": 9746,
+            "end": 9758
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9758,
+            "end": 9759
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 9759,
+            "end": 9762
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9762,
+            "end": 9763
+        },
+        {
+            "kind": "Identifier",
+            "text": "date_string",
+            "start": 9763,
+            "end": 9774
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9774,
+            "end": 9775
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"2023-12-25 15:30:00\"",
+            "start": 9775,
+            "end": 9796
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 9796,
+            "end": 9797
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 9797,
+            "end": 9799
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9799,
+            "end": 9800
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{[catch {clock scan $date_string -format \"%Y-%m-%d %H:%M:%S\"} timestamp]}",
+            "start": 9800,
+            "end": 9873
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9873,
+            "end": 9874
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"Failed to parse date\"\n}",
+            "start": 9874,
+            "end": 9909
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9909,
+            "end": 9910
+        },
+        {
+            "kind": "Else",
+            "text": "else",
+            "start": 9910,
+            "end": 9914
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 9914,
+            "end": 9915
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"Parsed timestamp: $timestamp\"\n    puts \"Formatted: [clock format $timestamp]\"\n}",
+            "start": 9915,
+            "end": 10006
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10006,
+            "end": 10007
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10007,
+            "end": 10008
+        },
+        {
+            "kind": "Comment",
+            "text": "# Mathematical operations",
+            "start": 10008,
+            "end": 10033
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10033,
+            "end": 10034
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10034,
+            "end": 10038
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10038,
+            "end": 10039
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Mathematical operations:\"",
+            "start": 10039,
+            "end": 10065
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10065,
+            "end": 10066
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10066,
+            "end": 10070
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10070,
+            "end": 10071
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"2 + 3 = [expr {2 + 3}]\"",
+            "start": 10071,
+            "end": 10095
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10095,
+            "end": 10096
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10096,
+            "end": 10100
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10100,
+            "end": 10101
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"10 - 4 = [expr {10 - 4}]\"",
+            "start": 10101,
+            "end": 10127
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10127,
+            "end": 10128
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10128,
+            "end": 10132
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10132,
+            "end": 10133
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"6 * 7 = [expr {6 * 7}]\"",
+            "start": 10133,
+            "end": 10157
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10157,
+            "end": 10158
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10158,
+            "end": 10162
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10162,
+            "end": 10163
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"15 / 3 = [expr {15 / 3}]\"",
+            "start": 10163,
+            "end": 10189
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10189,
+            "end": 10190
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10190,
+            "end": 10194
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10194,
+            "end": 10195
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"17 % 5 = [expr {17 % 5}]\"",
+            "start": 10195,
+            "end": 10221
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10221,
+            "end": 10222
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10222,
+            "end": 10226
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10226,
+            "end": 10227
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"2^8 = [expr {2**8}]\"",
+            "start": 10227,
+            "end": 10248
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10248,
+            "end": 10249
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10249,
+            "end": 10253
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10253,
+            "end": 10254
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"sqrt(16) = [expr {sqrt(16)}]\"",
+            "start": 10254,
+            "end": 10284
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10284,
+            "end": 10285
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10285,
+            "end": 10289
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10289,
+            "end": 10290
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"sin(pi/2) = [expr {sin(3.14159/2)}]\"",
+            "start": 10290,
+            "end": 10327
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10327,
+            "end": 10328
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10328,
+            "end": 10332
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10332,
+            "end": 10333
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"cos(0) = [expr {cos(0)}]\"",
+            "start": 10333,
+            "end": 10359
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10359,
+            "end": 10360
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10360,
+            "end": 10364
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10364,
+            "end": 10365
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"log(10) = [expr {log(10)}]\"",
+            "start": 10365,
+            "end": 10393
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10393,
+            "end": 10394
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10394,
+            "end": 10398
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10398,
+            "end": 10399
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"exp(1) = [expr {exp(1)}]\"",
+            "start": 10399,
+            "end": 10425
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10425,
+            "end": 10426
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10426,
+            "end": 10430
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10430,
+            "end": 10431
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"abs(-5) = [expr {abs(-5)}]\"",
+            "start": 10431,
+            "end": 10459
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10459,
+            "end": 10460
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10460,
+            "end": 10464
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10464,
+            "end": 10465
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"round(3.7) = [expr {round(3.7)}]\"",
+            "start": 10465,
+            "end": 10499
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10499,
+            "end": 10500
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10500,
+            "end": 10504
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10504,
+            "end": 10505
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"floor(3.7) = [expr {floor(3.7)}]\"",
+            "start": 10505,
+            "end": 10539
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10539,
+            "end": 10540
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10540,
+            "end": 10544
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10544,
+            "end": 10545
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"ceil(3.2) = [expr {ceil(3.2)}]\"",
+            "start": 10545,
+            "end": 10577
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10577,
+            "end": 10578
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10578,
+            "end": 10579
+        },
+        {
+            "kind": "Comment",
+            "text": "# Random numbers",
+            "start": 10579,
+            "end": 10595
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10595,
+            "end": 10596
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10596,
+            "end": 10600
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10600,
+            "end": 10601
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Random integer 1-100: [expr {int(rand() * 100) + 1}]\"",
+            "start": 10601,
+            "end": 10655
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10655,
+            "end": 10656
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10656,
+            "end": 10660
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10660,
+            "end": 10661
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Random float 0-1: [expr {rand()}]\"",
+            "start": 10661,
+            "end": 10696
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10696,
+            "end": 10697
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10697,
+            "end": 10698
+        },
+        {
+            "kind": "Comment",
+            "text": "# Command substitution and variable substitution",
+            "start": 10698,
+            "end": 10746
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10746,
+            "end": 10747
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 10747,
+            "end": 10750
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10750,
+            "end": 10751
+        },
+        {
+            "kind": "Identifier",
+            "text": "command",
+            "start": 10751,
+            "end": 10758
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10758,
+            "end": 10759
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"date\"",
+            "start": 10759,
+            "end": 10765
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10765,
+            "end": 10766
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10766,
+            "end": 10770
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10770,
+            "end": 10771
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Command output: [exec date]\"",
+            "start": 10771,
+            "end": 10800
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10800,
+            "end": 10801
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 10801,
+            "end": 10802
+        },
+        {
+            "kind": "Comment",
+            "text": "# This might not work on all systems",
+            "start": 10802,
+            "end": 10838
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10838,
+            "end": 10839
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10839,
+            "end": 10840
+        },
+        {
+            "kind": "Comment",
+            "text": "# Variable substitution examples",
+            "start": 10840,
+            "end": 10872
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10872,
+            "end": 10873
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 10873,
+            "end": 10876
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10876,
+            "end": 10877
+        },
+        {
+            "kind": "Identifier",
+            "text": "var1",
+            "start": 10877,
+            "end": 10881
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10881,
+            "end": 10882
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello\"",
+            "start": 10882,
+            "end": 10889
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10889,
+            "end": 10890
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 10890,
+            "end": 10893
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10893,
+            "end": 10894
+        },
+        {
+            "kind": "Identifier",
+            "text": "var2",
+            "start": 10894,
+            "end": 10898
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10898,
+            "end": 10899
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"World\"",
+            "start": 10899,
+            "end": 10906
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10906,
+            "end": 10907
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10907,
+            "end": 10911
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10911,
+            "end": 10912
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"$var1, $var2!\"",
+            "start": 10912,
+            "end": 10927
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10927,
+            "end": 10928
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10928,
+            "end": 10932
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10932,
+            "end": 10933
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"${var1}, ${var2}!\"",
+            "start": 10933,
+            "end": 10952
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10952,
+            "end": 10953
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10953,
+            "end": 10954
+        },
+        {
+            "kind": "Comment",
+            "text": "# Escape sequences",
+            "start": 10954,
+            "end": 10972
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10972,
+            "end": 10973
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10973,
+            "end": 10977
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 10977,
+            "end": 10978
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Tab:\\tTabbed text\"",
+            "start": 10978,
+            "end": 10997
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 10997,
+            "end": 10998
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 10998,
+            "end": 11002
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11002,
+            "end": 11003
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Newline:\\nNew line\"",
+            "start": 11003,
+            "end": 11023
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11023,
+            "end": 11024
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 11024,
+            "end": 11028
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11028,
+            "end": 11029
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Quote: \\\"Hello\\\"\"",
+            "start": 11029,
+            "end": 11047
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11047,
+            "end": 11048
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 11048,
+            "end": 11052
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11052,
+            "end": 11053
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Backslash: \\\\\"",
+            "start": 11053,
+            "end": 11068
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11068,
+            "end": 11069
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11069,
+            "end": 11070
+        },
+        {
+            "kind": "Comment",
+            "text": "# Comments",
+            "start": 11070,
+            "end": 11080
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11080,
+            "end": 11081
+        },
+        {
+            "kind": "Comment",
+            "text": "# This is a single-line comment",
+            "start": 11081,
+            "end": 11112
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11112,
+            "end": 11113
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11113,
+            "end": 11114
+        },
+        {
+            "kind": "Comment",
+            "text": "# Multi-line comment (using if 0)",
+            "start": 11114,
+            "end": 11147
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11147,
+            "end": 11148
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 11148,
+            "end": 11150
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11150,
+            "end": 11151
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 11151,
+            "end": 11152
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11152,
+            "end": 11153
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    This is a multi-line comment\n    that spans several lines\n    and won't be executed\n}",
+            "start": 11153,
+            "end": 11244
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11244,
+            "end": 11245
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11245,
+            "end": 11246
+        },
+        {
+            "kind": "Comment",
+            "text": "# Procedure with default arguments and variable arguments",
+            "start": 11246,
+            "end": 11303
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11303,
+            "end": 11304
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 11304,
+            "end": 11308
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11308,
+            "end": 11309
+        },
+        {
+            "kind": "Identifier",
+            "text": "flexible_proc",
+            "start": 11309,
+            "end": 11322
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11322,
+            "end": 11323
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{required {optional \"default\"} args}",
+            "start": 11323,
+            "end": 11359
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11359,
+            "end": 11360
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    puts \"Required: $required\"\n    puts \"Optional: $optional\"\n    puts \"Additional args: $args\"\n}",
+            "start": 11360,
+            "end": 11459
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11459,
+            "end": 11460
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11460,
+            "end": 11461
+        },
+        {
+            "kind": "Identifier",
+            "text": "flexible_proc",
+            "start": 11461,
+            "end": 11474
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11474,
+            "end": 11475
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"test\"",
+            "start": 11475,
+            "end": 11481
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11481,
+            "end": 11482
+        },
+        {
+            "kind": "Identifier",
+            "text": "flexible_proc",
+            "start": 11482,
+            "end": 11495
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11495,
+            "end": 11496
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"test\"",
+            "start": 11496,
+            "end": 11502
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11502,
+            "end": 11503
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"custom\"",
+            "start": 11503,
+            "end": 11511
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11511,
+            "end": 11512
+        },
+        {
+            "kind": "Identifier",
+            "text": "flexible_proc",
+            "start": 11512,
+            "end": 11525
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11525,
+            "end": 11526
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"test\"",
+            "start": 11526,
+            "end": 11532
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11532,
+            "end": 11533
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"custom\"",
+            "start": 11533,
+            "end": 11541
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11541,
+            "end": 11542
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"extra1\"",
+            "start": 11542,
+            "end": 11550
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11550,
+            "end": 11551
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"extra2\"",
+            "start": 11551,
+            "end": 11559
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11559,
+            "end": 11560
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11560,
+            "end": 11561
+        },
+        {
+            "kind": "Comment",
+            "text": "# Lambda-like procedures (anonymous procedures)",
+            "start": 11561,
+            "end": 11608
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11608,
+            "end": 11609
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 11609,
+            "end": 11612
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11612,
+            "end": 11613
+        },
+        {
+            "kind": "Identifier",
+            "text": "lambda",
+            "start": 11613,
+            "end": 11619
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11619,
+            "end": 11620
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 11620,
+            "end": 11621
+        },
+        {
+            "kind": "Identifier",
+            "text": "list",
+            "start": 11621,
+            "end": 11625
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11625,
+            "end": 11626
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{x}",
+            "start": 11626,
+            "end": 11629
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11629,
+            "end": 11630
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{return [terms {$x * 2}]}",
+            "start": 11630,
+            "end": 11655
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 11655,
+            "end": 11656
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11656,
+            "end": 11657
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 11657,
+            "end": 11661
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11661,
+            "end": 11662
+        },
+        {
+            "kind": "Identifier",
+            "text": "apply_lambda",
+            "start": 11662,
+            "end": 11674
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11674,
+            "end": 11675
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{lambda_proc arg}",
+            "start": 11675,
+            "end": 11692
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11692,
+            "end": 11693
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\n    return [apply $lambda_proc $arg]\n}",
+            "start": 11693,
+            "end": 11733
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11733,
+            "end": 11734
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11734,
+            "end": 11735
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 11735,
+            "end": 11739
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11739,
+            "end": 11740
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Lambda result: [apply_lambda $lambda 5]\"",
+            "start": 11740,
+            "end": 11781
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11781,
+            "end": 11782
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11782,
+            "end": 11783
+        },
+        {
+            "kind": "Comment",
+            "text": "# Eval and subst",
+            "start": 11783,
+            "end": 11799
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11799,
+            "end": 11800
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 11800,
+            "end": 11803
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11803,
+            "end": 11804
+        },
+        {
+            "kind": "Identifier",
+            "text": "code",
+            "start": 11804,
+            "end": 11808
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11808,
+            "end": 11809
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{puts \"This code was evaluated\"}",
+            "start": 11809,
+            "end": 11841
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11841,
+            "end": 11842
+        },
+        {
+            "kind": "Identifier",
+            "text": "eval",
+            "start": 11842,
+            "end": 11846
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11846,
+            "end": 11847
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 11847,
+            "end": 11848
+        },
+        {
+            "kind": "Identifier",
+            "text": "code",
+            "start": 11848,
+            "end": 11852
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11852,
+            "end": 11853
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11853,
+            "end": 11854
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 11854,
+            "end": 11857
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11857,
+            "end": 11858
+        },
+        {
+            "kind": "Identifier",
+            "text": "template",
+            "start": 11858,
+            "end": 11866
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11866,
+            "end": 11867
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello, \\$name! Today is [clock format [clock seconds] -format %A]\"",
+            "start": 11867,
+            "end": 11934
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11934,
+            "end": 11935
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 11935,
+            "end": 11938
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11938,
+            "end": 11939
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 11939,
+            "end": 11943
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11943,
+            "end": 11944
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"TCL User\"",
+            "start": 11944,
+            "end": 11954
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11954,
+            "end": 11955
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 11955,
+            "end": 11959
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11959,
+            "end": 11960
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 11960,
+            "end": 11961
+        },
+        {
+            "kind": "Identifier",
+            "text": "subst",
+            "start": 11961,
+            "end": 11966
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11966,
+            "end": 11967
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 11967,
+            "end": 11968
+        },
+        {
+            "kind": "Identifier",
+            "text": "template",
+            "start": 11968,
+            "end": 11976
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 11976,
+            "end": 11977
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11977,
+            "end": 11978
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 11978,
+            "end": 11979
+        },
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 11979,
+            "end": 11983
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 11983,
+            "end": 11984
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"TCL lexer test completed successfully!\"",
+            "start": 11984,
+            "end": 12024
+        },
+        {
+            "kind": "Error",
+            "text": "",
+            "start": 12024,
+            "end": 12024
         }
     ],
     "errors": []

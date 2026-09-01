@@ -123,8 +123,12 @@ impl BuilderTester {
     fn find_test_files(&self) -> Result<Vec<PathBuf>, OakError> {
         let mut files = Vec::new();
 
+        if !self.root.exists() {
+            return Ok(files);
+        }
+
         for entry in WalkDir::new(&self.root) {
-            let entry = entry.unwrap();
+            let entry = entry.map_err(|e| OakError::custom_error(e.to_string()))?;
             let path = entry.path();
 
             if path.is_file() {
