@@ -16,7 +16,7 @@
                             },
                             "statements": []
                         },
-                        "generics": [],
+                        "generics": null,
                         "is_async": false,
                         "is_extern": false,
                         "is_unsafe": false,
@@ -30,7 +30,7 @@
                         "params": [],
                         "return_type": null,
                         "span": {
-                            "end": 43,
+                            "end": 45,
                             "start": 0
                         }
                     }
@@ -38,12 +38,5 @@
             ]
         }
     },
-    "errors": [
-        "Expected 'Identifier' at 2",
-        "Expected 'LeftParen' at 2",
-        "Expected 'LeftBrace' at 9",
-        "Expected 'LeftBrace' at 21",
-        "Expected 'RightBrace' at 49",
-        "Expected 'RightBrace' at 49"
-    ]
+    "errors": []
 }

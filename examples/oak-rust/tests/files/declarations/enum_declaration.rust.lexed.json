@@ -3,7 +3,7 @@
     "count": 12,
     "tokens": [
         {
-            "kind": "Keyword(Enum)",
+            "kind": "Enum",
             "text": "enum",
             "start": 0,
             "end": 4
@@ -23,56 +23,56 @@
         {
             "kind": "Identifier",
             "text": "Some",
-            "start": 19,
-            "end": 23
+            "start": 18,
+            "end": 22
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 23,
-            "end": 24
+            "start": 22,
+            "end": 23
         },
         {
             "kind": "Identifier",
             "text": "i32",
-            "start": 24,
-            "end": 27
+            "start": 23,
+            "end": 26
         },
         {
             "kind": "RightParen",
             "text": ")",
+            "start": 26,
+            "end": 27
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
             "start": 27,
             "end": 28
         },
         {
-            "kind": "Comma",
-            "text": ",",
-            "start": 28,
-            "end": 29
-        },
-        {
             "kind": "Identifier",
             "text": "None",
-            "start": 35,
-            "end": 39
+            "start": 33,
+            "end": 37
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 39,
-            "end": 40
+            "start": 37,
+            "end": 38
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 42,
-            "end": 43
+            "start": 39,
+            "end": 40
         },
         {
             "kind": "Eof",
             "text": "",
-            "start": 43,
-            "end": 43
+            "start": 40,
+            "end": 40
         }
     ],
     "errors": []

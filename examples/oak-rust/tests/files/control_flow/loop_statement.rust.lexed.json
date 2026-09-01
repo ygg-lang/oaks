@@ -3,7 +3,7 @@
     "count": 12,
     "tokens": [
         {
-            "kind": "Keyword(Fn)",
+            "kind": "Fn",
             "text": "fn",
             "start": 0,
             "end": 2
@@ -33,46 +33,46 @@
             "end": 11
         },
         {
-            "kind": "Keyword(Loop)",
+            "kind": "Loop",
             "text": "loop",
-            "start": 17,
-            "end": 21
+            "start": 16,
+            "end": 20
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 22,
-            "end": 23
+            "start": 21,
+            "end": 22
         },
         {
-            "kind": "Keyword(Break)",
+            "kind": "Break",
             "text": "break",
-            "start": 33,
-            "end": 38
+            "start": 31,
+            "end": 36
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 38,
-            "end": 39
+            "start": 36,
+            "end": 37
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 45,
-            "end": 46
+            "start": 42,
+            "end": 43
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 48,
-            "end": 49
+            "start": 44,
+            "end": 45
         },
         {
             "kind": "Eof",
             "text": "",
-            "start": 49,
-            "end": 49
+            "start": 45,
+            "end": 45
         }
     ],
     "errors": []

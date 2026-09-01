@@ -1,0 +1,1927 @@
+{
+    "success": true,
+    "count": 320,
+    "tokens": [
+        {
+            "kind": "ModuleKw",
+            "text": "module",
+            "start": 40,
+            "end": 46
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 47,
+            "end": 51
+        },
+        {
+            "kind": "ImportKw",
+            "text": "import",
+            "start": 53,
+            "end": 59
+        },
+        {
+            "kind": "Identifier",
+            "text": "os",
+            "start": 60,
+            "end": 62
+        },
+        {
+            "kind": "ImportKw",
+            "text": "import",
+            "start": 63,
+            "end": 69
+        },
+        {
+            "kind": "Identifier",
+            "text": "time",
+            "start": 70,
+            "end": 74
+        },
+        {
+            "kind": "ConstKw",
+            "text": "const",
+            "start": 89,
+            "end": 94
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 95,
+            "end": 96
+        },
+        {
+            "kind": "Identifier",
+            "text": "pi",
+            "start": 101,
+            "end": 103
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 107,
+            "end": 108
+        },
+        {
+            "kind": "FloatLiteral",
+            "text": "3.14159",
+            "start": 109,
+            "end": 116
+        },
+        {
+            "kind": "Identifier",
+            "text": "world",
+            "start": 121,
+            "end": 126
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 127,
+            "end": 128
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'World'",
+            "start": 129,
+            "end": 136
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 137,
+            "end": 138
+        },
+        {
+            "kind": "EnumKw",
+            "text": "enum",
+            "start": 149,
+            "end": 153
+        },
+        {
+            "kind": "Identifier",
+            "text": "Color",
+            "start": 154,
+            "end": 159
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 160,
+            "end": 161
+        },
+        {
+            "kind": "Identifier",
+            "text": "red",
+            "start": 166,
+            "end": 169
+        },
+        {
+            "kind": "Identifier",
+            "text": "green",
+            "start": 174,
+            "end": 179
+        },
+        {
+            "kind": "Identifier",
+            "text": "blue",
+            "start": 184,
+            "end": 188
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 189,
+            "end": 190
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 219,
+            "end": 220
+        },
+        {
+            "kind": "Identifier",
+            "text": "heap",
+            "start": 220,
+            "end": 224
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 224,
+            "end": 225
+        },
+        {
+            "kind": "StructKw",
+            "text": "struct",
+            "start": 226,
+            "end": 232
+        },
+        {
+            "kind": "Identifier",
+            "text": "User",
+            "start": 233,
+            "end": 237
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 238,
+            "end": 239
+        },
+        {
+            "kind": "PubKw",
+            "text": "pub",
+            "start": 240,
+            "end": 243
+        },
+        {
+            "kind": "MutKw",
+            "text": "mut",
+            "start": 244,
+            "end": 247
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 247,
+            "end": 248
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 253,
+            "end": 257
+        },
+        {
+            "kind": "StringKw",
+            "text": "string",
+            "start": 258,
+            "end": 264
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 265,
+            "end": 266
+        },
+        {
+            "kind": "Identifier",
+            "text": "required",
+            "start": 266,
+            "end": 274
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 274,
+            "end": 275
+        },
+        {
+            "kind": "Identifier",
+            "text": "age",
+            "start": 280,
+            "end": 283
+        },
+        {
+            "kind": "IntKw",
+            "text": "int",
+            "start": 285,
+            "end": 288
+        },
+        {
+            "kind": "Identifier",
+            "text": "role",
+            "start": 293,
+            "end": 297
+        },
+        {
+            "kind": "StringKw",
+            "text": "string",
+            "start": 298,
+            "end": 304
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 305,
+            "end": 306
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'user'",
+            "start": 307,
+            "end": 313
+        },
+        {
+            "kind": "Identifier",
+            "text": "tags",
+            "start": 318,
+            "end": 322
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 323,
+            "end": 324
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 324,
+            "end": 325
+        },
+        {
+            "kind": "StringKw",
+            "text": "string",
+            "start": 325,
+            "end": 331
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 332,
+            "end": 333
+        },
+        {
+            "kind": "InterfaceKw",
+            "text": "interface",
+            "start": 348,
+            "end": 357
+        },
+        {
+            "kind": "Identifier",
+            "text": "Speaker",
+            "start": 358,
+            "end": 365
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 366,
+            "end": 367
+        },
+        {
+            "kind": "Identifier",
+            "text": "speak",
+            "start": 372,
+            "end": 377
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 377,
+            "end": 378
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 378,
+            "end": 379
+        },
+        {
+            "kind": "StringKw",
+            "text": "string",
+            "start": 380,
+            "end": 386
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 387,
+            "end": 388
+        },
+        {
+            "kind": "FnKw",
+            "text": "fn",
+            "start": 401,
+            "end": 403
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 404,
+            "end": 405
+        },
+        {
+            "kind": "Identifier",
+            "text": "u",
+            "start": 405,
+            "end": 406
+        },
+        {
+            "kind": "Identifier",
+            "text": "User",
+            "start": 407,
+            "end": 411
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 411,
+            "end": 412
+        },
+        {
+            "kind": "Identifier",
+            "text": "speak",
+            "start": 413,
+            "end": 418
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 418,
+            "end": 419
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 419,
+            "end": 420
+        },
+        {
+            "kind": "StringKw",
+            "text": "string",
+            "start": 421,
+            "end": 427
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 428,
+            "end": 429
+        },
+        {
+            "kind": "ReturnKw",
+            "text": "return",
+            "start": 434,
+            "end": 440
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'Hello, my name is $u.name'",
+            "start": 441,
+            "end": 468
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 469,
+            "end": 470
+        },
+        {
+            "kind": "FnKw",
+            "text": "fn",
+            "start": 484,
+            "end": 486
+        },
+        {
+            "kind": "Identifier",
+            "text": "compare",
+            "start": 487,
+            "end": 494
+        },
+        {
+            "kind": "LessThan",
+            "text": "<",
+            "start": 494,
+            "end": 495
+        },
+        {
+            "kind": "Identifier",
+            "text": "T",
+            "start": 495,
+            "end": 496
+        },
+        {
+            "kind": "GreaterThan",
+            "text": ">",
+            "start": 496,
+            "end": 497
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 497,
+            "end": 498
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 498,
+            "end": 499
+        },
+        {
+            "kind": "Identifier",
+            "text": "T",
+            "start": 500,
+            "end": 501
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 501,
+            "end": 502
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 503,
+            "end": 504
+        },
+        {
+            "kind": "Identifier",
+            "text": "T",
+            "start": 505,
+            "end": 506
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 506,
+            "end": 507
+        },
+        {
+            "kind": "IntKw",
+            "text": "int",
+            "start": 508,
+            "end": 511
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 512,
+            "end": 513
+        },
+        {
+            "kind": "IfKw",
+            "text": "if",
+            "start": 518,
+            "end": 520
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 521,
+            "end": 522
+        },
+        {
+            "kind": "LessThan",
+            "text": "<",
+            "start": 523,
+            "end": 524
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 525,
+            "end": 526
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 527,
+            "end": 528
+        },
+        {
+            "kind": "ReturnKw",
+            "text": "return",
+            "start": 537,
+            "end": 543
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 544,
+            "end": 545
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 545,
+            "end": 546
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 551,
+            "end": 552
+        },
+        {
+            "kind": "IfKw",
+            "text": "if",
+            "start": 557,
+            "end": 559
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 560,
+            "end": 561
+        },
+        {
+            "kind": "GreaterThan",
+            "text": ">",
+            "start": 562,
+            "end": 563
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 564,
+            "end": 565
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 566,
+            "end": 567
+        },
+        {
+            "kind": "ReturnKw",
+            "text": "return",
+            "start": 576,
+            "end": 582
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 583,
+            "end": 584
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 589,
+            "end": 590
+        },
+        {
+            "kind": "ReturnKw",
+            "text": "return",
+            "start": 595,
+            "end": 601
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 602,
+            "end": 603
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 604,
+            "end": 605
+        },
+        {
+            "kind": "FnKw",
+            "text": "fn",
+            "start": 624,
+            "end": 626
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 627,
+            "end": 631
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 631,
+            "end": 632
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 632,
+            "end": 633
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 634,
+            "end": 635
+        },
+        {
+            "kind": "PrintlnKw",
+            "text": "println",
+            "start": 640,
+            "end": 647
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 647,
+            "end": 648
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'Hello, V!'",
+            "start": 648,
+            "end": 659
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 659,
+            "end": 660
+        },
+        {
+            "kind": "MutKw",
+            "text": "mut",
+            "start": 687,
+            "end": 690
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 691,
+            "end": 692
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 693,
+            "end": 694
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 694,
+            "end": 695
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "10",
+            "start": 696,
+            "end": 698
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 703,
+            "end": 704
+        },
+        {
+            "kind": "PlusEq",
+            "text": "+=",
+            "start": 705,
+            "end": 707
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "5",
+            "start": 708,
+            "end": 709
+        },
+        {
+            "kind": "Identifier",
+            "text": "nums",
+            "start": 733,
+            "end": 737
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 738,
+            "end": 739
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 739,
+            "end": 740
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 741,
+            "end": 742
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 742,
+            "end": 743
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 743,
+            "end": 744
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2",
+            "start": 745,
+            "end": 746
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 746,
+            "end": 747
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "3",
+            "start": 748,
+            "end": 749
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 749,
+            "end": 750
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "4",
+            "start": 751,
+            "end": 752
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 752,
+            "end": 753
+        },
+        {
+            "kind": "Identifier",
+            "text": "filtered",
+            "start": 758,
+            "end": 766
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 767,
+            "end": 768
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 768,
+            "end": 769
+        },
+        {
+            "kind": "Identifier",
+            "text": "nums",
+            "start": 770,
+            "end": 774
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 774,
+            "end": 775
+        },
+        {
+            "kind": "Identifier",
+            "text": "filter",
+            "start": 775,
+            "end": 781
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 781,
+            "end": 782
+        },
+        {
+            "kind": "Identifier",
+            "text": "it",
+            "start": 782,
+            "end": 784
+        },
+        {
+            "kind": "GreaterThan",
+            "text": ">",
+            "start": 785,
+            "end": 786
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2",
+            "start": 787,
+            "end": 788
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 788,
+            "end": 789
+        },
+        {
+            "kind": "MutKw",
+            "text": "mut",
+            "start": 811,
+            "end": 814
+        },
+        {
+            "kind": "Identifier",
+            "text": "m",
+            "start": 815,
+            "end": 816
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 817,
+            "end": 818
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 818,
+            "end": 819
+        },
+        {
+            "kind": "Identifier",
+            "text": "map",
+            "start": 820,
+            "end": 823
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 823,
+            "end": 824
+        },
+        {
+            "kind": "StringKw",
+            "text": "string",
+            "start": 824,
+            "end": 830
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 830,
+            "end": 831
+        },
+        {
+            "kind": "IntKw",
+            "text": "int",
+            "start": 831,
+            "end": 834
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 834,
+            "end": 835
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 835,
+            "end": 836
+        },
+        {
+            "kind": "Identifier",
+            "text": "m",
+            "start": 841,
+            "end": 842
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 842,
+            "end": 843
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'one'",
+            "start": 843,
+            "end": 848
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 848,
+            "end": 849
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 850,
+            "end": 851
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 852,
+            "end": 853
+        },
+        {
+            "kind": "IfKw",
+            "text": "if",
+            "start": 883,
+            "end": 885
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 886,
+            "end": 887
+        },
+        {
+            "kind": "GreaterThan",
+            "text": ">",
+            "start": 888,
+            "end": 889
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "10",
+            "start": 890,
+            "end": 892
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 893,
+            "end": 894
+        },
+        {
+            "kind": "PrintlnKw",
+            "text": "println",
+            "start": 903,
+            "end": 910
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 910,
+            "end": 911
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'Greater than 10'",
+            "start": 911,
+            "end": 928
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 928,
+            "end": 929
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 934,
+            "end": 935
+        },
+        {
+            "kind": "ElseKw",
+            "text": "else",
+            "start": 936,
+            "end": 940
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 941,
+            "end": 942
+        },
+        {
+            "kind": "PrintlnKw",
+            "text": "println",
+            "start": 951,
+            "end": 958
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 958,
+            "end": 959
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'Less or equal'",
+            "start": 959,
+            "end": 974
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 974,
+            "end": 975
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 980,
+            "end": 981
+        },
+        {
+            "kind": "Identifier",
+            "text": "os_name",
+            "start": 1004,
+            "end": 1011
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1012,
+            "end": 1013
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 1013,
+            "end": 1014
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'linux'",
+            "start": 1015,
+            "end": 1022
+        },
+        {
+            "kind": "MatchKw",
+            "text": "match",
+            "start": 1027,
+            "end": 1032
+        },
+        {
+            "kind": "Identifier",
+            "text": "os_name",
+            "start": 1033,
+            "end": 1040
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1041,
+            "end": 1042
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'linux'",
+            "start": 1051,
+            "end": 1058
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1059,
+            "end": 1060
+        },
+        {
+            "kind": "PrintlnKw",
+            "text": "println",
+            "start": 1061,
+            "end": 1068
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1068,
+            "end": 1069
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'Linux'",
+            "start": 1069,
+            "end": 1076
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1076,
+            "end": 1077
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1078,
+            "end": 1079
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'windows'",
+            "start": 1088,
+            "end": 1097
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1098,
+            "end": 1099
+        },
+        {
+            "kind": "PrintlnKw",
+            "text": "println",
+            "start": 1100,
+            "end": 1107
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1107,
+            "end": 1108
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'Windows'",
+            "start": 1108,
+            "end": 1117
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1117,
+            "end": 1118
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1119,
+            "end": 1120
+        },
+        {
+            "kind": "ElseKw",
+            "text": "else",
+            "start": 1129,
+            "end": 1133
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1134,
+            "end": 1135
+        },
+        {
+            "kind": "PrintlnKw",
+            "text": "println",
+            "start": 1136,
+            "end": 1143
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1143,
+            "end": 1144
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'Other'",
+            "start": 1144,
+            "end": 1151
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1151,
+            "end": 1152
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1153,
+            "end": 1154
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1159,
+            "end": 1160
+        },
+        {
+            "kind": "ForKw",
+            "text": "for",
+            "start": 1183,
+            "end": 1186
+        },
+        {
+            "kind": "Identifier",
+            "text": "i",
+            "start": 1187,
+            "end": 1188
+        },
+        {
+            "kind": "InKw",
+            "text": "in",
+            "start": 1189,
+            "end": 1191
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 1192,
+            "end": 1193
+        },
+        {
+            "kind": "DotDot",
+            "text": "..",
+            "start": 1193,
+            "end": 1195
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "5",
+            "start": 1195,
+            "end": 1196
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1197,
+            "end": 1198
+        },
+        {
+            "kind": "PrintlnKw",
+            "text": "println",
+            "start": 1207,
+            "end": 1214
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1214,
+            "end": 1215
+        },
+        {
+            "kind": "Identifier",
+            "text": "i",
+            "start": 1215,
+            "end": 1216
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1216,
+            "end": 1217
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1222,
+            "end": 1223
+        },
+        {
+            "kind": "Identifier",
+            "text": "names",
+            "start": 1233,
+            "end": 1238
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1239,
+            "end": 1240
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 1240,
+            "end": 1241
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1242,
+            "end": 1243
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'a'",
+            "start": 1243,
+            "end": 1246
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1246,
+            "end": 1247
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'b'",
+            "start": 1248,
+            "end": 1251
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1251,
+            "end": 1252
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'c'",
+            "start": 1253,
+            "end": 1256
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1256,
+            "end": 1257
+        },
+        {
+            "kind": "ForKw",
+            "text": "for",
+            "start": 1262,
+            "end": 1265
+        },
+        {
+            "kind": "Identifier",
+            "text": "i",
+            "start": 1266,
+            "end": 1267
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1267,
+            "end": 1268
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 1269,
+            "end": 1273
+        },
+        {
+            "kind": "InKw",
+            "text": "in",
+            "start": 1274,
+            "end": 1276
+        },
+        {
+            "kind": "Identifier",
+            "text": "names",
+            "start": 1277,
+            "end": 1282
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1283,
+            "end": 1284
+        },
+        {
+            "kind": "PrintlnKw",
+            "text": "println",
+            "start": 1293,
+            "end": 1300
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1300,
+            "end": 1301
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'$i: $name'",
+            "start": 1301,
+            "end": 1312
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1312,
+            "end": 1313
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1318,
+            "end": 1319
+        },
+        {
+            "kind": "Identifier",
+            "text": "res",
+            "start": 1351,
+            "end": 1354
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1355,
+            "end": 1356
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 1356,
+            "end": 1357
+        },
+        {
+            "kind": "Identifier",
+            "text": "might_fail",
+            "start": 1358,
+            "end": 1368
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1368,
+            "end": 1369
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1369,
+            "end": 1370
+        },
+        {
+            "kind": "OrKw",
+            "text": "or",
+            "start": 1371,
+            "end": 1373
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1374,
+            "end": 1375
+        },
+        {
+            "kind": "EprintlnKw",
+            "text": "eprintln",
+            "start": 1384,
+            "end": 1392
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1392,
+            "end": 1393
+        },
+        {
+            "kind": "Identifier",
+            "text": "err",
+            "start": 1393,
+            "end": 1396
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1396,
+            "end": 1397
+        },
+        {
+            "kind": "ReturnKw",
+            "text": "return",
+            "start": 1406,
+            "end": 1412
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1417,
+            "end": 1418
+        },
+        {
+            "kind": "Identifier",
+            "text": "ch",
+            "start": 1447,
+            "end": 1449
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1450,
+            "end": 1451
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 1451,
+            "end": 1452
+        },
+        {
+            "kind": "Identifier",
+            "text": "chan",
+            "start": 1453,
+            "end": 1457
+        },
+        {
+            "kind": "IntKw",
+            "text": "int",
+            "start": 1458,
+            "end": 1461
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1461,
+            "end": 1462
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1462,
+            "end": 1463
+        },
+        {
+            "kind": "GoKw",
+            "text": "go",
+            "start": 1468,
+            "end": 1470
+        },
+        {
+            "kind": "FnKw",
+            "text": "fn",
+            "start": 1471,
+            "end": 1473
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1473,
+            "end": 1474
+        },
+        {
+            "kind": "Identifier",
+            "text": "c",
+            "start": 1474,
+            "end": 1475
+        },
+        {
+            "kind": "Identifier",
+            "text": "chan",
+            "start": 1476,
+            "end": 1480
+        },
+        {
+            "kind": "IntKw",
+            "text": "int",
+            "start": 1481,
+            "end": 1484
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1484,
+            "end": 1485
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1486,
+            "end": 1487
+        },
+        {
+            "kind": "Identifier",
+            "text": "c",
+            "start": 1496,
+            "end": 1497
+        },
+        {
+            "kind": "LessThan",
+            "text": "<",
+            "start": 1498,
+            "end": 1499
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1499,
+            "end": 1500
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "100",
+            "start": 1501,
+            "end": 1504
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1509,
+            "end": 1510
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1510,
+            "end": 1511
+        },
+        {
+            "kind": "Identifier",
+            "text": "ch",
+            "start": 1511,
+            "end": 1513
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1513,
+            "end": 1514
+        },
+        {
+            "kind": "Identifier",
+            "text": "val",
+            "start": 1524,
+            "end": 1527
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1528,
+            "end": 1529
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 1529,
+            "end": 1530
+        },
+        {
+            "kind": "LessThan",
+            "text": "<",
+            "start": 1531,
+            "end": 1532
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1532,
+            "end": 1533
+        },
+        {
+            "kind": "Identifier",
+            "text": "ch",
+            "start": 1533,
+            "end": 1535
+        },
+        {
+            "kind": "PrintlnKw",
+            "text": "println",
+            "start": 1540,
+            "end": 1547
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1547,
+            "end": 1548
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'Got $val'",
+            "start": 1548,
+            "end": 1558
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1558,
+            "end": 1559
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1560,
+            "end": 1561
+        },
+        {
+            "kind": "FnKw",
+            "text": "fn",
+            "start": 1563,
+            "end": 1565
+        },
+        {
+            "kind": "Identifier",
+            "text": "might_fail",
+            "start": 1566,
+            "end": 1576
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1576,
+            "end": 1577
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1577,
+            "end": 1578
+        },
+        {
+            "kind": "Bang",
+            "text": "!",
+            "start": 1579,
+            "end": 1580
+        },
+        {
+            "kind": "IntKw",
+            "text": "int",
+            "start": 1580,
+            "end": 1583
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1584,
+            "end": 1585
+        },
+        {
+            "kind": "ReturnKw",
+            "text": "return",
+            "start": 1590,
+            "end": 1596
+        },
+        {
+            "kind": "Identifier",
+            "text": "error",
+            "start": 1597,
+            "end": 1602
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1602,
+            "end": 1603
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'Something went wrong'",
+            "start": 1603,
+            "end": 1625
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1625,
+            "end": 1626
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1627,
+            "end": 1628
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1644,
+            "end": 1645
+        },
+        {
+            "kind": "Identifier",
+            "text": "inline",
+            "start": 1645,
+            "end": 1651
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1651,
+            "end": 1652
+        },
+        {
+            "kind": "FnKw",
+            "text": "fn",
+            "start": 1653,
+            "end": 1655
+        },
+        {
+            "kind": "Identifier",
+            "text": "fast_add",
+            "start": 1656,
+            "end": 1664
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1664,
+            "end": 1665
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 1665,
+            "end": 1666
+        },
+        {
+            "kind": "IntKw",
+            "text": "int",
+            "start": 1667,
+            "end": 1670
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1670,
+            "end": 1671
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 1672,
+            "end": 1673
+        },
+        {
+            "kind": "IntKw",
+            "text": "int",
+            "start": 1674,
+            "end": 1677
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1677,
+            "end": 1678
+        },
+        {
+            "kind": "IntKw",
+            "text": "int",
+            "start": 1679,
+            "end": 1682
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1683,
+            "end": 1684
+        },
+        {
+            "kind": "ReturnKw",
+            "text": "return",
+            "start": 1689,
+            "end": 1695
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 1696,
+            "end": 1697
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 1698,
+            "end": 1699
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 1700,
+            "end": 1701
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1702,
+            "end": 1703
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 1704,
+            "end": 1704
+        }
+    ],
+    "errors": []
+}

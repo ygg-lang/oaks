@@ -5,638 +5,704 @@
         {
             "kind": "Preprocessor",
             "text": "#include <stdio.h>",
-            "start": 91,
-            "end": 109
+            "start": 88,
+            "end": 106
         },
         {
             "kind": "Preprocessor",
             "text": "#include <stdlib.h>",
-            "start": 111,
-            "end": 130
+            "start": 107,
+            "end": 126
         },
         {
             "kind": "Preprocessor",
             "text": "#include <stdbool.h>",
-            "start": 132,
-            "end": 152
+            "start": 127,
+            "end": 147
         },
         {
             "kind": "Preprocessor",
             "text": "#include <string.h>",
-            "start": 154,
-            "end": 173
+            "start": 148,
+            "end": 167
         },
         {
             "kind": "Preprocessor",
             "text": "#define MAX_BUFFER_SIZE 1024",
-            "start": 188,
-            "end": 216
+            "start": 179,
+            "end": 207
         },
         {
             "kind": "Preprocessor",
             "text": "#define SQUARE(x) ((x) * (x))",
-            "start": 218,
-            "end": 247
+            "start": 208,
+            "end": 237
         },
         {
             "kind": "Preprocessor",
             "text": "#define CONCAT(a, b) a ## b",
-            "start": 249,
-            "end": 276
+            "start": 238,
+            "end": 265
         },
         {
             "kind": "Preprocessor",
             "text": "#define STRINGIFY(x) #x",
-            "start": 278,
-            "end": 301
+            "start": 266,
+            "end": 289
         },
         {
             "kind": "Typedef",
             "text": "typedef",
-            "start": 330,
-            "end": 337
+            "start": 315,
+            "end": 322
         },
         {
             "kind": "Struct",
             "text": "struct",
-            "start": 338,
-            "end": 344
+            "start": 323,
+            "end": 329
         },
         {
             "kind": "Identifier",
             "text": "Point",
-            "start": 345,
-            "end": 350
+            "start": 330,
+            "end": 335
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 351,
-            "end": 352
+            "start": 336,
+            "end": 337
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 358,
-            "end": 361
+            "start": 342,
+            "end": 345
         },
         {
             "kind": "Identifier",
             "text": "x",
-            "start": 362,
-            "end": 363
+            "start": 346,
+            "end": 347
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 363,
-            "end": 364
+            "start": 347,
+            "end": 348
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 370,
-            "end": 373
+            "start": 353,
+            "end": 356
         },
         {
             "kind": "Identifier",
             "text": "y",
-            "start": 374,
-            "end": 375
+            "start": 357,
+            "end": 358
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 375,
-            "end": 376
+            "start": 358,
+            "end": 359
         },
         {
             "kind": "Struct",
             "text": "struct",
-            "start": 382,
-            "end": 388
+            "start": 364,
+            "end": 370
         },
         {
             "kind": "Identifier",
             "text": "Point",
-            "start": 389,
-            "end": 394
+            "start": 371,
+            "end": 376
         },
         {
             "kind": "Star",
             "text": "*",
-            "start": 394,
-            "end": 395
+            "start": 376,
+            "end": 377
         },
         {
             "kind": "Identifier",
             "text": "next",
-            "start": 396,
-            "end": 400
+            "start": 378,
+            "end": 382
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 400,
-            "end": 401
+            "start": 382,
+            "end": 383
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 403,
-            "end": 404
+            "start": 384,
+            "end": 385
         },
         {
             "kind": "Identifier",
             "text": "Point",
-            "start": 405,
-            "end": 410
+            "start": 386,
+            "end": 391
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 410,
-            "end": 411
+            "start": 391,
+            "end": 392
         },
         {
             "kind": "Typedef",
             "text": "typedef",
-            "start": 415,
-            "end": 422
+            "start": 394,
+            "end": 401
         },
         {
             "kind": "Union",
             "text": "union",
-            "start": 423,
-            "end": 428
+            "start": 402,
+            "end": 407
         },
         {
             "kind": "Identifier",
             "text": "Data",
-            "start": 429,
-            "end": 433
+            "start": 408,
+            "end": 412
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 434,
-            "end": 435
+            "start": 413,
+            "end": 414
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 441,
-            "end": 444
+            "start": 419,
+            "end": 422
         },
         {
             "kind": "Identifier",
             "text": "i",
-            "start": 445,
-            "end": 446
+            "start": 423,
+            "end": 424
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 446,
-            "end": 447
+            "start": 424,
+            "end": 425
         },
         {
             "kind": "Float",
             "text": "float",
-            "start": 453,
-            "end": 458
+            "start": 430,
+            "end": 435
         },
         {
             "kind": "Identifier",
             "text": "f",
-            "start": 459,
-            "end": 460
+            "start": 436,
+            "end": 437
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 460,
-            "end": 461
+            "start": 437,
+            "end": 438
         },
         {
             "kind": "Char",
             "text": "char",
-            "start": 467,
-            "end": 471
+            "start": 443,
+            "end": 447
         },
         {
             "kind": "Identifier",
             "text": "str",
-            "start": 472,
-            "end": 475
+            "start": 448,
+            "end": 451
         },
         {
             "kind": "LeftBracket",
             "text": "[",
-            "start": 475,
-            "end": 476
+            "start": 451,
+            "end": 452
         },
         {
             "kind": "IntConstant",
             "text": "20",
-            "start": 476,
-            "end": 478
+            "start": 452,
+            "end": 454
         },
         {
             "kind": "RightBracket",
             "text": "]",
-            "start": 478,
-            "end": 479
+            "start": 454,
+            "end": 455
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 479,
-            "end": 480
+            "start": 455,
+            "end": 456
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 482,
-            "end": 483
+            "start": 457,
+            "end": 458
         },
         {
             "kind": "Identifier",
             "text": "Data",
-            "start": 484,
-            "end": 488
+            "start": 459,
+            "end": 463
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 488,
-            "end": 489
+            "start": 463,
+            "end": 464
         },
         {
             "kind": "Enum",
             "text": "enum",
-            "start": 503,
-            "end": 507
+            "start": 475,
+            "end": 479
         },
         {
             "kind": "Identifier",
             "text": "Color",
-            "start": 508,
-            "end": 513
+            "start": 480,
+            "end": 485
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 514,
-            "end": 515
+            "start": 486,
+            "end": 487
         },
         {
             "kind": "Identifier",
             "text": "RED",
-            "start": 521,
-            "end": 524
+            "start": 492,
+            "end": 495
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 524,
-            "end": 525
+            "start": 495,
+            "end": 496
         },
         {
             "kind": "Identifier",
             "text": "GREEN",
-            "start": 531,
-            "end": 536
+            "start": 501,
+            "end": 506
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 536,
-            "end": 537
+            "start": 506,
+            "end": 507
         },
         {
             "kind": "Identifier",
             "text": "BLUE",
-            "start": 543,
-            "end": 547
+            "start": 512,
+            "end": 516
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 548,
-            "end": 549
+            "start": 517,
+            "end": 518
         },
         {
             "kind": "IntConstant",
             "text": "10",
-            "start": 550,
-            "end": 552
+            "start": 519,
+            "end": 521
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 554,
-            "end": 555
+            "start": 522,
+            "end": 523
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 555,
-            "end": 556
+            "start": 523,
+            "end": 524
         },
         {
             "kind": "Static",
             "text": "static",
-            "start": 581,
-            "end": 587
+            "start": 546,
+            "end": 552
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 588,
-            "end": 591
+            "start": 553,
+            "end": 556
         },
         {
             "kind": "Identifier",
             "text": "counter",
-            "start": 592,
-            "end": 599
+            "start": 557,
+            "end": 564
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 600,
-            "end": 601
+            "start": 565,
+            "end": 566
         },
         {
             "kind": "IntConstant",
             "text": "0",
-            "start": 602,
-            "end": 603
+            "start": 567,
+            "end": 568
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 603,
-            "end": 604
+            "start": 568,
+            "end": 569
         },
         {
             "kind": "Const",
             "text": "const",
-            "start": 606,
-            "end": 611
+            "start": 570,
+            "end": 575
         },
         {
             "kind": "Double",
             "text": "double",
-            "start": 612,
-            "end": 618
+            "start": 576,
+            "end": 582
         },
         {
             "kind": "Identifier",
             "text": "PI",
-            "start": 619,
-            "end": 621
+            "start": 583,
+            "end": 585
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 622,
-            "end": 623
+            "start": 586,
+            "end": 587
         },
         {
             "kind": "FloatConstant",
             "text": "3.1415926535",
-            "start": 624,
-            "end": 636
+            "start": 588,
+            "end": 600
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 636,
-            "end": 637
+            "start": 600,
+            "end": 601
         },
         {
             "kind": "Extern",
             "text": "extern",
-            "start": 639,
-            "end": 645
+            "start": 602,
+            "end": 608
         },
         {
             "kind": "Void",
             "text": "void",
-            "start": 646,
-            "end": 650
+            "start": 609,
+            "end": 613
         },
         {
             "kind": "Identifier",
             "text": "helper_function",
-            "start": 651,
-            "end": 666
+            "start": 614,
+            "end": 629
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 666,
-            "end": 667
+            "start": 629,
+            "end": 630
         },
         {
             "kind": "Void",
             "text": "void",
-            "start": 667,
-            "end": 671
+            "start": 630,
+            "end": 634
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 671,
-            "end": 672
+            "start": 634,
+            "end": 635
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 672,
-            "end": 673
+            "start": 635,
+            "end": 636
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 701,
-            "end": 704
+            "start": 661,
+            "end": 664
         },
         {
             "kind": "Identifier",
             "text": "add",
-            "start": 705,
-            "end": 708
+            "start": 665,
+            "end": 668
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 708,
-            "end": 709
+            "start": 668,
+            "end": 669
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 709,
-            "end": 712
+            "start": 669,
+            "end": 672
         },
         {
             "kind": "Identifier",
             "text": "a",
-            "start": 713,
-            "end": 714
+            "start": 673,
+            "end": 674
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 714,
-            "end": 715
+            "start": 674,
+            "end": 675
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 716,
-            "end": 719
+            "start": 676,
+            "end": 679
         },
         {
             "kind": "Identifier",
             "text": "b",
-            "start": 720,
-            "end": 721
+            "start": 680,
+            "end": 681
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 721,
-            "end": 722
+            "start": 681,
+            "end": 682
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 722,
-            "end": 723
+            "start": 682,
+            "end": 683
         },
         {
             "kind": "Void",
             "text": "void",
-            "start": 725,
-            "end": 729
+            "start": 684,
+            "end": 688
         },
         {
             "kind": "Identifier",
             "text": "print_point",
-            "start": 730,
-            "end": 741
+            "start": 689,
+            "end": 700
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 741,
-            "end": 742
+            "start": 700,
+            "end": 701
         },
         {
             "kind": "Identifier",
             "text": "Point",
-            "start": 742,
-            "end": 747
+            "start": 701,
+            "end": 706
         },
         {
             "kind": "Identifier",
             "text": "p",
-            "start": 748,
-            "end": 749
+            "start": 707,
+            "end": 708
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 749,
-            "end": 750
+            "start": 708,
+            "end": 709
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 750,
-            "end": 751
+            "start": 709,
+            "end": 710
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 773,
-            "end": 776
+            "start": 729,
+            "end": 732
         },
         {
             "kind": "Identifier",
             "text": "main",
-            "start": 777,
-            "end": 781
+            "start": 733,
+            "end": 737
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 781,
-            "end": 782
+            "start": 737,
+            "end": 738
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 782,
-            "end": 785
+            "start": 738,
+            "end": 741
         },
         {
             "kind": "Identifier",
             "text": "argc",
-            "start": 786,
-            "end": 790
+            "start": 742,
+            "end": 746
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 790,
-            "end": 791
+            "start": 746,
+            "end": 747
         },
         {
             "kind": "Char",
             "text": "char",
-            "start": 792,
-            "end": 796
+            "start": 748,
+            "end": 752
         },
         {
             "kind": "Star",
             "text": "*",
-            "start": 796,
-            "end": 797
+            "start": 752,
+            "end": 753
         },
         {
             "kind": "Identifier",
             "text": "argv",
-            "start": 798,
-            "end": 802
+            "start": 754,
+            "end": 758
         },
         {
             "kind": "LeftBracket",
             "text": "[",
-            "start": 802,
-            "end": 803
+            "start": 758,
+            "end": 759
         },
         {
             "kind": "RightBracket",
             "text": "]",
-            "start": 803,
-            "end": 804
+            "start": 759,
+            "end": 760
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 804,
-            "end": 805
+            "start": 760,
+            "end": 761
         },
         {
             "kind": "LeftBrace",
             "text": "{",
+            "start": 762,
+            "end": 763
+        },
+        {
+            "kind": "Int",
+            "text": "int",
+            "start": 785,
+            "end": 788
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 789,
+            "end": 790
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 791,
+            "end": 792
+        },
+        {
+            "kind": "IntConstant",
+            "text": "10",
+            "start": 793,
+            "end": 795
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 795,
+            "end": 796
+        },
+        {
+            "kind": "Long",
+            "text": "long",
+            "start": 801,
+            "end": 805
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
             "start": 806,
             "end": 807
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 808,
+            "end": 809
+        },
+        {
+            "kind": "IntConstant",
+            "text": "20000L",
+            "start": 810,
+            "end": 816
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 816,
+            "end": 817
+        },
+        {
+            "kind": "Unsigned",
+            "text": "unsigned",
+            "start": 822,
+            "end": 830
         },
         {
             "kind": "Int",
@@ -646,7 +712,7 @@
         },
         {
             "kind": "Identifier",
-            "text": "a",
+            "text": "c",
             "start": 835,
             "end": 836
         },
@@ -658,458 +724,464 @@
         },
         {
             "kind": "IntConstant",
-            "text": "10",
+            "text": "30U",
             "start": 839,
-            "end": 841
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 841,
             "end": 842
         },
         {
-            "kind": "Long",
-            "text": "long",
-            "start": 848,
-            "end": 852
-        },
-        {
-            "kind": "Identifier",
-            "text": "b",
-            "start": 853,
-            "end": 854
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 855,
-            "end": 856
-        },
-        {
-            "kind": "IntConstant",
-            "text": "20000L",
-            "start": 857,
-            "end": 863
-        },
-        {
             "kind": "Semicolon",
             "text": ";",
-            "start": 863,
-            "end": 864
-        },
-        {
-            "kind": "Unsigned",
-            "text": "unsigned",
-            "start": 870,
-            "end": 878
-        },
-        {
-            "kind": "Int",
-            "text": "int",
-            "start": 879,
-            "end": 882
-        },
-        {
-            "kind": "Identifier",
-            "text": "c",
-            "start": 883,
-            "end": 884
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 885,
-            "end": 886
-        },
-        {
-            "kind": "IntConstant",
-            "text": "30U",
-            "start": 887,
-            "end": 890
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 890,
-            "end": 891
+            "start": 842,
+            "end": 843
         },
         {
             "kind": "Float",
             "text": "float",
-            "start": 897,
-            "end": 902
+            "start": 848,
+            "end": 853
         },
         {
             "kind": "Identifier",
             "text": "f",
-            "start": 903,
-            "end": 904
+            "start": 854,
+            "end": 855
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 905,
-            "end": 906
+            "start": 856,
+            "end": 857
         },
         {
             "kind": "FloatConstant",
             "text": "1.5f",
-            "start": 907,
-            "end": 911
+            "start": 858,
+            "end": 862
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 911,
-            "end": 912
+            "start": 862,
+            "end": 863
         },
         {
             "kind": "Double",
             "text": "double",
-            "start": 918,
-            "end": 924
+            "start": 868,
+            "end": 874
         },
         {
             "kind": "Identifier",
             "text": "d",
-            "start": 925,
-            "end": 926
+            "start": 875,
+            "end": 876
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 927,
-            "end": 928
+            "start": 877,
+            "end": 878
         },
         {
             "kind": "FloatConstant",
             "text": "2.5",
-            "start": 929,
-            "end": 932
+            "start": 879,
+            "end": 882
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 932,
-            "end": 933
+            "start": 882,
+            "end": 883
         },
         {
             "kind": "Char",
             "text": "char",
-            "start": 939,
-            "end": 943
+            "start": 888,
+            "end": 892
         },
         {
             "kind": "Identifier",
             "text": "ch",
-            "start": 944,
-            "end": 946
+            "start": 893,
+            "end": 895
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 947,
-            "end": 948
+            "start": 896,
+            "end": 897
         },
         {
             "kind": "CharConstant",
             "text": "'A'",
-            "start": 949,
-            "end": 952
+            "start": 898,
+            "end": 901
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 952,
-            "end": 953
+            "start": 901,
+            "end": 902
         },
         {
             "kind": "Char",
             "text": "char",
-            "start": 959,
-            "end": 963
+            "start": 907,
+            "end": 911
         },
         {
             "kind": "Star",
             "text": "*",
-            "start": 963,
-            "end": 964
+            "start": 911,
+            "end": 912
         },
         {
             "kind": "Identifier",
             "text": "str",
-            "start": 965,
-            "end": 968
+            "start": 913,
+            "end": 916
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 969,
-            "end": 970
+            "start": 917,
+            "end": 918
         },
         {
             "kind": "StringLiteral",
             "text": "\"Hello, World!\"",
-            "start": 971,
-            "end": 986
+            "start": 919,
+            "end": 934
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 986,
-            "end": 987
+            "start": 934,
+            "end": 935
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 1014,
-            "end": 1017
+            "start": 959,
+            "end": 962
         },
         {
             "kind": "Identifier",
             "text": "numbers",
-            "start": 1018,
-            "end": 1025
+            "start": 963,
+            "end": 970
         },
         {
             "kind": "LeftBracket",
             "text": "[",
+            "start": 970,
+            "end": 971
+        },
+        {
+            "kind": "IntConstant",
+            "text": "5",
+            "start": 971,
+            "end": 972
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 972,
+            "end": 973
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 974,
+            "end": 975
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 976,
+            "end": 977
+        },
+        {
+            "kind": "IntConstant",
+            "text": "1",
+            "start": 977,
+            "end": 978
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 978,
+            "end": 979
+        },
+        {
+            "kind": "IntConstant",
+            "text": "2",
+            "start": 980,
+            "end": 981
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 981,
+            "end": 982
+        },
+        {
+            "kind": "IntConstant",
+            "text": "3",
+            "start": 983,
+            "end": 984
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 984,
+            "end": 985
+        },
+        {
+            "kind": "IntConstant",
+            "text": "4",
+            "start": 986,
+            "end": 987
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 987,
+            "end": 988
+        },
+        {
+            "kind": "IntConstant",
+            "text": "5",
+            "start": 989,
+            "end": 990
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 990,
+            "end": 991
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 991,
+            "end": 992
+        },
+        {
+            "kind": "Int",
+            "text": "int",
+            "start": 997,
+            "end": 1000
+        },
+        {
+            "kind": "Identifier",
+            "text": "matrix",
+            "start": 1001,
+            "end": 1007
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1007,
+            "end": 1008
+        },
+        {
+            "kind": "IntConstant",
+            "text": "2",
+            "start": 1008,
+            "end": 1009
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1009,
+            "end": 1010
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1010,
+            "end": 1011
+        },
+        {
+            "kind": "IntConstant",
+            "text": "2",
+            "start": 1011,
+            "end": 1012
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1012,
+            "end": 1013
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 1014,
+            "end": 1015
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1016,
+            "end": 1017
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1017,
+            "end": 1018
+        },
+        {
+            "kind": "IntConstant",
+            "text": "1",
+            "start": 1018,
+            "end": 1019
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1019,
+            "end": 1020
+        },
+        {
+            "kind": "IntConstant",
+            "text": "0",
+            "start": 1021,
+            "end": 1022
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1022,
+            "end": 1023
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1023,
+            "end": 1024
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
             "start": 1025,
             "end": 1026
         },
         {
             "kind": "IntConstant",
-            "text": "5",
+            "text": "0",
             "start": 1026,
             "end": 1027
         },
         {
-            "kind": "RightBracket",
-            "text": "]",
+            "kind": "Comma",
+            "text": ",",
             "start": 1027,
             "end": 1028
         },
         {
-            "kind": "Assign",
-            "text": "=",
+            "kind": "IntConstant",
+            "text": "1",
             "start": 1029,
             "end": 1030
         },
         {
-            "kind": "LeftBrace",
-            "text": "{",
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1030,
+            "end": 1031
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
             "start": 1031,
             "end": 1032
         },
         {
-            "kind": "IntConstant",
-            "text": "1",
+            "kind": "Semicolon",
+            "text": ";",
             "start": 1032,
             "end": 1033
         },
         {
-            "kind": "Comma",
-            "text": ",",
-            "start": 1033,
-            "end": 1034
-        },
-        {
-            "kind": "IntConstant",
-            "text": "2",
-            "start": 1035,
-            "end": 1036
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 1036,
-            "end": 1037
-        },
-        {
-            "kind": "IntConstant",
-            "text": "3",
-            "start": 1038,
-            "end": 1039
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 1039,
-            "end": 1040
-        },
-        {
-            "kind": "IntConstant",
-            "text": "4",
-            "start": 1041,
-            "end": 1042
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 1042,
-            "end": 1043
-        },
-        {
-            "kind": "IntConstant",
-            "text": "5",
-            "start": 1044,
-            "end": 1045
-        },
-        {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 1045,
-            "end": 1046
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 1046,
-            "end": 1047
-        },
-        {
             "kind": "Int",
             "text": "int",
-            "start": 1053,
-            "end": 1056
+            "start": 1055,
+            "end": 1058
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 1058,
+            "end": 1059
         },
         {
             "kind": "Identifier",
-            "text": "matrix",
-            "start": 1057,
+            "text": "ptr",
+            "start": 1060,
             "end": 1063
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 1063,
-            "end": 1064
-        },
-        {
-            "kind": "IntConstant",
-            "text": "2",
-            "start": 1064,
-            "end": 1065
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 1065,
-            "end": 1066
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 1066,
-            "end": 1067
-        },
-        {
-            "kind": "IntConstant",
-            "text": "2",
-            "start": 1067,
-            "end": 1068
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 1068,
-            "end": 1069
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 1070,
-            "end": 1071
+            "start": 1064,
+            "end": 1065
         },
         {
-            "kind": "LeftBrace",
-            "text": "{",
-            "start": 1072,
-            "end": 1073
+            "kind": "BitAnd",
+            "text": "&",
+            "start": 1066,
+            "end": 1067
         },
         {
-            "kind": "LeftBrace",
-            "text": "{",
-            "start": 1073,
-            "end": 1074
-        },
-        {
-            "kind": "IntConstant",
-            "text": "1",
-            "start": 1074,
-            "end": 1075
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 1075,
-            "end": 1076
-        },
-        {
-            "kind": "IntConstant",
-            "text": "0",
-            "start": 1077,
-            "end": 1078
-        },
-        {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 1078,
-            "end": 1079
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 1079,
-            "end": 1080
-        },
-        {
-            "kind": "LeftBrace",
-            "text": "{",
-            "start": 1081,
-            "end": 1082
-        },
-        {
-            "kind": "IntConstant",
-            "text": "0",
-            "start": 1082,
-            "end": 1083
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 1083,
-            "end": 1084
-        },
-        {
-            "kind": "IntConstant",
-            "text": "1",
-            "start": 1085,
-            "end": 1086
-        },
-        {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 1086,
-            "end": 1087
-        },
-        {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 1087,
-            "end": 1088
+            "kind": "Identifier",
+            "text": "a",
+            "start": 1067,
+            "end": 1068
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1088,
-            "end": 1089
+            "start": 1068,
+            "end": 1069
         },
         {
-            "kind": "Int",
-            "text": "int",
-            "start": 1114,
+            "kind": "Star",
+            "text": "*",
+            "start": 1074,
+            "end": 1075
+        },
+        {
+            "kind": "Identifier",
+            "text": "ptr",
+            "start": 1075,
+            "end": 1078
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 1079,
+            "end": 1080
+        },
+        {
+            "kind": "IntConstant",
+            "text": "20",
+            "start": 1081,
+            "end": 1083
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1083,
+            "end": 1084
+        },
+        {
+            "kind": "Identifier",
+            "text": "Point",
+            "start": 1112,
             "end": 1117
         },
         {
@@ -1120,620 +1192,662 @@
         },
         {
             "kind": "Identifier",
-            "text": "ptr",
+            "text": "p",
             "start": 1119,
-            "end": 1122
+            "end": 1120
         },
         {
             "kind": "Assign",
             "text": "=",
+            "start": 1121,
+            "end": 1122
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
             "start": 1123,
             "end": 1124
         },
         {
-            "kind": "BitAnd",
-            "text": "&",
-            "start": 1125,
-            "end": 1126
-        },
-        {
-            "kind": "Identifier",
-            "text": "a",
-            "start": 1126,
-            "end": 1127
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 1127,
-            "end": 1128
-        },
-        {
-            "kind": "Star",
-            "text": "*",
-            "start": 1134,
-            "end": 1135
-        },
-        {
-            "kind": "Identifier",
-            "text": "ptr",
-            "start": 1135,
-            "end": 1138
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 1139,
-            "end": 1140
-        },
-        {
-            "kind": "IntConstant",
-            "text": "20",
-            "start": 1141,
-            "end": 1143
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 1143,
-            "end": 1144
-        },
-        {
             "kind": "Identifier",
             "text": "Point",
-            "start": 1175,
-            "end": 1180
+            "start": 1124,
+            "end": 1129
         },
         {
             "kind": "Star",
             "text": "*",
-            "start": 1180,
-            "end": 1181
-        },
-        {
-            "kind": "Identifier",
-            "text": "p",
-            "start": 1182,
-            "end": 1183
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 1184,
-            "end": 1185
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 1186,
-            "end": 1187
-        },
-        {
-            "kind": "Identifier",
-            "text": "Point",
-            "start": 1187,
-            "end": 1192
-        },
-        {
-            "kind": "Star",
-            "text": "*",
-            "start": 1192,
-            "end": 1193
+            "start": 1129,
+            "end": 1130
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1193,
-            "end": 1194
+            "start": 1130,
+            "end": 1131
         },
         {
             "kind": "Identifier",
             "text": "malloc",
-            "start": 1194,
-            "end": 1200
+            "start": 1131,
+            "end": 1137
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1200,
-            "end": 1201
+            "start": 1137,
+            "end": 1138
         },
         {
             "kind": "Sizeof",
             "text": "sizeof",
-            "start": 1201,
-            "end": 1207
+            "start": 1138,
+            "end": 1144
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1207,
-            "end": 1208
+            "start": 1144,
+            "end": 1145
         },
         {
             "kind": "Identifier",
             "text": "Point",
-            "start": 1208,
-            "end": 1213
+            "start": 1145,
+            "end": 1150
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1213,
-            "end": 1214
+            "start": 1150,
+            "end": 1151
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1214,
-            "end": 1215
+            "start": 1151,
+            "end": 1152
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1215,
-            "end": 1216
+            "start": 1152,
+            "end": 1153
         },
         {
             "kind": "If",
             "text": "if",
-            "start": 1222,
-            "end": 1224
+            "start": 1158,
+            "end": 1160
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1225,
-            "end": 1226
+            "start": 1161,
+            "end": 1162
         },
         {
             "kind": "Identifier",
             "text": "p",
-            "start": 1226,
-            "end": 1227
+            "start": 1162,
+            "end": 1163
         },
         {
             "kind": "Equal",
             "text": "==",
-            "start": 1228,
-            "end": 1230
+            "start": 1164,
+            "end": 1166
         },
         {
             "kind": "Identifier",
             "text": "NULL",
-            "start": 1231,
-            "end": 1235
+            "start": 1167,
+            "end": 1171
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1235,
-            "end": 1236
+            "start": 1171,
+            "end": 1172
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 1237,
-            "end": 1238
+            "start": 1173,
+            "end": 1174
         },
         {
             "kind": "Identifier",
             "text": "fprintf",
-            "start": 1248,
-            "end": 1255
+            "start": 1183,
+            "end": 1190
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1255,
-            "end": 1256
+            "start": 1190,
+            "end": 1191
         },
         {
             "kind": "Identifier",
             "text": "stderr",
-            "start": 1256,
-            "end": 1262
+            "start": 1191,
+            "end": 1197
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 1262,
-            "end": 1263
+            "start": 1197,
+            "end": 1198
         },
         {
             "kind": "StringLiteral",
             "text": "\"Memory allocation failed\\n\"",
-            "start": 1264,
-            "end": 1292
+            "start": 1199,
+            "end": 1227
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1292,
-            "end": 1293
+            "start": 1227,
+            "end": 1228
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1293,
-            "end": 1294
+            "start": 1228,
+            "end": 1229
         },
         {
             "kind": "Return",
             "text": "return",
-            "start": 1304,
-            "end": 1310
+            "start": 1238,
+            "end": 1244
         },
         {
             "kind": "IntConstant",
             "text": "1",
-            "start": 1311,
-            "end": 1312
+            "start": 1245,
+            "end": 1246
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1312,
-            "end": 1313
+            "start": 1246,
+            "end": 1247
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 1319,
-            "end": 1320
+            "start": 1252,
+            "end": 1253
         },
         {
             "kind": "Identifier",
             "text": "p",
-            "start": 1326,
-            "end": 1327
+            "start": 1258,
+            "end": 1259
         },
         {
             "kind": "Arrow",
             "text": "->",
-            "start": 1327,
-            "end": 1329
+            "start": 1259,
+            "end": 1261
         },
         {
             "kind": "Identifier",
             "text": "x",
-            "start": 1329,
-            "end": 1330
+            "start": 1261,
+            "end": 1262
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 1331,
-            "end": 1332
+            "start": 1263,
+            "end": 1264
         },
         {
             "kind": "IntConstant",
             "text": "10",
-            "start": 1333,
-            "end": 1335
+            "start": 1265,
+            "end": 1267
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1335,
-            "end": 1336
+            "start": 1267,
+            "end": 1268
         },
         {
             "kind": "Identifier",
             "text": "p",
-            "start": 1342,
-            "end": 1343
+            "start": 1273,
+            "end": 1274
         },
         {
             "kind": "Arrow",
             "text": "->",
-            "start": 1343,
-            "end": 1345
+            "start": 1274,
+            "end": 1276
         },
         {
             "kind": "Identifier",
             "text": "y",
-            "start": 1345,
-            "end": 1346
+            "start": 1276,
+            "end": 1277
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 1347,
-            "end": 1348
+            "start": 1278,
+            "end": 1279
         },
         {
             "kind": "IntConstant",
             "text": "20",
-            "start": 1349,
-            "end": 1351
+            "start": 1280,
+            "end": 1282
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1351,
-            "end": 1352
+            "start": 1282,
+            "end": 1283
         },
         {
             "kind": "If",
             "text": "if",
-            "start": 1381,
-            "end": 1383
+            "start": 1309,
+            "end": 1311
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1384,
-            "end": 1385
+            "start": 1312,
+            "end": 1313
         },
         {
             "kind": "Identifier",
             "text": "a",
-            "start": 1385,
-            "end": 1386
+            "start": 1313,
+            "end": 1314
         },
         {
             "kind": "Greater",
             "text": ">",
-            "start": 1387,
-            "end": 1388
+            "start": 1315,
+            "end": 1316
         },
         {
             "kind": "IntConstant",
             "text": "5",
-            "start": 1389,
-            "end": 1390
+            "start": 1317,
+            "end": 1318
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1390,
-            "end": 1391
+            "start": 1318,
+            "end": 1319
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 1392,
-            "end": 1393
+            "start": 1320,
+            "end": 1321
         },
         {
             "kind": "Identifier",
             "text": "printf",
-            "start": 1403,
-            "end": 1409
+            "start": 1330,
+            "end": 1336
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1409,
-            "end": 1410
+            "start": 1336,
+            "end": 1337
         },
         {
             "kind": "StringLiteral",
             "text": "\"Greater than 5\\n\"",
-            "start": 1410,
-            "end": 1428
+            "start": 1337,
+            "end": 1355
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1428,
-            "end": 1429
+            "start": 1355,
+            "end": 1356
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1429,
-            "end": 1430
+            "start": 1356,
+            "end": 1357
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 1436,
-            "end": 1437
+            "start": 1362,
+            "end": 1363
         },
         {
             "kind": "Else",
             "text": "else",
-            "start": 1438,
-            "end": 1442
+            "start": 1364,
+            "end": 1368
         },
         {
             "kind": "If",
             "text": "if",
-            "start": 1443,
-            "end": 1445
+            "start": 1369,
+            "end": 1371
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1446,
-            "end": 1447
+            "start": 1372,
+            "end": 1373
         },
         {
             "kind": "Identifier",
             "text": "a",
-            "start": 1447,
-            "end": 1448
+            "start": 1373,
+            "end": 1374
         },
         {
             "kind": "Equal",
             "text": "==",
-            "start": 1449,
-            "end": 1451
+            "start": 1375,
+            "end": 1377
         },
         {
             "kind": "IntConstant",
             "text": "5",
-            "start": 1452,
-            "end": 1453
+            "start": 1378,
+            "end": 1379
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1453,
-            "end": 1454
+            "start": 1379,
+            "end": 1380
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 1455,
-            "end": 1456
+            "start": 1381,
+            "end": 1382
         },
         {
             "kind": "Identifier",
             "text": "printf",
-            "start": 1466,
-            "end": 1472
+            "start": 1391,
+            "end": 1397
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1472,
-            "end": 1473
+            "start": 1397,
+            "end": 1398
         },
         {
             "kind": "StringLiteral",
             "text": "\"Equal to 5\\n\"",
-            "start": 1473,
-            "end": 1487
+            "start": 1398,
+            "end": 1412
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1487,
-            "end": 1488
+            "start": 1412,
+            "end": 1413
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1488,
-            "end": 1489
+            "start": 1413,
+            "end": 1414
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 1495,
-            "end": 1496
+            "start": 1419,
+            "end": 1420
         },
         {
             "kind": "Else",
             "text": "else",
-            "start": 1497,
-            "end": 1501
+            "start": 1421,
+            "end": 1425
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 1502,
-            "end": 1503
+            "start": 1426,
+            "end": 1427
         },
         {
             "kind": "Identifier",
             "text": "printf",
-            "start": 1513,
-            "end": 1519
+            "start": 1436,
+            "end": 1442
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1519,
-            "end": 1520
+            "start": 1442,
+            "end": 1443
         },
         {
             "kind": "StringLiteral",
             "text": "\"Less than 5\\n\"",
-            "start": 1520,
-            "end": 1535
+            "start": 1443,
+            "end": 1458
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1535,
-            "end": 1536
+            "start": 1458,
+            "end": 1459
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1536,
-            "end": 1537
+            "start": 1459,
+            "end": 1460
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 1543,
-            "end": 1544
+            "start": 1465,
+            "end": 1466
         },
         {
             "kind": "For",
             "text": "for",
-            "start": 1566,
-            "end": 1569
+            "start": 1485,
+            "end": 1488
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1570,
-            "end": 1571
+            "start": 1489,
+            "end": 1490
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 1571,
-            "end": 1574
+            "start": 1490,
+            "end": 1493
         },
         {
             "kind": "Identifier",
             "text": "i",
-            "start": 1575,
-            "end": 1576
+            "start": 1494,
+            "end": 1495
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 1577,
-            "end": 1578
+            "start": 1496,
+            "end": 1497
         },
         {
             "kind": "IntConstant",
             "text": "0",
-            "start": 1579,
-            "end": 1580
+            "start": 1498,
+            "end": 1499
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1580,
-            "end": 1581
+            "start": 1499,
+            "end": 1500
         },
         {
             "kind": "Identifier",
             "text": "i",
-            "start": 1582,
-            "end": 1583
+            "start": 1501,
+            "end": 1502
         },
         {
             "kind": "Less",
             "text": "<",
-            "start": 1584,
-            "end": 1585
+            "start": 1503,
+            "end": 1504
         },
         {
             "kind": "IntConstant",
             "text": "5",
-            "start": 1586,
-            "end": 1587
+            "start": 1505,
+            "end": 1506
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1587,
-            "end": 1588
+            "start": 1506,
+            "end": 1507
         },
         {
             "kind": "Identifier",
             "text": "i",
-            "start": 1589,
+            "start": 1508,
+            "end": 1509
+        },
+        {
+            "kind": "Increment",
+            "text": "++",
+            "start": 1509,
+            "end": 1511
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1511,
+            "end": 1512
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1513,
+            "end": 1514
+        },
+        {
+            "kind": "Identifier",
+            "text": "printf",
+            "start": 1523,
+            "end": 1529
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1529,
+            "end": 1530
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"%d \"",
+            "start": 1530,
+            "end": 1535
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1535,
+            "end": 1536
+        },
+        {
+            "kind": "Identifier",
+            "text": "i",
+            "start": 1537,
+            "end": 1538
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1538,
+            "end": 1539
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1539,
+            "end": 1540
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1545,
+            "end": 1546
+        },
+        {
+            "kind": "While",
+            "text": "while",
+            "start": 1552,
+            "end": 1557
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1558,
+            "end": 1559
+        },
+        {
+            "kind": "Identifier",
+            "text": "counter",
+            "start": 1559,
+            "end": 1566
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 1567,
+            "end": 1568
+        },
+        {
+            "kind": "IntConstant",
+            "text": "10",
+            "start": 1569,
+            "end": 1571
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1571,
+            "end": 1572
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1573,
+            "end": 1574
+        },
+        {
+            "kind": "Identifier",
+            "text": "counter",
+            "start": 1583,
             "end": 1590
         },
         {
@@ -1743,970 +1857,988 @@
             "end": 1592
         },
         {
-            "kind": "RightParen",
-            "text": ")",
+            "kind": "Semicolon",
+            "text": ";",
             "start": 1592,
             "end": 1593
         },
         {
-            "kind": "LeftBrace",
-            "text": "{",
-            "start": 1594,
-            "end": 1595
-        },
-        {
-            "kind": "Identifier",
-            "text": "printf",
-            "start": 1605,
-            "end": 1611
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 1611,
-            "end": 1612
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"%d \"",
-            "start": 1612,
-            "end": 1617
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 1617,
-            "end": 1618
-        },
-        {
-            "kind": "Identifier",
-            "text": "i",
-            "start": 1619,
-            "end": 1620
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 1620,
-            "end": 1621
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 1621,
-            "end": 1622
-        },
-        {
             "kind": "RightBrace",
             "text": "}",
-            "start": 1628,
-            "end": 1629
-        },
-        {
-            "kind": "While",
-            "text": "while",
-            "start": 1637,
-            "end": 1642
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 1643,
-            "end": 1644
-        },
-        {
-            "kind": "Identifier",
-            "text": "counter",
-            "start": 1644,
-            "end": 1651
-        },
-        {
-            "kind": "Less",
-            "text": "<",
-            "start": 1652,
-            "end": 1653
-        },
-        {
-            "kind": "IntConstant",
-            "text": "10",
-            "start": 1654,
-            "end": 1656
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 1656,
-            "end": 1657
-        },
-        {
-            "kind": "LeftBrace",
-            "text": "{",
-            "start": 1658,
-            "end": 1659
-        },
-        {
-            "kind": "Identifier",
-            "text": "counter",
-            "start": 1669,
-            "end": 1676
-        },
-        {
-            "kind": "Increment",
-            "text": "++",
-            "start": 1676,
-            "end": 1678
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 1678,
-            "end": 1679
-        },
-        {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 1685,
-            "end": 1686
+            "start": 1598,
+            "end": 1599
         },
         {
             "kind": "Do",
             "text": "do",
-            "start": 1694,
-            "end": 1696
+            "start": 1605,
+            "end": 1607
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 1697,
-            "end": 1698
+            "start": 1608,
+            "end": 1609
         },
         {
             "kind": "Identifier",
             "text": "counter",
-            "start": 1708,
-            "end": 1715
+            "start": 1618,
+            "end": 1625
         },
         {
             "kind": "Decrement",
             "text": "--",
-            "start": 1715,
-            "end": 1717
+            "start": 1625,
+            "end": 1627
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1717,
-            "end": 1718
+            "start": 1627,
+            "end": 1628
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 1724,
-            "end": 1725
+            "start": 1633,
+            "end": 1634
         },
         {
             "kind": "While",
             "text": "while",
-            "start": 1726,
-            "end": 1731
+            "start": 1635,
+            "end": 1640
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1732,
-            "end": 1733
+            "start": 1641,
+            "end": 1642
         },
         {
             "kind": "Identifier",
             "text": "counter",
-            "start": 1733,
-            "end": 1740
+            "start": 1642,
+            "end": 1649
         },
         {
             "kind": "Greater",
             "text": ">",
-            "start": 1741,
-            "end": 1742
+            "start": 1650,
+            "end": 1651
         },
         {
             "kind": "IntConstant",
             "text": "0",
-            "start": 1743,
-            "end": 1744
+            "start": 1652,
+            "end": 1653
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1744,
-            "end": 1745
+            "start": 1653,
+            "end": 1654
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1745,
-            "end": 1746
+            "start": 1654,
+            "end": 1655
         },
         {
             "kind": "Switch",
             "text": "switch",
-            "start": 1774,
-            "end": 1780
+            "start": 1680,
+            "end": 1686
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1781,
-            "end": 1782
+            "start": 1687,
+            "end": 1688
         },
         {
             "kind": "Identifier",
             "text": "ch",
-            "start": 1782,
-            "end": 1784
+            "start": 1688,
+            "end": 1690
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1784,
-            "end": 1785
+            "start": 1690,
+            "end": 1691
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 1786,
-            "end": 1787
+            "start": 1692,
+            "end": 1693
         },
         {
             "kind": "Case",
             "text": "case",
-            "start": 1797,
-            "end": 1801
+            "start": 1702,
+            "end": 1706
         },
         {
             "kind": "CharConstant",
             "text": "'A'",
-            "start": 1802,
-            "end": 1805
+            "start": 1707,
+            "end": 1710
         },
         {
             "kind": "Colon",
             "text": ":",
-            "start": 1805,
-            "end": 1806
+            "start": 1710,
+            "end": 1711
         },
         {
             "kind": "Identifier",
             "text": "printf",
-            "start": 1820,
-            "end": 1826
+            "start": 1724,
+            "end": 1730
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1826,
-            "end": 1827
+            "start": 1730,
+            "end": 1731
         },
         {
             "kind": "StringLiteral",
             "text": "\"Alpha\\n\"",
-            "start": 1827,
-            "end": 1836
+            "start": 1731,
+            "end": 1740
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1836,
-            "end": 1837
+            "start": 1740,
+            "end": 1741
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1837,
-            "end": 1838
+            "start": 1741,
+            "end": 1742
         },
         {
             "kind": "Break",
             "text": "break",
-            "start": 1852,
-            "end": 1857
+            "start": 1755,
+            "end": 1760
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1857,
-            "end": 1858
+            "start": 1760,
+            "end": 1761
         },
         {
             "kind": "Case",
             "text": "case",
-            "start": 1868,
-            "end": 1872
+            "start": 1770,
+            "end": 1774
         },
         {
             "kind": "CharConstant",
             "text": "'B'",
-            "start": 1873,
-            "end": 1876
+            "start": 1775,
+            "end": 1778
         },
         {
             "kind": "Colon",
             "text": ":",
-            "start": 1876,
-            "end": 1877
+            "start": 1778,
+            "end": 1779
         },
         {
             "kind": "Identifier",
             "text": "printf",
-            "start": 1891,
-            "end": 1897
+            "start": 1792,
+            "end": 1798
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1897,
-            "end": 1898
+            "start": 1798,
+            "end": 1799
         },
         {
             "kind": "StringLiteral",
             "text": "\"Bravo\\n\"",
-            "start": 1898,
-            "end": 1907
+            "start": 1799,
+            "end": 1808
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1907,
-            "end": 1908
+            "start": 1808,
+            "end": 1809
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1908,
-            "end": 1909
+            "start": 1809,
+            "end": 1810
         },
         {
             "kind": "Break",
             "text": "break",
-            "start": 1923,
-            "end": 1928
+            "start": 1823,
+            "end": 1828
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1928,
-            "end": 1929
+            "start": 1828,
+            "end": 1829
         },
         {
             "kind": "Default",
             "text": "default",
-            "start": 1939,
-            "end": 1946
+            "start": 1838,
+            "end": 1845
         },
         {
             "kind": "Colon",
             "text": ":",
-            "start": 1946,
-            "end": 1947
+            "start": 1845,
+            "end": 1846
         },
         {
             "kind": "Identifier",
             "text": "printf",
-            "start": 1961,
-            "end": 1967
+            "start": 1859,
+            "end": 1865
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 1967,
-            "end": 1968
+            "start": 1865,
+            "end": 1866
         },
         {
             "kind": "StringLiteral",
             "text": "\"Other\\n\"",
-            "start": 1968,
-            "end": 1977
+            "start": 1866,
+            "end": 1875
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 1977,
-            "end": 1978
+            "start": 1875,
+            "end": 1876
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 1978,
-            "end": 1979
+            "start": 1876,
+            "end": 1877
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 1985,
-            "end": 1986
+            "start": 1882,
+            "end": 1883
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 2020,
-            "end": 2023
+            "start": 1914,
+            "end": 1917
         },
         {
             "kind": "Identifier",
             "text": "x",
-            "start": 2024,
-            "end": 2025
+            "start": 1918,
+            "end": 1919
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 2026,
-            "end": 2027
+            "start": 1920,
+            "end": 1921
         },
         {
             "kind": "IntConstant",
             "text": "0x0F",
-            "start": 2028,
-            "end": 2032
+            "start": 1922,
+            "end": 1926
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 2032,
-            "end": 2033
+            "start": 1926,
+            "end": 1927
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 2039,
-            "end": 2042
+            "start": 1932,
+            "end": 1935
         },
         {
             "kind": "Identifier",
             "text": "y",
-            "start": 2043,
-            "end": 2044
+            "start": 1936,
+            "end": 1937
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 2045,
-            "end": 2046
+            "start": 1938,
+            "end": 1939
         },
         {
             "kind": "IntConstant",
             "text": "0xF0",
-            "start": 2047,
-            "end": 2051
+            "start": 1940,
+            "end": 1944
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 2051,
-            "end": 2052
+            "start": 1944,
+            "end": 1945
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 2058,
-            "end": 2061
+            "start": 1950,
+            "end": 1953
         },
         {
             "kind": "Identifier",
             "text": "z",
-            "start": 2062,
-            "end": 2063
+            "start": 1954,
+            "end": 1955
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 2064,
-            "end": 2065
+            "start": 1956,
+            "end": 1957
         },
         {
             "kind": "Identifier",
             "text": "x",
-            "start": 2066,
-            "end": 2067
+            "start": 1958,
+            "end": 1959
         },
         {
             "kind": "BitAnd",
             "text": "&",
-            "start": 2068,
-            "end": 2069
+            "start": 1960,
+            "end": 1961
         },
         {
             "kind": "Identifier",
             "text": "y",
-            "start": 2070,
-            "end": 2071
+            "start": 1962,
+            "end": 1963
         },
         {
             "kind": "BitOr",
             "text": "|",
-            "start": 2072,
-            "end": 2073
+            "start": 1964,
+            "end": 1965
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 2074,
-            "end": 2075
+            "start": 1966,
+            "end": 1967
         },
         {
             "kind": "Identifier",
             "text": "x",
-            "start": 2075,
-            "end": 2076
+            "start": 1967,
+            "end": 1968
         },
         {
             "kind": "BitXor",
             "text": "^",
-            "start": 2077,
-            "end": 2078
+            "start": 1969,
+            "end": 1970
         },
         {
             "kind": "Identifier",
             "text": "y",
-            "start": 2079,
-            "end": 2080
+            "start": 1971,
+            "end": 1972
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 2080,
-            "end": 2081
+            "start": 1972,
+            "end": 1973
         },
         {
             "kind": "LeftShift",
             "text": "<<",
-            "start": 2082,
-            "end": 2084
+            "start": 1974,
+            "end": 1976
         },
         {
             "kind": "IntConstant",
             "text": "1",
-            "start": 2085,
-            "end": 2086
+            "start": 1977,
+            "end": 1978
         },
         {
             "kind": "RightShift",
             "text": ">>",
-            "start": 2087,
-            "end": 2089
+            "start": 1979,
+            "end": 1981
         },
         {
             "kind": "IntConstant",
             "text": "1",
-            "start": 2090,
-            "end": 2091
+            "start": 1982,
+            "end": 1983
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 2091,
-            "end": 2092
+            "start": 1983,
+            "end": 1984
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 2098,
-            "end": 2101
+            "start": 1989,
+            "end": 1992
         },
         {
             "kind": "Identifier",
             "text": "not_x",
-            "start": 2102,
-            "end": 2107
+            "start": 1993,
+            "end": 1998
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 2108,
-            "end": 2109
+            "start": 1999,
+            "end": 2000
         },
         {
             "kind": "BitNot",
             "text": "~",
-            "start": 2110,
-            "end": 2111
+            "start": 2001,
+            "end": 2002
         },
         {
             "kind": "Identifier",
             "text": "x",
-            "start": 2111,
-            "end": 2112
+            "start": 2002,
+            "end": 2003
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 2112,
-            "end": 2113
+            "start": 2003,
+            "end": 2004
         },
         {
             "kind": "Identifier",
             "text": "bool",
-            "start": 2147,
-            "end": 2151
+            "start": 2035,
+            "end": 2039
         },
         {
             "kind": "Identifier",
             "text": "is_valid",
-            "start": 2152,
-            "end": 2160
+            "start": 2040,
+            "end": 2048
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 2161,
-            "end": 2162
+            "start": 2049,
+            "end": 2050
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 2163,
-            "end": 2164
+            "start": 2051,
+            "end": 2052
         },
         {
             "kind": "Identifier",
             "text": "a",
-            "start": 2164,
-            "end": 2165
+            "start": 2052,
+            "end": 2053
         },
         {
             "kind": "Greater",
             "text": ">",
-            "start": 2166,
-            "end": 2167
+            "start": 2054,
+            "end": 2055
         },
         {
             "kind": "IntConstant",
             "text": "0",
-            "start": 2168,
-            "end": 2169
+            "start": 2056,
+            "end": 2057
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 2169,
-            "end": 2170
+            "start": 2057,
+            "end": 2058
         },
         {
             "kind": "LogicalAnd",
             "text": "&&",
-            "start": 2171,
-            "end": 2173
+            "start": 2059,
+            "end": 2061
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 2174,
-            "end": 2175
+            "start": 2062,
+            "end": 2063
         },
         {
             "kind": "Identifier",
             "text": "b",
-            "start": 2175,
-            "end": 2176
+            "start": 2063,
+            "end": 2064
         },
         {
             "kind": "Greater",
             "text": ">",
-            "start": 2177,
-            "end": 2178
+            "start": 2065,
+            "end": 2066
         },
         {
             "kind": "IntConstant",
             "text": "0",
-            "start": 2179,
-            "end": 2180
+            "start": 2067,
+            "end": 2068
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 2180,
-            "end": 2181
+            "start": 2068,
+            "end": 2069
         },
         {
             "kind": "LogicalOr",
             "text": "||",
-            "start": 2182,
-            "end": 2184
+            "start": 2070,
+            "end": 2072
         },
         {
             "kind": "LogicalNot",
             "text": "!",
-            "start": 2185,
-            "end": 2186
+            "start": 2073,
+            "end": 2074
         },
         {
             "kind": "Identifier",
             "text": "false",
-            "start": 2186,
-            "end": 2191
+            "start": 2074,
+            "end": 2079
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 2191,
-            "end": 2192
+            "start": 2079,
+            "end": 2080
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 2225,
-            "end": 2228
+            "start": 2110,
+            "end": 2113
         },
         {
             "kind": "Identifier",
             "text": "min",
-            "start": 2229,
-            "end": 2232
+            "start": 2114,
+            "end": 2117
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 2233,
-            "end": 2234
+            "start": 2118,
+            "end": 2119
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 2235,
-            "end": 2236
+            "start": 2120,
+            "end": 2121
         },
         {
             "kind": "Identifier",
             "text": "a",
-            "start": 2236,
-            "end": 2237
+            "start": 2121,
+            "end": 2122
         },
         {
             "kind": "Less",
             "text": "<",
-            "start": 2238,
-            "end": 2239
+            "start": 2123,
+            "end": 2124
         },
         {
             "kind": "Identifier",
             "text": "b",
-            "start": 2240,
-            "end": 2241
+            "start": 2125,
+            "end": 2126
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 2241,
-            "end": 2242
+            "start": 2126,
+            "end": 2127
         },
         {
             "kind": "Question",
             "text": "?",
-            "start": 2243,
-            "end": 2244
+            "start": 2128,
+            "end": 2129
         },
         {
             "kind": "Identifier",
             "text": "a",
-            "start": 2245,
-            "end": 2246
+            "start": 2130,
+            "end": 2131
         },
         {
             "kind": "Colon",
             "text": ":",
-            "start": 2247,
-            "end": 2248
+            "start": 2132,
+            "end": 2133
         },
         {
             "kind": "Identifier",
             "text": "b",
-            "start": 2249,
-            "end": 2250
+            "start": 2134,
+            "end": 2135
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 2250,
-            "end": 2251
+            "start": 2135,
+            "end": 2136
         },
         {
             "kind": "Goto",
             "text": "goto",
-            "start": 2272,
-            "end": 2276
+            "start": 2154,
+            "end": 2158
         },
         {
             "kind": "Identifier",
             "text": "cleanup",
-            "start": 2277,
-            "end": 2284
+            "start": 2159,
+            "end": 2166
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 2284,
-            "end": 2285
+            "start": 2166,
+            "end": 2167
         },
         {
             "kind": "Identifier",
             "text": "cleanup",
-            "start": 2289,
-            "end": 2296
+            "start": 2169,
+            "end": 2176
         },
         {
             "kind": "Colon",
             "text": ":",
-            "start": 2296,
-            "end": 2297
+            "start": 2176,
+            "end": 2177
         },
         {
             "kind": "Identifier",
             "text": "free",
-            "start": 2303,
-            "end": 2307
+            "start": 2182,
+            "end": 2186
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 2307,
-            "end": 2308
+            "start": 2186,
+            "end": 2187
         },
         {
             "kind": "Identifier",
             "text": "p",
-            "start": 2308,
-            "end": 2309
+            "start": 2187,
+            "end": 2188
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 2309,
-            "end": 2310
+            "start": 2188,
+            "end": 2189
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 2310,
-            "end": 2311
+            "start": 2189,
+            "end": 2190
         },
         {
             "kind": "Return",
             "text": "return",
-            "start": 2317,
-            "end": 2323
+            "start": 2195,
+            "end": 2201
         },
         {
             "kind": "IntConstant",
             "text": "0",
-            "start": 2324,
-            "end": 2325
+            "start": 2202,
+            "end": 2203
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 2325,
-            "end": 2326
+            "start": 2203,
+            "end": 2204
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 2328,
-            "end": 2329
+            "start": 2205,
+            "end": 2206
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 2357,
-            "end": 2360
+            "start": 2231,
+            "end": 2234
         },
         {
             "kind": "Identifier",
             "text": "add",
-            "start": 2361,
-            "end": 2364
+            "start": 2235,
+            "end": 2238
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 2364,
-            "end": 2365
+            "start": 2238,
+            "end": 2239
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 2365,
-            "end": 2368
+            "start": 2239,
+            "end": 2242
         },
         {
             "kind": "Identifier",
             "text": "a",
-            "start": 2369,
-            "end": 2370
+            "start": 2243,
+            "end": 2244
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 2370,
-            "end": 2371
+            "start": 2244,
+            "end": 2245
         },
         {
             "kind": "Int",
             "text": "int",
-            "start": 2372,
-            "end": 2375
+            "start": 2246,
+            "end": 2249
         },
         {
             "kind": "Identifier",
             "text": "b",
-            "start": 2376,
-            "end": 2377
+            "start": 2250,
+            "end": 2251
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 2377,
-            "end": 2378
+            "start": 2251,
+            "end": 2252
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 2379,
-            "end": 2380
+            "start": 2253,
+            "end": 2254
         },
         {
             "kind": "Return",
             "text": "return",
-            "start": 2386,
-            "end": 2392
+            "start": 2259,
+            "end": 2265
         },
         {
             "kind": "Identifier",
             "text": "a",
-            "start": 2393,
-            "end": 2394
+            "start": 2266,
+            "end": 2267
         },
         {
             "kind": "Plus",
             "text": "+",
-            "start": 2395,
-            "end": 2396
+            "start": 2268,
+            "end": 2269
         },
         {
             "kind": "Identifier",
             "text": "b",
-            "start": 2397,
-            "end": 2398
+            "start": 2270,
+            "end": 2271
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 2398,
-            "end": 2399
+            "start": 2271,
+            "end": 2272
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 2401,
-            "end": 2402
+            "start": 2273,
+            "end": 2274
+        },
+        {
+            "kind": "Void",
+            "text": "void",
+            "start": 2298,
+            "end": 2302
+        },
+        {
+            "kind": "Identifier",
+            "text": "log_message",
+            "start": 2303,
+            "end": 2314
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2314,
+            "end": 2315
+        },
+        {
+            "kind": "Const",
+            "text": "const",
+            "start": 2315,
+            "end": 2320
+        },
+        {
+            "kind": "Char",
+            "text": "char",
+            "start": 2321,
+            "end": 2325
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 2325,
+            "end": 2326
+        },
+        {
+            "kind": "Identifier",
+            "text": "format",
+            "start": 2327,
+            "end": 2333
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2333,
+            "end": 2334
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2335,
+            "end": 2336
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2336,
+            "end": 2337
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2337,
+            "end": 2338
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2338,
+            "end": 2339
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2340,
+            "end": 2341
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2372,
+            "end": 2373
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2403,
+            "end": 2404
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2404,
+            "end": 2405
+        },
+        {
+            "kind": "Identifier",
+            "text": "nodiscard",
+            "start": 2405,
+            "end": 2414
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2414,
+            "end": 2415
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2415,
+            "end": 2416
+        },
+        {
+            "kind": "Int",
+            "text": "int",
+            "start": 2417,
+            "end": 2420
+        },
+        {
+            "kind": "Identifier",
+            "text": "compute",
+            "start": 2421,
+            "end": 2428
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2428,
+            "end": 2429
         },
         {
             "kind": "Void",
@@ -2715,159 +2847,153 @@
             "end": 2433
         },
         {
-            "kind": "Identifier",
-            "text": "log_message",
-            "start": 2434,
-            "end": 2445
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 2445,
-            "end": 2446
-        },
-        {
-            "kind": "Const",
-            "text": "const",
-            "start": 2446,
-            "end": 2451
-        },
-        {
-            "kind": "Char",
-            "text": "char",
-            "start": 2452,
-            "end": 2456
-        },
-        {
-            "kind": "Star",
-            "text": "*",
-            "start": 2456,
-            "end": 2457
-        },
-        {
-            "kind": "Identifier",
-            "text": "format",
-            "start": 2458,
-            "end": 2464
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 2464,
-            "end": 2465
-        },
-        {
-            "kind": "Dot",
-            "text": ".",
-            "start": 2466,
-            "end": 2467
-        },
-        {
-            "kind": "Dot",
-            "text": ".",
-            "start": 2467,
-            "end": 2468
-        },
-        {
-            "kind": "Dot",
-            "text": ".",
-            "start": 2468,
-            "end": 2469
-        },
-        {
             "kind": "RightParen",
             "text": ")",
-            "start": 2469,
-            "end": 2470
+            "start": 2433,
+            "end": 2434
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 2471,
-            "end": 2472
-        },
-        {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 2505,
-            "end": 2506
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 2539,
-            "end": 2540
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 2540,
-            "end": 2541
-        },
-        {
-            "kind": "Identifier",
-            "text": "nodiscard",
-            "start": 2541,
-            "end": 2550
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 2550,
-            "end": 2551
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 2551,
-            "end": 2552
-        },
-        {
-            "kind": "Int",
-            "text": "int",
-            "start": 2553,
-            "end": 2556
-        },
-        {
-            "kind": "Identifier",
-            "text": "compute",
-            "start": 2557,
-            "end": 2564
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 2564,
-            "end": 2565
-        },
-        {
-            "kind": "Void",
-            "text": "void",
-            "start": 2565,
-            "end": 2569
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 2569,
-            "end": 2570
-        },
-        {
-            "kind": "LeftBrace",
-            "text": "{",
-            "start": 2571,
-            "end": 2572
+            "start": 2435,
+            "end": 2436
         },
         {
             "kind": "Return",
             "text": "return",
-            "start": 2578,
-            "end": 2584
+            "start": 2441,
+            "end": 2447
         },
         {
             "kind": "IntConstant",
             "text": "42",
-            "start": 2585,
+            "start": 2448,
+            "end": 2450
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2450,
+            "end": 2451
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2452,
+            "end": 2453
+        },
+        {
+            "kind": "Complex",
+            "text": "_Complex",
+            "start": 2472,
+            "end": 2480
+        },
+        {
+            "kind": "Double",
+            "text": "double",
+            "start": 2481,
+            "end": 2487
+        },
+        {
+            "kind": "Identifier",
+            "text": "cplx",
+            "start": 2488,
+            "end": 2492
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2493,
+            "end": 2494
+        },
+        {
+            "kind": "FloatConstant",
+            "text": "1.0",
+            "start": 2495,
+            "end": 2498
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 2499,
+            "end": 2500
+        },
+        {
+            "kind": "FloatConstant",
+            "text": "2.0",
+            "start": 2501,
+            "end": 2504
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 2505,
+            "end": 2506
+        },
+        {
+            "kind": "Identifier",
+            "text": "_Complex_I",
+            "start": 2507,
+            "end": 2517
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2517,
+            "end": 2518
+        },
+        {
+            "kind": "Int",
+            "text": "int",
+            "start": 2557,
+            "end": 2560
+        },
+        {
+            "kind": "Identifier",
+            "text": "hex",
+            "start": 2561,
+            "end": 2564
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2565,
+            "end": 2566
+        },
+        {
+            "kind": "IntConstant",
+            "text": "0xFF",
+            "start": 2567,
+            "end": 2571
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2571,
+            "end": 2572
+        },
+        {
+            "kind": "Int",
+            "text": "int",
+            "start": 2573,
+            "end": 2576
+        },
+        {
+            "kind": "Identifier",
+            "text": "oct",
+            "start": 2577,
+            "end": 2580
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2581,
+            "end": 2582
+        },
+        {
+            "kind": "IntConstant",
+            "text": "0777",
+            "start": 2583,
             "end": 2587
         },
         {
@@ -2877,166 +3003,40 @@
             "end": 2588
         },
         {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 2590,
-            "end": 2591
-        },
-        {
-            "kind": "Complex",
-            "text": "_Complex",
-            "start": 2613,
-            "end": 2621
-        },
-        {
-            "kind": "Double",
-            "text": "double",
-            "start": 2622,
-            "end": 2628
-        },
-        {
-            "kind": "Identifier",
-            "text": "cplx",
-            "start": 2629,
-            "end": 2633
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 2634,
-            "end": 2635
-        },
-        {
-            "kind": "FloatConstant",
-            "text": "1.0",
-            "start": 2636,
-            "end": 2639
-        },
-        {
-            "kind": "Plus",
-            "text": "+",
-            "start": 2640,
-            "end": 2641
-        },
-        {
-            "kind": "FloatConstant",
-            "text": "2.0",
-            "start": 2642,
-            "end": 2645
-        },
-        {
-            "kind": "Star",
-            "text": "*",
-            "start": 2646,
-            "end": 2647
-        },
-        {
-            "kind": "Identifier",
-            "text": "_Complex_I",
-            "start": 2648,
-            "end": 2658
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 2658,
-            "end": 2659
-        },
-        {
             "kind": "Int",
             "text": "int",
-            "start": 2701,
-            "end": 2704
-        },
-        {
-            "kind": "Identifier",
-            "text": "hex",
-            "start": 2705,
-            "end": 2708
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 2709,
-            "end": 2710
-        },
-        {
-            "kind": "IntConstant",
-            "text": "0xFF",
-            "start": 2711,
-            "end": 2715
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 2715,
-            "end": 2716
-        },
-        {
-            "kind": "Int",
-            "text": "int",
-            "start": 2718,
-            "end": 2721
-        },
-        {
-            "kind": "Identifier",
-            "text": "oct",
-            "start": 2722,
-            "end": 2725
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 2726,
-            "end": 2727
-        },
-        {
-            "kind": "IntConstant",
-            "text": "0777",
-            "start": 2728,
-            "end": 2732
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 2732,
-            "end": 2733
-        },
-        {
-            "kind": "Int",
-            "text": "int",
-            "start": 2735,
-            "end": 2738
+            "start": 2589,
+            "end": 2592
         },
         {
             "kind": "Identifier",
             "text": "bin",
-            "start": 2739,
-            "end": 2742
+            "start": 2593,
+            "end": 2596
         },
         {
             "kind": "Assign",
             "text": "=",
-            "start": 2743,
-            "end": 2744
+            "start": 2597,
+            "end": 2598
         },
         {
             "kind": "IntConstant",
             "text": "0b1010",
-            "start": 2745,
-            "end": 2751
+            "start": 2599,
+            "end": 2605
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 2751,
-            "end": 2752
+            "start": 2605,
+            "end": 2606
         },
         {
             "kind": "Eof",
             "text": "",
-            "start": 2864,
-            "end": 2864
+            "start": 2714,
+            "end": 2714
         }
     ],
     "errors": []

@@ -14,13 +14,13 @@
                                 "kind": "Number",
                                 "children": [
                                     {
-                                        "kind": "Leaves(1)",
+                                        "kind": "Leaves(2)",
                                         "children": [],
-                                        "text_length": 1,
+                                        "text_length": 6,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 1,
+                                "text_length": 6,
                                 "is_leaf": false
                             },
                             {
@@ -30,13 +30,13 @@
                                 "is_leaf": true
                             }
                         ],
-                        "text_length": 6,
+                        "text_length": 11,
                         "is_leaf": false
                     },
                     {
-                        "kind": "Leaves(3)",
+                        "kind": "Leaves(2)",
                         "children": [],
-                        "text_length": 11,
+                        "text_length": 6,
                         "is_leaf": true
                     }
                 ],
@@ -48,7 +48,7 @@
         "is_leaf": false
     },
     "errors": [
-        "Expected ',' at 17",
-        "Expected '}' at 17"
+        "ExpectedToken { expected: \",\", offset: 17, source_id: None }",
+        "ExpectedToken { expected: \"}\", offset: 17, source_id: None }"
     ]
 }

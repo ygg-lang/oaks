@@ -3,7 +3,7 @@
     "count": 12,
     "tokens": [
         {
-            "kind": "Keyword(Fn)",
+            "kind": "Fn",
             "text": "fn",
             "start": 0,
             "end": 2
@@ -35,44 +35,44 @@
         {
             "kind": "Identifier",
             "text": "println",
-            "start": 17,
-            "end": 24
+            "start": 16,
+            "end": 23
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 24,
-            "end": 25
+            "start": 23,
+            "end": 24
         },
         {
             "kind": "StringLiteral",
             "text": "\"Hello\"",
-            "start": 25,
-            "end": 32
+            "start": 24,
+            "end": 31
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 32,
-            "end": 33
+            "start": 31,
+            "end": 32
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 33,
-            "end": 34
+            "start": 32,
+            "end": 33
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 36,
-            "end": 37
+            "start": 34,
+            "end": 35
         },
         {
             "kind": "Eof",
             "text": "",
-            "start": 37,
-            "end": 37
+            "start": 35,
+            "end": 35
         }
     ],
     "errors": []

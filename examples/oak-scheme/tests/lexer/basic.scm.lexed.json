@@ -1,42 +1,42 @@
 {
     "success": true,
-    "count": 100,
+    "count": 189,
     "tokens": [
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 21,
-            "end": 22
+            "start": 20,
+            "end": 21
         },
         {
             "kind": "Keyword",
             "text": "define",
-            "start": 22,
-            "end": 28
+            "start": 21,
+            "end": 27
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 29,
-            "end": 30
+            "start": 28,
+            "end": 29
         },
         {
             "kind": "Identifier",
             "text": "factorial",
-            "start": 30,
-            "end": 39
+            "start": 29,
+            "end": 38
         },
         {
             "kind": "Identifier",
             "text": "n",
-            "start": 40,
-            "end": 41
+            "start": 39,
+            "end": 40
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 41,
-            "end": 42
+            "start": 40,
+            "end": 41
         },
         {
             "kind": "LeftParen",
@@ -83,72 +83,60 @@
         {
             "kind": "NumberLiteral",
             "text": "1",
-            "start": 66,
-            "end": 67
+            "start": 67,
+            "end": 68
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 75,
-            "end": 76
+            "start": 77,
+            "end": 78
         },
         {
             "kind": "Identifier",
             "text": "*",
-            "start": 76,
-            "end": 77
-        },
-        {
-            "kind": "Identifier",
-            "text": "n",
             "start": 78,
             "end": 79
         },
         {
-            "kind": "LeftParen",
-            "text": "(",
+            "kind": "Identifier",
+            "text": "n",
             "start": 80,
             "end": 81
         },
         {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 82,
+            "end": 83
+        },
+        {
             "kind": "Identifier",
             "text": "factorial",
-            "start": 81,
-            "end": 90
+            "start": 83,
+            "end": 92
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 91,
-            "end": 92
+            "start": 93,
+            "end": 94
         },
         {
             "kind": "Identifier",
             "text": "-",
-            "start": 92,
-            "end": 93
-        },
-        {
-            "kind": "Identifier",
-            "text": "n",
             "start": 94,
             "end": 95
         },
         {
-            "kind": "NumberLiteral",
-            "text": "1",
+            "kind": "Identifier",
+            "text": "n",
             "start": 96,
             "end": 97
         },
         {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 97,
-            "end": 98
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
+            "kind": "NumberLiteral",
+            "text": "1",
             "start": 98,
             "end": 99
         },
@@ -169,6 +157,18 @@
             "text": ")",
             "start": 101,
             "end": 102
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 102,
+            "end": 103
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 103,
+            "end": 104
         },
         {
             "kind": "LeftParen",
@@ -209,398 +209,932 @@
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 131,
-            "end": 132
+            "start": 132,
+            "end": 133
         },
         {
             "kind": "Keyword",
             "text": "cond",
-            "start": 132,
-            "end": 136
+            "start": 133,
+            "end": 137
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 142,
-            "end": 143
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 143,
-            "end": 144
-        },
-        {
-            "kind": "Identifier",
-            "text": "=",
-            "start": 144,
-            "end": 145
-        },
-        {
-            "kind": "Identifier",
-            "text": "n",
             "start": 146,
             "end": 147
         },
         {
-            "kind": "NumberLiteral",
-            "text": "0",
-            "start": 148,
-            "end": 149
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 149,
-            "end": 150
-        },
-        {
-            "kind": "NumberLiteral",
-            "text": "0",
-            "start": 151,
-            "end": 152
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 152,
-            "end": 153
-        },
-        {
             "kind": "LeftParen",
             "text": "(",
-            "start": 159,
-            "end": 160
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 160,
-            "end": 161
+            "start": 147,
+            "end": 148
         },
         {
             "kind": "Identifier",
             "text": "=",
-            "start": 161,
-            "end": 162
+            "start": 148,
+            "end": 149
         },
         {
             "kind": "Identifier",
             "text": "n",
-            "start": 163,
-            "end": 164
+            "start": 150,
+            "end": 151
         },
         {
             "kind": "NumberLiteral",
-            "text": "1",
-            "start": 165,
-            "end": 166
+            "text": "0",
+            "start": 152,
+            "end": 153
         },
         {
             "kind": "RightParen",
             "text": ")",
+            "start": 153,
+            "end": 154
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 155,
+            "end": 156
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 156,
+            "end": 157
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
             "start": 166,
             "end": 167
         },
         {
-            "kind": "NumberLiteral",
-            "text": "1",
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 167,
+            "end": 168
+        },
+        {
+            "kind": "Identifier",
+            "text": "=",
             "start": 168,
             "end": 169
         },
         {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 169,
-            "end": 170
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 176,
-            "end": 177
-        },
-        {
-            "kind": "Identifier",
-            "text": "else",
-            "start": 177,
-            "end": 181
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 182,
-            "end": 183
-        },
-        {
-            "kind": "Identifier",
-            "text": "+",
-            "start": 183,
-            "end": 184
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 185,
-            "end": 186
-        },
-        {
-            "kind": "Identifier",
-            "text": "fibonacci",
-            "start": 186,
-            "end": 195
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 196,
-            "end": 197
-        },
-        {
-            "kind": "Identifier",
-            "text": "-",
-            "start": 197,
-            "end": 198
-        },
-        {
             "kind": "Identifier",
             "text": "n",
-            "start": 199,
-            "end": 200
+            "start": 170,
+            "end": 171
         },
         {
             "kind": "NumberLiteral",
             "text": "1",
-            "start": 201,
-            "end": 202
+            "start": 172,
+            "end": 173
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 202,
-            "end": 203
+            "start": 173,
+            "end": 174
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 175,
+            "end": 176
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 203,
-            "end": 204
+            "start": 176,
+            "end": 177
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 219,
-            "end": 220
+            "start": 186,
+            "end": 187
+        },
+        {
+            "kind": "Identifier",
+            "text": "else",
+            "start": 187,
+            "end": 191
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 192,
+            "end": 193
+        },
+        {
+            "kind": "Identifier",
+            "text": "+",
+            "start": 193,
+            "end": 194
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 195,
+            "end": 196
         },
         {
             "kind": "Identifier",
             "text": "fibonacci",
-            "start": 220,
-            "end": 229
+            "start": 196,
+            "end": 205
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 230,
-            "end": 231
+            "start": 206,
+            "end": 207
         },
         {
             "kind": "Identifier",
             "text": "-",
-            "start": 231,
-            "end": 232
+            "start": 207,
+            "end": 208
         },
         {
             "kind": "Identifier",
             "text": "n",
-            "start": 233,
-            "end": 234
+            "start": 209,
+            "end": 210
         },
         {
             "kind": "NumberLiteral",
-            "text": "2",
-            "start": 235,
-            "end": 236
+            "text": "1",
+            "start": 211,
+            "end": 212
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 236,
-            "end": 237
+            "start": 212,
+            "end": 213
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 237,
-            "end": 238
+            "start": 213,
+            "end": 214
         },
         {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 238,
-            "end": 239
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 232,
+            "end": 233
         },
         {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 239,
-            "end": 240
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 240,
-            "end": 241
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 241,
+            "kind": "Identifier",
+            "text": "fibonacci",
+            "start": 233,
             "end": 242
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 256,
-            "end": 257
-        },
-        {
-            "kind": "Keyword",
-            "text": "define",
-            "start": 257,
-            "end": 263
+            "start": 243,
+            "end": 244
         },
         {
             "kind": "Identifier",
-            "text": "numbers",
-            "start": 264,
-            "end": 271
+            "text": "-",
+            "start": 244,
+            "end": 245
         },
         {
-            "kind": "Quote",
-            "text": "'",
-            "start": 272,
-            "end": 273
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 273,
-            "end": 274
-        },
-        {
-            "kind": "NumberLiteral",
-            "text": "1",
-            "start": 274,
-            "end": 275
+            "kind": "Identifier",
+            "text": "n",
+            "start": 246,
+            "end": 247
         },
         {
             "kind": "NumberLiteral",
             "text": "2",
-            "start": 276,
-            "end": 277
-        },
-        {
-            "kind": "NumberLiteral",
-            "text": "3",
-            "start": 278,
-            "end": 279
-        },
-        {
-            "kind": "NumberLiteral",
-            "text": "4",
-            "start": 280,
-            "end": 281
-        },
-        {
-            "kind": "NumberLiteral",
-            "text": "5",
-            "start": 282,
-            "end": 283
+            "start": 248,
+            "end": 249
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 283,
-            "end": 284
+            "start": 249,
+            "end": 250
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 284,
-            "end": 285
+            "start": 250,
+            "end": 251
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 251,
+            "end": 252
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 252,
+            "end": 253
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 253,
+            "end": 254
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 254,
+            "end": 255
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 287,
-            "end": 288
+            "start": 266,
+            "end": 267
         },
         {
             "kind": "Keyword",
             "text": "define",
+            "start": 267,
+            "end": 273
+        },
+        {
+            "kind": "Identifier",
+            "text": "numbers",
+            "start": 274,
+            "end": 281
+        },
+        {
+            "kind": "Quote",
+            "text": "'",
+            "start": 282,
+            "end": 283
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 283,
+            "end": 284
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 284,
+            "end": 285
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 286,
+            "end": 287
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
             "start": 288,
-            "end": 294
+            "end": 289
         },
         {
-            "kind": "Identifier",
-            "text": "squares",
-            "start": 295,
-            "end": 302
+            "kind": "NumberLiteral",
+            "text": "4",
+            "start": 290,
+            "end": 291
         },
         {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 303,
-            "end": 304
-        },
-        {
-            "kind": "Keyword",
-            "text": "map",
-            "start": 304,
-            "end": 307
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 308,
-            "end": 309
-        },
-        {
-            "kind": "Keyword",
-            "text": "lambda",
-            "start": 309,
-            "end": 315
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 316,
-            "end": 317
-        },
-        {
-            "kind": "Identifier",
-            "text": "x",
-            "start": 317,
-            "end": 318
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 292,
+            "end": 293
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 318,
-            "end": 319
+            "start": 293,
+            "end": 294
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 294,
+            "end": 295
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 320,
-            "end": 321
+            "start": 296,
+            "end": 297
+        },
+        {
+            "kind": "Keyword",
+            "text": "define",
+            "start": 297,
+            "end": 303
+        },
+        {
+            "kind": "Identifier",
+            "text": "squares",
+            "start": 304,
+            "end": 311
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 312,
+            "end": 313
+        },
+        {
+            "kind": "Keyword",
+            "text": "map",
+            "start": 313,
+            "end": 316
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 317,
+            "end": 318
+        },
+        {
+            "kind": "Keyword",
+            "text": "lambda",
+            "start": 318,
+            "end": 324
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 325,
+            "end": 326
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 326,
+            "end": 327
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 327,
+            "end": 328
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 329,
+            "end": 330
         },
         {
             "kind": "Identifier",
             "text": "*",
-            "start": 321,
-            "end": 322
+            "start": 330,
+            "end": 331
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 332,
+            "end": 333
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 334,
+            "end": 335
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 335,
+            "end": 336
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 336,
+            "end": 337
+        },
+        {
+            "kind": "Identifier",
+            "text": "numbers",
+            "start": 338,
+            "end": 345
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 345,
+            "end": 346
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 346,
+            "end": 347
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 375,
+            "end": 376
+        },
+        {
+            "kind": "Keyword",
+            "text": "define",
+            "start": 376,
+            "end": 382
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 383,
+            "end": 384
+        },
+        {
+            "kind": "Identifier",
+            "text": "apply-twice",
+            "start": 384,
+            "end": 395
+        },
+        {
+            "kind": "Identifier",
+            "text": "f",
+            "start": 396,
+            "end": 397
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 398,
+            "end": 399
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 399,
+            "end": 400
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 405,
+            "end": 406
+        },
+        {
+            "kind": "Identifier",
+            "text": "f",
+            "start": 406,
+            "end": 407
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 408,
+            "end": 409
+        },
+        {
+            "kind": "Identifier",
+            "text": "f",
+            "start": 409,
+            "end": 410
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 411,
+            "end": 412
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 412,
+            "end": 413
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 413,
+            "end": 414
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 414,
+            "end": 415
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 417,
+            "end": 418
+        },
+        {
+            "kind": "Keyword",
+            "text": "define",
+            "start": 418,
+            "end": 424
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 425,
+            "end": 426
+        },
+        {
+            "kind": "Identifier",
+            "text": "add-one",
+            "start": 426,
+            "end": 433
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 434,
+            "end": 435
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 435,
+            "end": 436
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 437,
+            "end": 438
+        },
+        {
+            "kind": "Identifier",
+            "text": "+",
+            "start": 438,
+            "end": 439
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 440,
+            "end": 441
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 442,
+            "end": 443
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 443,
+            "end": 444
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 444,
+            "end": 445
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 467,
+            "end": 468
+        },
+        {
+            "kind": "Identifier",
+            "text": "display",
+            "start": 468,
+            "end": 475
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Factorial of 5: \"",
+            "start": 476,
+            "end": 494
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 494,
+            "end": 495
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 496,
+            "end": 497
+        },
+        {
+            "kind": "Identifier",
+            "text": "display",
+            "start": 497,
+            "end": 504
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 505,
+            "end": 506
+        },
+        {
+            "kind": "Identifier",
+            "text": "factorial",
+            "start": 506,
+            "end": 515
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 516,
+            "end": 517
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 517,
+            "end": 518
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 518,
+            "end": 519
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 520,
+            "end": 521
+        },
+        {
+            "kind": "Identifier",
+            "text": "newline",
+            "start": 521,
+            "end": 528
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 528,
+            "end": 529
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 531,
+            "end": 532
+        },
+        {
+            "kind": "Identifier",
+            "text": "display",
+            "start": 532,
+            "end": 539
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Fibonacci of 10: \"",
+            "start": 540,
+            "end": 559
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 559,
+            "end": 560
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 561,
+            "end": 562
+        },
+        {
+            "kind": "Identifier",
+            "text": "display",
+            "start": 562,
+            "end": 569
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 570,
+            "end": 571
+        },
+        {
+            "kind": "Identifier",
+            "text": "fibonacci",
+            "start": 571,
+            "end": 580
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 581,
+            "end": 583
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 583,
+            "end": 584
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 584,
+            "end": 585
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 586,
+            "end": 587
+        },
+        {
+            "kind": "Identifier",
+            "text": "newline",
+            "start": 587,
+            "end": 594
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 594,
+            "end": 595
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 597,
+            "end": 598
+        },
+        {
+            "kind": "Identifier",
+            "text": "display",
+            "start": 598,
+            "end": 605
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Squares: \"",
+            "start": 606,
+            "end": 617
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 617,
+            "end": 618
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 619,
+            "end": 620
+        },
+        {
+            "kind": "Identifier",
+            "text": "display",
+            "start": 620,
+            "end": 627
+        },
+        {
+            "kind": "Identifier",
+            "text": "squares",
+            "start": 628,
+            "end": 635
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 635,
+            "end": 636
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 637,
+            "end": 638
+        },
+        {
+            "kind": "Identifier",
+            "text": "newline",
+            "start": 638,
+            "end": 645
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 645,
+            "end": 646
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 648,
+            "end": 649
+        },
+        {
+            "kind": "Identifier",
+            "text": "display",
+            "start": 649,
+            "end": 656
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Apply twice add-one to 3: \"",
+            "start": 657,
+            "end": 685
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 685,
+            "end": 686
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 687,
+            "end": 688
+        },
+        {
+            "kind": "Identifier",
+            "text": "display",
+            "start": 688,
+            "end": 695
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 696,
+            "end": 697
+        },
+        {
+            "kind": "Identifier",
+            "text": "apply-twice",
+            "start": 697,
+            "end": 708
+        },
+        {
+            "kind": "Identifier",
+            "text": "add-one",
+            "start": 709,
+            "end": 716
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 717,
+            "end": 718
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 718,
+            "end": 719
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 719,
+            "end": 720
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 721,
+            "end": 722
+        },
+        {
+            "kind": "Identifier",
+            "text": "newline",
+            "start": 722,
+            "end": 729
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 729,
+            "end": 730
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 731,
+            "end": 731
         }
     ],
     "errors": []

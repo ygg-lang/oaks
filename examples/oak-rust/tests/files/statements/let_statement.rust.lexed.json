@@ -3,7 +3,7 @@
     "count": 12,
     "tokens": [
         {
-            "kind": "Keyword(Fn)",
+            "kind": "Fn",
             "text": "fn",
             "start": 0,
             "end": 2
@@ -33,46 +33,46 @@
             "end": 11
         },
         {
-            "kind": "Keyword(Let)",
+            "kind": "Let",
             "text": "let",
-            "start": 17,
-            "end": 20
+            "start": 16,
+            "end": 19
         },
         {
             "kind": "Identifier",
             "text": "x",
-            "start": 21,
-            "end": 22
+            "start": 20,
+            "end": 21
         },
         {
             "kind": "Eq",
             "text": "=",
-            "start": 23,
-            "end": 24
+            "start": 22,
+            "end": 23
         },
         {
             "kind": "IntegerLiteral",
             "text": "42",
-            "start": 25,
-            "end": 27
+            "start": 24,
+            "end": 26
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 27,
-            "end": 28
+            "start": 26,
+            "end": 27
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 30,
-            "end": 31
+            "start": 28,
+            "end": 29
         },
         {
             "kind": "Eof",
             "text": "",
-            "start": 31,
-            "end": 31
+            "start": 29,
+            "end": 29
         }
     ],
     "errors": []

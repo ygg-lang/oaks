@@ -1,103 +1,25 @@
 {
-  "success": true,
-  "node_count": 15,
-  "ast_structure": {
-    "kind": "DejavuRoot",
-    "children": [
-      {
-        "kind": "Micro",
+    "success": true,
+    "node_count": 3,
+    "ast_structure": {
+        "kind": "Root",
         "children": [
-          {
-            "kind": "ParameterList",
-            "children": [
-              {
-                "kind": "Leaves(3)",
-                "children": [],
-                "text_length": 3,
-                "is_leaf": true
-              }
-            ],
-            "text_length": 3,
-            "is_leaf": false
-          },
-          {
-            "kind": "BlockExpression",
-            "children": [
-              {
-                "kind": "ExpressionStatement",
+            {
+                "kind": "TemplateText",
                 "children": [
-                  {
-                    "kind": "CallExpression",
-                    "children": [
-                      {
-                        "kind": "IdentifierExpression",
-                        "children": [
-                          {
-                            "kind": "Leaves(1)",
-                            "children": [],
-                            "text_length": 7,
-                            "is_leaf": true
-                          }
-                        ],
-                        "text_length": 7,
-                        "is_leaf": false
-                      },
-                      {
-                        "kind": "LiteralExpression",
-                        "children": [
-                          {
-                            "kind": "Leaves(2)",
-                            "children": [],
-                            "text_length": 12,
-                            "is_leaf": true
-                          }
-                        ],
-                        "text_length": 12,
-                        "is_leaf": false
-                      },
-                      {
-                        "kind": "Leaves(2)",
+                    {
+                        "kind": "Leaves(1)",
                         "children": [],
-                        "text_length": 2,
+                        "text_length": 38,
                         "is_leaf": true
-                      }
-                    ],
-                    "text_length": 21,
-                    "is_leaf": false
-                  },
-                  {
-                    "kind": "Leaves(2)",
-                    "children": [],
-                    "text_length": 3,
-                    "is_leaf": true
-                  }
+                    }
                 ],
-                "text_length": 24,
+                "text_length": 38,
                 "is_leaf": false
-              },
-              {
-                "kind": "Leaves(3)",
-                "children": [],
-                "text_length": 8,
-                "is_leaf": true
-              }
-            ],
-            "text_length": 32,
-            "is_leaf": false
-          },
-          {
-            "kind": "Leaves(3)",
-            "children": [],
-            "text_length": 10,
-            "is_leaf": true
-          }
+            }
         ],
-        "text_length": 45,
+        "text_length": 38,
         "is_leaf": false
-      }
-    ],
-    "text_length": 45,
-    "is_leaf": false
-  },
-  "errors": []
+    },
+    "errors": []
 }

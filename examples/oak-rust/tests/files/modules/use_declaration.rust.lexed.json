@@ -3,7 +3,7 @@
     "count": 8,
     "tokens": [
         {
-            "kind": "Keyword(Use)",
+            "kind": "Use",
             "text": "use",
             "start": 0,
             "end": 3

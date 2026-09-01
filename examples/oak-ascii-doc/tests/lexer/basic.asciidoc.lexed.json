@@ -1,6 +1,6 @@
 {
     "success": true,
-    "count": 75,
+    "count": 374,
     "tokens": [
         {
             "kind": "Header1",
@@ -10,447 +10,2241 @@
         },
         {
             "kind": "Text",
-            "text": "Document Title",
+            "text": "Comprehensive",
             "start": 2,
-            "end": 16
-        },
-        {
-            "kind": "Colon",
-            "text": ":",
-            "start": 18,
-            "end": 19
+            "end": 15
         },
         {
             "kind": "Text",
-            "text": "author",
-            "start": 19,
-            "end": 25
+            "text": "AsciiDoc",
+            "start": 16,
+            "end": 24
         },
         {
-            "kind": "Colon",
-            "text": ":",
+            "kind": "Text",
+            "text": "Test",
             "start": 25,
-            "end": 26
+            "end": 29
         },
         {
             "kind": "Text",
-            "text": "Test Author",
-            "start": 27,
-            "end": 38
+            "text": "Author",
+            "start": 30,
+            "end": 36
         },
         {
-            "kind": "Colon",
-            "text": ":",
-            "start": 40,
+            "kind": "Text",
+            "text": "Name",
+            "start": 37,
             "end": 41
         },
         {
             "kind": "Text",
-            "text": "email",
-            "start": 41,
-            "end": 46
-        },
-        {
-            "kind": "Colon",
-            "text": ":",
-            "start": 46,
-            "end": 47
-        },
-        {
-            "kind": "Text",
-            "text": "test",
-            "start": 48,
-            "end": 52
-        },
-        {
-            "kind": "Text",
-            "text": "example",
-            "start": 53,
-            "end": 60
+            "text": "author@example",
+            "start": 43,
+            "end": 57
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 60,
-            "end": 61
+            "start": 57,
+            "end": 58
         },
         {
             "kind": "Text",
-            "text": "com",
-            "start": 61,
-            "end": 64
+            "text": "com>",
+            "start": 58,
+            "end": 62
         },
         {
-            "kind": "Colon",
-            "text": ":",
+            "kind": "Text",
+            "text": "v1",
+            "start": 63,
+            "end": 65
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 65,
+            "end": 66
+        },
+        {
+            "kind": "Text",
+            "text": "0",
             "start": 66,
             "end": 67
         },
         {
-            "kind": "Text",
-            "text": "toc",
+            "kind": "Comma",
+            "text": ",",
             "start": 67,
-            "end": 70
+            "end": 68
+        },
+        {
+            "kind": "Text",
+            "text": "2023",
+            "start": 69,
+            "end": 73
+        },
+        {
+            "kind": "Text",
+            "text": "10",
+            "start": 74,
+            "end": 76
+        },
+        {
+            "kind": "Text",
+            "text": "27",
+            "start": 77,
+            "end": 79
         },
         {
             "kind": "Colon",
             "text": ":",
-            "start": 70,
-            "end": 71
+            "start": 79,
+            "end": 80
+        },
+        {
+            "kind": "Text",
+            "text": "Draft",
+            "start": 81,
+            "end": 86
+        },
+        {
+            "kind": "AttributeMarker",
+            "text": ":toc:",
+            "start": 87,
+            "end": 92
+        },
+        {
+            "kind": "Text",
+            "text": "left",
+            "start": 93,
+            "end": 97
+        },
+        {
+            "kind": "AttributeMarker",
+            "text": ":icons:",
+            "start": 98,
+            "end": 105
+        },
+        {
+            "kind": "Text",
+            "text": "font",
+            "start": 106,
+            "end": 110
+        },
+        {
+            "kind": "AttributeMarker",
+            "text": ":source-highlighter:",
+            "start": 111,
+            "end": 131
+        },
+        {
+            "kind": "Text",
+            "text": "highlightjs",
+            "start": 132,
+            "end": 143
+        },
+        {
+            "kind": "AttributeMarker",
+            "text": ":sectnums:",
+            "start": 144,
+            "end": 154
+        },
+        {
+            "kind": "AttributeMarker",
+            "text": ":experimental:",
+            "start": 155,
+            "end": 169
         },
         {
             "kind": "Header2",
             "text": "==",
-            "start": 75,
-            "end": 77
+            "start": 171,
+            "end": 173
         },
         {
             "kind": "Text",
-            "text": "Introduction",
-            "start": 78,
-            "end": 90
-        },
-        {
-            "kind": "Text",
-            "text": "This is a test document for AsciiDoc lexer testing",
-            "start": 94,
-            "end": 144
-        },
-        {
-            "kind": "Dot",
-            "text": ".",
-            "start": 144,
-            "end": 145
-        },
-        {
-            "kind": "Header3",
-            "text": "===",
-            "start": 149,
-            "end": 152
-        },
-        {
-            "kind": "Text",
-            "text": "Features",
-            "start": 153,
-            "end": 161
-        },
-        {
-            "kind": "ItalicMarker",
-            "text": "*",
-            "start": 165,
-            "end": 166
-        },
-        {
-            "kind": "Text",
-            "text": "Bullet point 1",
-            "start": 167,
-            "end": 181
-        },
-        {
-            "kind": "ItalicMarker",
-            "text": "*",
-            "start": 183,
+            "text": "Formatting",
+            "start": 174,
             "end": 184
         },
         {
             "kind": "Text",
-            "text": "Bullet point 2",
+            "text": "Basics",
             "start": 185,
+            "end": 191
+        },
+        {
+            "kind": "Text",
+            "text": "Bold",
+            "start": 193,
+            "end": 197
+        },
+        {
+            "kind": "BoldMarker",
+            "text": "*",
+            "start": 198,
             "end": 199
         },
         {
-            "kind": "ItalicMarker",
+            "kind": "Text",
+            "text": "text",
+            "start": 199,
+            "end": 203
+        },
+        {
+            "kind": "BoldMarker",
             "text": "*",
-            "start": 201,
-            "end": 202
-        },
-        {
-            "kind": "Text",
-            "text": "Bullet point 3",
             "start": 203,
-            "end": 217
+            "end": 204
         },
         {
-            "kind": "Header2",
-            "text": "==",
-            "start": 221,
-            "end": 223
+            "kind": "Comma",
+            "text": ",",
+            "start": 204,
+            "end": 205
         },
         {
             "kind": "Text",
-            "text": "Code Example",
-            "start": 224,
+            "text": "italic",
+            "start": 206,
+            "end": 212
+        },
+        {
+            "kind": "ItalicMarker",
+            "text": "_",
+            "start": 213,
+            "end": 214
+        },
+        {
+            "kind": "Text",
+            "text": "text",
+            "start": 214,
+            "end": 218
+        },
+        {
+            "kind": "ItalicMarker",
+            "text": "_",
+            "start": 218,
+            "end": 219
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 219,
+            "end": 220
+        },
+        {
+            "kind": "Text",
+            "text": "monospace",
+            "start": 221,
+            "end": 230
+        },
+        {
+            "kind": "MonospaceMarker",
+            "text": "`",
+            "start": 231,
+            "end": 232
+        },
+        {
+            "kind": "Text",
+            "text": "text",
+            "start": 232,
             "end": 236
         },
         {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 240,
-            "end": 241
-        },
-        {
-            "kind": "Text",
-            "text": "source",
-            "start": 241,
-            "end": 247
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 247,
-            "end": 248
-        },
-        {
-            "kind": "Text",
-            "text": "rust",
-            "start": 248,
-            "end": 252
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 252,
-            "end": 253
-        },
-        {
-            "kind": "CodeBlockMarker",
-            "text": "----",
-            "start": 255,
-            "end": 259
-        },
-        {
-            "kind": "Text",
-            "text": "fn main",
-            "start": 261,
-            "end": 268
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 268,
-            "end": 269
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 269,
-            "end": 270
-        },
-        {
-            "kind": "Text",
-            "text": "println",
-            "start": 278,
-            "end": 285
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 286,
-            "end": 287
-        },
-        {
-            "kind": "Text",
-            "text": "Hello",
-            "start": 288,
-            "end": 293
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 293,
-            "end": 294
-        },
-        {
-            "kind": "Text",
-            "text": "World",
-            "start": 295,
-            "end": 300
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 302,
-            "end": 303
-        },
-        {
-            "kind": "CodeBlockMarker",
-            "text": "----",
-            "start": 309,
-            "end": 313
-        },
-        {
-            "kind": "Header2",
-            "text": "==",
-            "start": 317,
-            "end": 319
-        },
-        {
-            "kind": "Text",
-            "text": "Table Example",
-            "start": 320,
-            "end": 333
-        },
-        {
-            "kind": "Header3",
-            "text": "===",
-            "start": 338,
-            "end": 341
-        },
-        {
-            "kind": "Text",
-            "text": "Column 1 ",
-            "start": 345,
-            "end": 354
-        },
-        {
-            "kind": "Text",
-            "text": "Column 2 ",
-            "start": 356,
-            "end": 365
-        },
-        {
-            "kind": "Text",
-            "text": "Column 3",
-            "start": 367,
-            "end": 375
-        },
-        {
-            "kind": "Text",
-            "text": "Cell 1",
-            "start": 381,
-            "end": 387
-        },
-        {
-            "kind": "Text",
-            "text": "Cell 2",
-            "start": 391,
-            "end": 397
-        },
-        {
-            "kind": "Text",
-            "text": "Cell 3",
-            "start": 401,
-            "end": 407
-        },
-        {
-            "kind": "Header3",
-            "text": "===",
-            "start": 410,
-            "end": 413
-        },
-        {
-            "kind": "Header2",
-            "text": "==",
-            "start": 417,
-            "end": 419
-        },
-        {
-            "kind": "Text",
-            "text": "Links and References",
-            "start": 420,
-            "end": 440
-        },
-        {
-            "kind": "ItalicMarker",
-            "text": "*",
-            "start": 444,
-            "end": 445
-        },
-        {
-            "kind": "Text",
-            "text": "https",
-            "start": 446,
-            "end": 451
-        },
-        {
-            "kind": "Colon",
-            "text": ":",
-            "start": 451,
-            "end": 452
-        },
-        {
-            "kind": "ItalicMarker",
-            "text": "*",
-            "start": 482,
-            "end": 483
-        },
-        {
-            "kind": "Text",
-            "text": "introduction",
-            "start": 486,
-            "end": 498
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 498,
-            "end": 499
-        },
-        {
-            "kind": "Text",
-            "text": "Internal Reference",
-            "start": 499,
-            "end": 517
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 547,
-            "end": 548
-        },
-        {
-            "kind": "Text",
-            "text": "custom",
-            "start": 549,
-            "end": 555
-        },
-        {
-            "kind": "ListMarker",
-            "text": "-",
-            "start": 555,
-            "end": 556
-        },
-        {
-            "kind": "Text",
-            "text": "id",
-            "start": 556,
-            "end": 558
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 558,
-            "end": 559
-        },
-        {
-            "kind": "Header2",
-            "text": "==",
-            "start": 561,
-            "end": 563
-        },
-        {
-            "kind": "Text",
-            "text": "Custom ID Section",
-            "start": 564,
-            "end": 581
-        },
-        {
-            "kind": "Text",
-            "text": "This section has a custom ID",
-            "start": 585,
-            "end": 613
+            "kind": "MonospaceMarker",
+            "text": "`",
+            "start": 236,
+            "end": 237
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 613,
-            "end": 614
+            "start": 237,
+            "end": 238
+        },
+        {
+            "kind": "Text",
+            "text": "Curved",
+            "start": 239,
+            "end": 245
+        },
+        {
+            "kind": "Text",
+            "text": "quotes",
+            "start": 246,
+            "end": 252
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 252,
+            "end": 253
+        },
+        {
+            "kind": "Text",
+            "text": "\"",
+            "start": 254,
+            "end": 255
+        },
+        {
+            "kind": "MonospaceMarker",
+            "text": "`",
+            "start": 255,
+            "end": 256
+        },
+        {
+            "kind": "Text",
+            "text": "double",
+            "start": 256,
+            "end": 262
+        },
+        {
+            "kind": "MonospaceMarker",
+            "text": "`",
+            "start": 262,
+            "end": 263
+        },
+        {
+            "kind": "Text",
+            "text": "\"",
+            "start": 263,
+            "end": 264
+        },
+        {
+            "kind": "Text",
+            "text": "and",
+            "start": 265,
+            "end": 268
+        },
+        {
+            "kind": "Text",
+            "text": "'",
+            "start": 269,
+            "end": 270
+        },
+        {
+            "kind": "MonospaceMarker",
+            "text": "`",
+            "start": 270,
+            "end": 271
+        },
+        {
+            "kind": "Text",
+            "text": "single",
+            "start": 271,
+            "end": 277
+        },
+        {
+            "kind": "MonospaceMarker",
+            "text": "`",
+            "start": 277,
+            "end": 278
+        },
+        {
+            "kind": "Text",
+            "text": "'",
+            "start": 278,
+            "end": 279
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 279,
+            "end": 280
+        },
+        {
+            "kind": "Text",
+            "text": "Replacements",
+            "start": 281,
+            "end": 293
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 293,
+            "end": 294
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 295,
+            "end": 296
+        },
+        {
+            "kind": "Text",
+            "text": "C",
+            "start": 296,
+            "end": 297
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 297,
+            "end": 298
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 299,
+            "end": 300
+        },
+        {
+            "kind": "Text",
+            "text": "R",
+            "start": 300,
+            "end": 301
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 301,
+            "end": 302
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 303,
+            "end": 304
+        },
+        {
+            "kind": "Text",
+            "text": "TM",
+            "start": 304,
+            "end": 306
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 306,
+            "end": 307
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 311,
+            "end": 312
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 312,
+            "end": 313
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 313,
+            "end": 314
+        },
+        {
+            "kind": "Text",
+            "text": ">",
+            "start": 316,
+            "end": 317
+        },
+        {
+            "kind": "Text",
+            "text": ">",
+            "start": 322,
+            "end": 323
+        },
+        {
+            "kind": "Header2",
+            "text": "==",
+            "start": 328,
+            "end": 330
+        },
+        {
+            "kind": "Text",
+            "text": "Lists",
+            "start": 331,
+            "end": 336
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 338,
+            "end": 339
+        },
+        {
+            "kind": "Text",
+            "text": "Unordered",
+            "start": 339,
+            "end": 348
+        },
+        {
+            "kind": "ListMarker",
+            "text": "*",
+            "start": 349,
+            "end": 350
+        },
+        {
+            "kind": "Text",
+            "text": "Level",
+            "start": 351,
+            "end": 356
+        },
+        {
+            "kind": "Text",
+            "text": "1",
+            "start": 357,
+            "end": 358
+        },
+        {
+            "kind": "ListMarker",
+            "text": "**",
+            "start": 359,
+            "end": 361
+        },
+        {
+            "kind": "Text",
+            "text": "Level",
+            "start": 362,
+            "end": 367
+        },
+        {
+            "kind": "Text",
+            "text": "2",
+            "start": 368,
+            "end": 369
+        },
+        {
+            "kind": "ListMarker",
+            "text": "***",
+            "start": 370,
+            "end": 373
+        },
+        {
+            "kind": "Text",
+            "text": "Level",
+            "start": 374,
+            "end": 379
+        },
+        {
+            "kind": "Text",
+            "text": "3",
+            "start": 380,
+            "end": 381
+        },
+        {
+            "kind": "ListMarker",
+            "text": "*",
+            "start": 382,
+            "end": 383
+        },
+        {
+            "kind": "Text",
+            "text": "Level",
+            "start": 384,
+            "end": 389
+        },
+        {
+            "kind": "Text",
+            "text": "1",
+            "start": 390,
+            "end": 391
+        },
+        {
+            "kind": "Text",
+            "text": "again",
+            "start": 392,
+            "end": 397
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 399,
+            "end": 400
+        },
+        {
+            "kind": "Text",
+            "text": "Ordered",
+            "start": 400,
+            "end": 407
+        },
+        {
+            "kind": "ListMarker",
+            "text": ".",
+            "start": 408,
+            "end": 409
+        },
+        {
+            "kind": "Text",
+            "text": "Step",
+            "start": 410,
+            "end": 414
+        },
+        {
+            "kind": "Text",
+            "text": "1",
+            "start": 415,
+            "end": 416
+        },
+        {
+            "kind": "ListMarker",
+            "text": ".",
+            "start": 417,
+            "end": 418
+        },
+        {
+            "kind": "Text",
+            "text": "Step",
+            "start": 419,
+            "end": 423
+        },
+        {
+            "kind": "Text",
+            "text": "2",
+            "start": 424,
+            "end": 425
+        },
+        {
+            "kind": "ListMarker",
+            "text": "..",
+            "start": 426,
+            "end": 428
+        },
+        {
+            "kind": "Text",
+            "text": "Step",
+            "start": 429,
+            "end": 433
+        },
+        {
+            "kind": "Text",
+            "text": "2a",
+            "start": 434,
+            "end": 436
+        },
+        {
+            "kind": "ListMarker",
+            "text": "..",
+            "start": 437,
+            "end": 439
+        },
+        {
+            "kind": "Text",
+            "text": "Step",
+            "start": 440,
+            "end": 444
+        },
+        {
+            "kind": "Text",
+            "text": "2b",
+            "start": 445,
+            "end": 447
+        },
+        {
+            "kind": "ListMarker",
+            "text": ".",
+            "start": 448,
+            "end": 449
+        },
+        {
+            "kind": "Text",
+            "text": "Step",
+            "start": 450,
+            "end": 454
+        },
+        {
+            "kind": "Text",
+            "text": "3",
+            "start": 455,
+            "end": 456
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 458,
+            "end": 459
+        },
+        {
+            "kind": "Text",
+            "text": "Checklist",
+            "start": 459,
+            "end": 468
+        },
+        {
+            "kind": "ListMarker",
+            "text": "-",
+            "start": 469,
+            "end": 470
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 471,
+            "end": 472
+        },
+        {
+            "kind": "BoldMarker",
+            "text": "*",
+            "start": 472,
+            "end": 473
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 473,
+            "end": 474
+        },
+        {
+            "kind": "Text",
+            "text": "Checked",
+            "start": 475,
+            "end": 482
+        },
+        {
+            "kind": "ListMarker",
+            "text": "-",
+            "start": 483,
+            "end": 484
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 485,
+            "end": 486
+        },
+        {
+            "kind": "Text",
+            "text": "x",
+            "start": 486,
+            "end": 487
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 487,
+            "end": 488
+        },
+        {
+            "kind": "Text",
+            "text": "Also",
+            "start": 489,
+            "end": 493
+        },
+        {
+            "kind": "Text",
+            "text": "checked",
+            "start": 494,
+            "end": 501
+        },
+        {
+            "kind": "ListMarker",
+            "text": "-",
+            "start": 502,
+            "end": 503
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 504,
+            "end": 505
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 506,
+            "end": 507
+        },
+        {
+            "kind": "Text",
+            "text": "Not",
+            "start": 508,
+            "end": 511
+        },
+        {
+            "kind": "Text",
+            "text": "checked",
+            "start": 512,
+            "end": 519
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 521,
+            "end": 522
+        },
+        {
+            "kind": "Text",
+            "text": "Description",
+            "start": 522,
+            "end": 533
+        },
+        {
+            "kind": "Text",
+            "text": "List",
+            "start": 534,
+            "end": 538
+        },
+        {
+            "kind": "Text",
+            "text": "Term",
+            "start": 539,
+            "end": 543
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 543,
+            "end": 544
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 544,
+            "end": 545
+        },
+        {
+            "kind": "Text",
+            "text": "Definition",
+            "start": 546,
+            "end": 556
+        },
+        {
+            "kind": "Text",
+            "text": "Term",
+            "start": 557,
+            "end": 561
+        },
+        {
+            "kind": "Text",
+            "text": "2",
+            "start": 562,
+            "end": 563
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 563,
+            "end": 564
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 564,
+            "end": 565
+        },
+        {
+            "kind": "Text",
+            "text": "Definition",
+            "start": 566,
+            "end": 576
+        },
+        {
+            "kind": "Text",
+            "text": "2",
+            "start": 577,
+            "end": 578
+        },
+        {
+            "kind": "Header2",
+            "text": "==",
+            "start": 580,
+            "end": 582
+        },
+        {
+            "kind": "Text",
+            "text": "Blocks",
+            "start": 583,
+            "end": 589
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 591,
+            "end": 592
+        },
+        {
+            "kind": "Text",
+            "text": "Source",
+            "start": 592,
+            "end": 598
+        },
+        {
+            "kind": "Text",
+            "text": "Code",
+            "start": 599,
+            "end": 603
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 604,
+            "end": 605
+        },
+        {
+            "kind": "Text",
+            "text": "source",
+            "start": 605,
+            "end": 611
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 611,
+            "end": 612
+        },
+        {
+            "kind": "Text",
+            "text": "rust",
+            "start": 612,
+            "end": 616
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 616,
+            "end": 617
+        },
+        {
+            "kind": "Text",
+            "text": "linenums",
+            "start": 617,
+            "end": 625
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 625,
+            "end": 626
+        },
+        {
+            "kind": "CodeBlockMarker",
+            "text": "----",
+            "start": 627,
+            "end": 631
+        },
+        {
+            "kind": "Text",
+            "text": "fn",
+            "start": 632,
+            "end": 634
+        },
+        {
+            "kind": "Text",
+            "text": "main",
+            "start": 635,
+            "end": 639
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 639,
+            "end": 640
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 640,
+            "end": 641
+        },
+        {
+            "kind": "Text",
+            "text": "{",
+            "start": 642,
+            "end": 643
+        },
+        {
+            "kind": "Text",
+            "text": "println!",
+            "start": 648,
+            "end": 656
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 656,
+            "end": 657
+        },
+        {
+            "kind": "Text",
+            "text": "\"Hello",
+            "start": 657,
+            "end": 663
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 663,
+            "end": 664
+        },
+        {
+            "kind": "Text",
+            "text": "World!\"",
+            "start": 665,
+            "end": 672
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 672,
+            "end": 673
+        },
+        {
+            "kind": "Text",
+            "text": ";",
+            "start": 673,
+            "end": 674
+        },
+        {
+            "kind": "Text",
+            "text": "}",
+            "start": 675,
+            "end": 676
+        },
+        {
+            "kind": "CodeBlockMarker",
+            "text": "----",
+            "start": 677,
+            "end": 681
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 683,
+            "end": 684
+        },
+        {
+            "kind": "Text",
+            "text": "Admonitions",
+            "start": 684,
+            "end": 695
+        },
+        {
+            "kind": "AdmonitionMarker",
+            "text": "NOTE:",
+            "start": 696,
+            "end": 701
+        },
+        {
+            "kind": "Text",
+            "text": "This",
+            "start": 702,
+            "end": 706
+        },
+        {
+            "kind": "Text",
+            "text": "is",
+            "start": 707,
+            "end": 709
+        },
+        {
+            "kind": "Text",
+            "text": "a",
+            "start": 710,
+            "end": 711
+        },
+        {
+            "kind": "Text",
+            "text": "note",
+            "start": 712,
+            "end": 716
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 716,
+            "end": 717
+        },
+        {
+            "kind": "AdmonitionMarker",
+            "text": "TIP:",
+            "start": 719,
+            "end": 723
+        },
+        {
+            "kind": "Text",
+            "text": "Pro",
+            "start": 724,
+            "end": 727
+        },
+        {
+            "kind": "Text",
+            "text": "tip",
+            "start": 728,
+            "end": 731
+        },
+        {
+            "kind": "Text",
+            "text": "here",
+            "start": 732,
+            "end": 736
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 736,
+            "end": 737
+        },
+        {
+            "kind": "AdmonitionMarker",
+            "text": "IMPORTANT:",
+            "start": 739,
+            "end": 749
+        },
+        {
+            "kind": "Text",
+            "text": "Do",
+            "start": 750,
+            "end": 752
+        },
+        {
+            "kind": "Text",
+            "text": "not",
+            "start": 753,
+            "end": 756
+        },
+        {
+            "kind": "Text",
+            "text": "forget",
+            "start": 757,
+            "end": 763
+        },
+        {
+            "kind": "Text",
+            "text": "this",
+            "start": 764,
+            "end": 768
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 768,
+            "end": 769
+        },
+        {
+            "kind": "AdmonitionMarker",
+            "text": "WARNING:",
+            "start": 771,
+            "end": 779
+        },
+        {
+            "kind": "Text",
+            "text": "Watch",
+            "start": 780,
+            "end": 785
+        },
+        {
+            "kind": "Text",
+            "text": "out!",
+            "start": 786,
+            "end": 790
+        },
+        {
+            "kind": "AdmonitionMarker",
+            "text": "CAUTION:",
+            "start": 792,
+            "end": 800
+        },
+        {
+            "kind": "Text",
+            "text": "Handle",
+            "start": 801,
+            "end": 807
+        },
+        {
+            "kind": "Text",
+            "text": "with",
+            "start": 808,
+            "end": 812
+        },
+        {
+            "kind": "Text",
+            "text": "care",
+            "start": 813,
+            "end": 817
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 817,
+            "end": 818
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 820,
+            "end": 821
+        },
+        {
+            "kind": "Text",
+            "text": "Sidebar",
+            "start": 821,
+            "end": 828
+        },
+        {
+            "kind": "CodeBlockMarker",
+            "text": "****",
+            "start": 829,
+            "end": 833
+        },
+        {
+            "kind": "Text",
+            "text": "This",
+            "start": 834,
+            "end": 838
+        },
+        {
+            "kind": "Text",
+            "text": "is",
+            "start": 839,
+            "end": 841
+        },
+        {
+            "kind": "Text",
+            "text": "a",
+            "start": 842,
+            "end": 843
+        },
+        {
+            "kind": "Text",
+            "text": "sidebar",
+            "start": 844,
+            "end": 851
+        },
+        {
+            "kind": "Text",
+            "text": "block",
+            "start": 852,
+            "end": 857
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 857,
+            "end": 858
+        },
+        {
+            "kind": "Text",
+            "text": "It",
+            "start": 859,
+            "end": 861
+        },
+        {
+            "kind": "Text",
+            "text": "stands",
+            "start": 862,
+            "end": 868
+        },
+        {
+            "kind": "Text",
+            "text": "out",
+            "start": 869,
+            "end": 872
+        },
+        {
+            "kind": "Text",
+            "text": "from",
+            "start": 873,
+            "end": 877
+        },
+        {
+            "kind": "Text",
+            "text": "the",
+            "start": 878,
+            "end": 881
+        },
+        {
+            "kind": "Text",
+            "text": "rest",
+            "start": 882,
+            "end": 886
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 886,
+            "end": 887
+        },
+        {
+            "kind": "CodeBlockMarker",
+            "text": "****",
+            "start": 888,
+            "end": 892
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 894,
+            "end": 895
+        },
+        {
+            "kind": "Text",
+            "text": "Quote",
+            "start": 895,
+            "end": 900
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 901,
+            "end": 902
+        },
+        {
+            "kind": "Text",
+            "text": "quote",
+            "start": 902,
+            "end": 907
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 907,
+            "end": 908
+        },
+        {
+            "kind": "Text",
+            "text": "Einstein",
+            "start": 909,
+            "end": 917
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 917,
+            "end": 918
+        },
+        {
+            "kind": "Text",
+            "text": "Relativity",
+            "start": 919,
+            "end": 929
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 929,
+            "end": 930
+        },
+        {
+            "kind": "CodeBlockMarker",
+            "text": "____",
+            "start": 931,
+            "end": 935
+        },
+        {
+            "kind": "Text",
+            "text": "Time",
+            "start": 936,
+            "end": 940
+        },
+        {
+            "kind": "Text",
+            "text": "is",
+            "start": 941,
+            "end": 943
+        },
+        {
+            "kind": "Text",
+            "text": "relative",
+            "start": 944,
+            "end": 952
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 952,
+            "end": 953
+        },
+        {
+            "kind": "CodeBlockMarker",
+            "text": "____",
+            "start": 954,
+            "end": 958
+        },
+        {
+            "kind": "Header2",
+            "text": "==",
+            "start": 960,
+            "end": 962
+        },
+        {
+            "kind": "Text",
+            "text": "Tables",
+            "start": 963,
+            "end": 969
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 971,
+            "end": 972
+        },
+        {
+            "kind": "Text",
+            "text": "Table",
+            "start": 972,
+            "end": 977
+        },
+        {
+            "kind": "Text",
+            "text": "with",
+            "start": 978,
+            "end": 982
+        },
+        {
+            "kind": "Text",
+            "text": "formatting",
+            "start": 983,
+            "end": 993
+        },
+        {
+            "kind": "CodeBlockMarker",
+            "text": "|===",
+            "start": 994,
+            "end": 998
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 999,
+            "end": 1000
+        },
+        {
+            "kind": "Text",
+            "text": "Name",
+            "start": 1000,
+            "end": 1004
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1005,
+            "end": 1006
+        },
+        {
+            "kind": "Text",
+            "text": "Description",
+            "start": 1006,
+            "end": 1017
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1018,
+            "end": 1019
+        },
+        {
+            "kind": "Text",
+            "text": "Value",
+            "start": 1019,
+            "end": 1024
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1026,
+            "end": 1027
+        },
+        {
+            "kind": "Text",
+            "text": "Item",
+            "start": 1027,
+            "end": 1031
+        },
+        {
+            "kind": "Text",
+            "text": "1",
+            "start": 1032,
+            "end": 1033
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1034,
+            "end": 1035
+        },
+        {
+            "kind": "Text",
+            "text": "Description",
+            "start": 1035,
+            "end": 1046
+        },
+        {
+            "kind": "Text",
+            "text": "of",
+            "start": 1047,
+            "end": 1049
+        },
+        {
+            "kind": "BoldMarker",
+            "text": "*",
+            "start": 1050,
+            "end": 1051
+        },
+        {
+            "kind": "Text",
+            "text": "Item",
+            "start": 1051,
+            "end": 1055
+        },
+        {
+            "kind": "Text",
+            "text": "1",
+            "start": 1056,
+            "end": 1057
+        },
+        {
+            "kind": "BoldMarker",
+            "text": "*",
+            "start": 1057,
+            "end": 1058
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1059,
+            "end": 1060
+        },
+        {
+            "kind": "Text",
+            "text": "100",
+            "start": 1060,
+            "end": 1063
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1065,
+            "end": 1066
+        },
+        {
+            "kind": "Text",
+            "text": "Item",
+            "start": 1066,
+            "end": 1070
+        },
+        {
+            "kind": "Text",
+            "text": "2",
+            "start": 1071,
+            "end": 1072
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1073,
+            "end": 1074
+        },
+        {
+            "kind": "Text",
+            "text": "Description",
+            "start": 1074,
+            "end": 1085
+        },
+        {
+            "kind": "Text",
+            "text": "of",
+            "start": 1086,
+            "end": 1088
+        },
+        {
+            "kind": "ItalicMarker",
+            "text": "_",
+            "start": 1089,
+            "end": 1090
+        },
+        {
+            "kind": "Text",
+            "text": "Item",
+            "start": 1090,
+            "end": 1094
+        },
+        {
+            "kind": "Text",
+            "text": "2",
+            "start": 1095,
+            "end": 1096
+        },
+        {
+            "kind": "ItalicMarker",
+            "text": "_",
+            "start": 1096,
+            "end": 1097
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1098,
+            "end": 1099
+        },
+        {
+            "kind": "Text",
+            "text": "200",
+            "start": 1099,
+            "end": 1102
+        },
+        {
+            "kind": "CodeBlockMarker",
+            "text": "|===",
+            "start": 1103,
+            "end": 1107
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1109,
+            "end": 1110
+        },
+        {
+            "kind": "Text",
+            "text": "cols",
+            "start": 1110,
+            "end": 1114
+        },
+        {
+            "kind": "Text",
+            "text": "\"1",
+            "start": 1115,
+            "end": 1117
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1117,
+            "end": 1118
+        },
+        {
+            "kind": "Text",
+            "text": "2",
+            "start": 1118,
+            "end": 1119
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1119,
+            "end": 1120
+        },
+        {
+            "kind": "Text",
+            "text": "1\"",
+            "start": 1120,
+            "end": 1122
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1122,
+            "end": 1123
+        },
+        {
+            "kind": "CodeBlockMarker",
+            "text": "|===",
+            "start": 1124,
+            "end": 1128
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1129,
+            "end": 1130
+        },
+        {
+            "kind": "Text",
+            "text": "Cell",
+            "start": 1130,
+            "end": 1134
+        },
+        {
+            "kind": "Text",
+            "text": "1",
+            "start": 1135,
+            "end": 1136
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1136,
+            "end": 1137
+        },
+        {
+            "kind": "Text",
+            "text": "1",
+            "start": 1137,
+            "end": 1138
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1139,
+            "end": 1140
+        },
+        {
+            "kind": "Text",
+            "text": "Cell",
+            "start": 1140,
+            "end": 1144
+        },
+        {
+            "kind": "Text",
+            "text": "1",
+            "start": 1145,
+            "end": 1146
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1146,
+            "end": 1147
+        },
+        {
+            "kind": "Text",
+            "text": "2",
+            "start": 1147,
+            "end": 1148
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1149,
+            "end": 1150
+        },
+        {
+            "kind": "Text",
+            "text": "Cell",
+            "start": 1150,
+            "end": 1154
+        },
+        {
+            "kind": "Text",
+            "text": "1",
+            "start": 1155,
+            "end": 1156
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1156,
+            "end": 1157
+        },
+        {
+            "kind": "Text",
+            "text": "3",
+            "start": 1157,
+            "end": 1158
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1159,
+            "end": 1160
+        },
+        {
+            "kind": "Text",
+            "text": "Cell",
+            "start": 1160,
+            "end": 1164
+        },
+        {
+            "kind": "Text",
+            "text": "2",
+            "start": 1165,
+            "end": 1166
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1166,
+            "end": 1167
+        },
+        {
+            "kind": "Text",
+            "text": "1",
+            "start": 1167,
+            "end": 1168
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1169,
+            "end": 1170
+        },
+        {
+            "kind": "Text",
+            "text": "Cell",
+            "start": 1170,
+            "end": 1174
+        },
+        {
+            "kind": "Text",
+            "text": "2",
+            "start": 1175,
+            "end": 1176
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1176,
+            "end": 1177
+        },
+        {
+            "kind": "Text",
+            "text": "2",
+            "start": 1177,
+            "end": 1178
+        },
+        {
+            "kind": "TableDelimiter",
+            "text": "|",
+            "start": 1179,
+            "end": 1180
+        },
+        {
+            "kind": "Text",
+            "text": "Cell",
+            "start": 1180,
+            "end": 1184
+        },
+        {
+            "kind": "Text",
+            "text": "2",
+            "start": 1185,
+            "end": 1186
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1186,
+            "end": 1187
+        },
+        {
+            "kind": "Text",
+            "text": "3",
+            "start": 1187,
+            "end": 1188
+        },
+        {
+            "kind": "CodeBlockMarker",
+            "text": "|===",
+            "start": 1189,
+            "end": 1193
+        },
+        {
+            "kind": "Header2",
+            "text": "==",
+            "start": 1195,
+            "end": 1197
+        },
+        {
+            "kind": "Text",
+            "text": "UI",
+            "start": 1198,
+            "end": 1200
+        },
+        {
+            "kind": "Text",
+            "text": "Macros",
+            "start": 1201,
+            "end": 1207
+        },
+        {
+            "kind": "Text",
+            "text": "Press",
+            "start": 1209,
+            "end": 1214
+        },
+        {
+            "kind": "Text",
+            "text": "kbd",
+            "start": 1215,
+            "end": 1218
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1218,
+            "end": 1219
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1219,
+            "end": 1220
+        },
+        {
+            "kind": "Text",
+            "text": "Ctrl",
+            "start": 1220,
+            "end": 1224
+        },
+        {
+            "kind": "Text",
+            "text": "C",
+            "start": 1225,
+            "end": 1226
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1226,
+            "end": 1227
+        },
+        {
+            "kind": "Text",
+            "text": "to",
+            "start": 1228,
+            "end": 1230
+        },
+        {
+            "kind": "Text",
+            "text": "copy",
+            "start": 1231,
+            "end": 1235
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1235,
+            "end": 1236
+        },
+        {
+            "kind": "Text",
+            "text": "Select",
+            "start": 1237,
+            "end": 1243
+        },
+        {
+            "kind": "Text",
+            "text": "menu",
+            "start": 1244,
+            "end": 1248
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1248,
+            "end": 1249
+        },
+        {
+            "kind": "Text",
+            "text": "File",
+            "start": 1249,
+            "end": 1253
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1253,
+            "end": 1254
+        },
+        {
+            "kind": "Text",
+            "text": "Save",
+            "start": 1254,
+            "end": 1258
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1258,
+            "end": 1259
+        },
+        {
+            "kind": "Text",
+            "text": "to",
+            "start": 1260,
+            "end": 1262
+        },
+        {
+            "kind": "Text",
+            "text": "save",
+            "start": 1263,
+            "end": 1267
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1267,
+            "end": 1268
+        },
+        {
+            "kind": "Text",
+            "text": "Click",
+            "start": 1269,
+            "end": 1274
+        },
+        {
+            "kind": "Text",
+            "text": "btn",
+            "start": 1275,
+            "end": 1278
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1278,
+            "end": 1279
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1279,
+            "end": 1280
+        },
+        {
+            "kind": "Text",
+            "text": "OK",
+            "start": 1280,
+            "end": 1282
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1282,
+            "end": 1283
+        },
+        {
+            "kind": "Text",
+            "text": "to",
+            "start": 1284,
+            "end": 1286
+        },
+        {
+            "kind": "Text",
+            "text": "confirm",
+            "start": 1287,
+            "end": 1294
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1294,
+            "end": 1295
+        },
+        {
+            "kind": "Header2",
+            "text": "==",
+            "start": 1297,
+            "end": 1299
+        },
+        {
+            "kind": "Text",
+            "text": "Attributes",
+            "start": 1300,
+            "end": 1310
+        },
+        {
+            "kind": "Text",
+            "text": "and",
+            "start": 1311,
+            "end": 1314
+        },
+        {
+            "kind": "Text",
+            "text": "Includes",
+            "start": 1315,
+            "end": 1323
+        },
+        {
+            "kind": "AttributeMarker",
+            "text": ":my-var:",
+            "start": 1325,
+            "end": 1333
+        },
+        {
+            "kind": "Text",
+            "text": "custom",
+            "start": 1334,
+            "end": 1340
+        },
+        {
+            "kind": "Text",
+            "text": "value",
+            "start": 1341,
+            "end": 1346
+        },
+        {
+            "kind": "Text",
+            "text": "The",
+            "start": 1348,
+            "end": 1351
+        },
+        {
+            "kind": "Text",
+            "text": "value",
+            "start": 1352,
+            "end": 1357
+        },
+        {
+            "kind": "Text",
+            "text": "is",
+            "start": 1358,
+            "end": 1360
+        },
+        {
+            "kind": "Text",
+            "text": "{my",
+            "start": 1361,
+            "end": 1364
+        },
+        {
+            "kind": "Text",
+            "text": "var}",
+            "start": 1365,
+            "end": 1369
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1369,
+            "end": 1370
+        },
+        {
+            "kind": "Text",
+            "text": "ifdef",
+            "start": 1372,
+            "end": 1377
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1377,
+            "end": 1378
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1378,
+            "end": 1379
+        },
+        {
+            "kind": "Text",
+            "text": "env",
+            "start": 1379,
+            "end": 1382
+        },
+        {
+            "kind": "Text",
+            "text": "github",
+            "start": 1383,
+            "end": 1389
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1389,
+            "end": 1390
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1390,
+            "end": 1391
+        },
+        {
+            "kind": "Text",
+            "text": "This",
+            "start": 1392,
+            "end": 1396
+        },
+        {
+            "kind": "Text",
+            "text": "is",
+            "start": 1397,
+            "end": 1399
+        },
+        {
+            "kind": "Text",
+            "text": "GitHub",
+            "start": 1400,
+            "end": 1406
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1406,
+            "end": 1407
+        },
+        {
+            "kind": "Text",
+            "text": "endif",
+            "start": 1408,
+            "end": 1413
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1413,
+            "end": 1414
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1414,
+            "end": 1415
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1415,
+            "end": 1416
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1416,
+            "end": 1417
+        },
+        {
+            "kind": "Text",
+            "text": "include",
+            "start": 1419,
+            "end": 1426
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1426,
+            "end": 1427
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1427,
+            "end": 1428
+        },
+        {
+            "kind": "Text",
+            "text": "footer",
+            "start": 1428,
+            "end": 1434
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1434,
+            "end": 1435
+        },
+        {
+            "kind": "Text",
+            "text": "adoc",
+            "start": 1435,
+            "end": 1439
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1439,
+            "end": 1440
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1440,
+            "end": 1441
         },
         {
             "kind": "Eof",
             "text": "",
-            "start": 614,
-            "end": 614
+            "start": 1442,
+            "end": 1442
         }
     ],
     "errors": []

@@ -3,13 +3,13 @@
     "count": 7,
     "tokens": [
         {
-            "kind": "Keyword(Pub)",
+            "kind": "Pub",
             "text": "pub",
             "start": 0,
             "end": 3
         },
         {
-            "kind": "Keyword(Use)",
+            "kind": "Use",
             "text": "use",
             "start": 4,
             "end": 7

@@ -3,7 +3,7 @@
     "count": 4,
     "tokens": [
         {
-            "kind": "Keyword(Mod)",
+            "kind": "Mod",
             "text": "mod",
             "start": 0,
             "end": 3

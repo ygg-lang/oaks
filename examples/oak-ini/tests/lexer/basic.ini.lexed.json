@@ -1,606 +1,1818 @@
 {
     "success": true,
-    "count": 100,
+    "count": 302,
     "tokens": [
         {
             "kind": "LeftBracket",
             "text": "[",
-            "start": 63,
-            "end": 64
+            "start": 60,
+            "end": 61
         },
         {
             "kind": "Identifier",
             "text": "Database",
-            "start": 64,
-            "end": 72
+            "start": 61,
+            "end": 69
         },
         {
             "kind": "RightBracket",
             "text": "]",
-            "start": 72,
-            "end": 73
+            "start": 69,
+            "end": 70
         },
         {
             "kind": "Identifier",
             "text": "host",
-            "start": 109,
-            "end": 113
+            "start": 104,
+            "end": 108
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 114,
-            "end": 115
+            "start": 109,
+            "end": 110
         },
         {
             "kind": "Identifier",
             "text": "localhost",
-            "start": 116,
-            "end": 125
+            "start": 111,
+            "end": 120
         },
         {
             "kind": "Identifier",
             "text": "port",
-            "start": 127,
-            "end": 131
+            "start": 121,
+            "end": 125
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 132,
-            "end": 133
+            "start": 126,
+            "end": 127
         },
         {
             "kind": "Integer",
             "text": "5432",
-            "start": 134,
-            "end": 138
+            "start": 128,
+            "end": 132
         },
         {
             "kind": "Identifier",
             "text": "username",
-            "start": 140,
-            "end": 148
+            "start": 133,
+            "end": 141
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 149,
-            "end": 150
+            "start": 142,
+            "end": 143
         },
         {
             "kind": "Identifier",
             "text": "dbuser",
-            "start": 151,
-            "end": 157
+            "start": 144,
+            "end": 150
         },
         {
             "kind": "Identifier",
             "text": "password",
-            "start": 159,
-            "end": 167
+            "start": 151,
+            "end": 159
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 168,
-            "end": 169
+            "start": 160,
+            "end": 161
         },
         {
             "kind": "Identifier",
             "text": "secret123",
-            "start": 170,
-            "end": 179
+            "start": 162,
+            "end": 171
         },
         {
             "kind": "Identifier",
             "text": "encrypted_password",
-            "start": 212,
-            "end": 230
+            "start": 202,
+            "end": 220
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 231,
-            "end": 232
+            "start": 221,
+            "end": 222
         },
         {
             "kind": "Identifier",
             "text": "U2VjdXJlUGFzc3dvcmQxMjM",
-            "start": 233,
-            "end": 256
+            "start": 223,
+            "end": 246
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 256,
-            "end": 257
+            "start": 246,
+            "end": 247
         },
         {
             "kind": "Identifier",
             "text": "database_name",
-            "start": 259,
-            "end": 272
+            "start": 248,
+            "end": 261
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 273,
-            "end": 274
+            "start": 262,
+            "end": 263
         },
         {
             "kind": "Identifier",
             "text": "myapp_production",
-            "start": 275,
-            "end": 291
+            "start": 264,
+            "end": 280
         },
         {
             "kind": "Identifier",
             "text": "connection_timeout",
-            "start": 293,
-            "end": 311
+            "start": 281,
+            "end": 299
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 312,
-            "end": 313
+            "start": 300,
+            "end": 301
         },
         {
             "kind": "Integer",
             "text": "30",
-            "start": 314,
-            "end": 316
+            "start": 302,
+            "end": 304
         },
         {
             "kind": "Identifier",
             "text": "max_connections",
-            "start": 318,
-            "end": 333
+            "start": 305,
+            "end": 320
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 334,
-            "end": 335
+            "start": 321,
+            "end": 322
         },
         {
             "kind": "Integer",
             "text": "100",
-            "start": 336,
-            "end": 339
+            "start": 323,
+            "end": 326
         },
         {
             "kind": "LeftBracket",
             "text": "[",
-            "start": 343,
-            "end": 344
+            "start": 328,
+            "end": 329
         },
         {
             "kind": "Identifier",
             "text": "Server",
-            "start": 344,
-            "end": 350
+            "start": 329,
+            "end": 335
         },
         {
             "kind": "RightBracket",
             "text": "]",
-            "start": 350,
-            "end": 351
+            "start": 335,
+            "end": 336
         },
         {
             "kind": "Identifier",
             "text": "host",
-            "start": 381,
-            "end": 385
+            "start": 364,
+            "end": 368
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 386,
-            "end": 387
+            "start": 369,
+            "end": 370
         },
         {
             "kind": "Float",
             "text": "0.0",
-            "start": 388,
-            "end": 391
+            "start": 371,
+            "end": 374
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 391,
-            "end": 392
+            "start": 374,
+            "end": 375
         },
         {
             "kind": "Float",
             "text": "0.0",
-            "start": 392,
-            "end": 395
+            "start": 375,
+            "end": 378
         },
         {
             "kind": "Identifier",
             "text": "port",
-            "start": 397,
-            "end": 401
+            "start": 379,
+            "end": 383
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 402,
-            "end": 403
+            "start": 384,
+            "end": 385
         },
         {
             "kind": "Integer",
             "text": "8080",
-            "start": 404,
-            "end": 408
+            "start": 386,
+            "end": 390
         },
         {
             "kind": "Identifier",
             "text": "ssl_enabled",
-            "start": 410,
-            "end": 421
+            "start": 391,
+            "end": 402
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 422,
-            "end": 423
+            "start": 403,
+            "end": 404
         },
         {
             "kind": "Boolean",
             "text": "true",
-            "start": 424,
-            "end": 428
+            "start": 405,
+            "end": 409
         },
         {
             "kind": "Identifier",
             "text": "certificate_path",
-            "start": 430,
-            "end": 446
+            "start": 410,
+            "end": 426
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 447,
-            "end": 448
+            "start": 427,
+            "end": 428
         },
         {
             "kind": "Identifier",
             "text": "etc",
-            "start": 450,
-            "end": 453
+            "start": 430,
+            "end": 433
         },
         {
             "kind": "Identifier",
             "text": "ssl",
-            "start": 454,
-            "end": 457
+            "start": 434,
+            "end": 437
         },
         {
             "kind": "Identifier",
             "text": "certs",
-            "start": 458,
-            "end": 463
+            "start": 438,
+            "end": 443
         },
         {
             "kind": "Identifier",
             "text": "server",
-            "start": 464,
-            "end": 470
+            "start": 444,
+            "end": 450
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 470,
-            "end": 471
+            "start": 450,
+            "end": 451
         },
         {
             "kind": "Identifier",
             "text": "crt",
-            "start": 471,
-            "end": 474
+            "start": 451,
+            "end": 454
         },
         {
             "kind": "Identifier",
             "text": "private_key_path",
-            "start": 476,
-            "end": 492
+            "start": 455,
+            "end": 471
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 493,
-            "end": 494
+            "start": 472,
+            "end": 473
         },
         {
             "kind": "Identifier",
             "text": "etc",
-            "start": 496,
-            "end": 499
+            "start": 475,
+            "end": 478
         },
         {
             "kind": "Identifier",
             "text": "ssl",
-            "start": 500,
-            "end": 503
+            "start": 479,
+            "end": 482
         },
         {
             "kind": "Identifier",
             "text": "private",
-            "start": 504,
-            "end": 511
+            "start": 483,
+            "end": 490
         },
         {
             "kind": "Identifier",
             "text": "server",
-            "start": 512,
-            "end": 518
+            "start": 491,
+            "end": 497
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 518,
-            "end": 519
+            "start": 497,
+            "end": 498
         },
         {
             "kind": "Identifier",
             "text": "key",
-            "start": 519,
-            "end": 522
+            "start": 498,
+            "end": 501
         },
         {
             "kind": "Identifier",
             "text": "max_request_size",
-            "start": 524,
-            "end": 540
+            "start": 502,
+            "end": 518
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 541,
-            "end": 542
+            "start": 519,
+            "end": 520
         },
         {
             "kind": "Integer",
             "text": "10",
-            "start": 543,
-            "end": 545
+            "start": 521,
+            "end": 523
         },
         {
             "kind": "Identifier",
             "text": "MB",
-            "start": 545,
-            "end": 547
+            "start": 523,
+            "end": 525
         },
         {
             "kind": "Identifier",
             "text": "keep_alive_timeout",
-            "start": 549,
-            "end": 567
+            "start": 526,
+            "end": 544
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 568,
-            "end": 569
+            "start": 545,
+            "end": 546
         },
         {
             "kind": "Integer",
             "text": "65",
-            "start": 570,
-            "end": 572
+            "start": 547,
+            "end": 549
         },
         {
             "kind": "LeftBracket",
             "text": "[",
-            "start": 576,
-            "end": 577
+            "start": 551,
+            "end": 552
         },
         {
             "kind": "Identifier",
             "text": "Application",
-            "start": 577,
-            "end": 588
+            "start": 552,
+            "end": 563
         },
         {
             "kind": "RightBracket",
             "text": "]",
-            "start": 588,
-            "end": 589
+            "start": 563,
+            "end": 564
         },
         {
             "kind": "Identifier",
             "text": "debug_mode",
-            "start": 615,
-            "end": 625
+            "start": 588,
+            "end": 598
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 626,
-            "end": 627
+            "start": 599,
+            "end": 600
         },
         {
             "kind": "Boolean",
             "text": "false",
-            "start": 628,
-            "end": 633
+            "start": 601,
+            "end": 606
         },
         {
             "kind": "Identifier",
             "text": "log_level",
-            "start": 635,
-            "end": 644
+            "start": 607,
+            "end": 616
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 645,
-            "end": 646
+            "start": 617,
+            "end": 618
         },
         {
             "kind": "Identifier",
             "text": "INFO",
-            "start": 647,
-            "end": 651
+            "start": 619,
+            "end": 623
         },
         {
             "kind": "Identifier",
             "text": "environment",
-            "start": 653,
-            "end": 664
+            "start": 624,
+            "end": 635
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 665,
-            "end": 666
+            "start": 636,
+            "end": 637
         },
         {
             "kind": "Identifier",
             "text": "production",
-            "start": 667,
-            "end": 677
+            "start": 638,
+            "end": 648
         },
         {
             "kind": "Identifier",
             "text": "timezone",
-            "start": 679,
-            "end": 687
+            "start": 649,
+            "end": 657
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 688,
-            "end": 689
+            "start": 658,
+            "end": 659
         },
         {
             "kind": "Identifier",
             "text": "UTC",
-            "start": 690,
-            "end": 693
+            "start": 660,
+            "end": 663
         },
         {
             "kind": "Identifier",
             "text": "default_language",
-            "start": 695,
-            "end": 711
+            "start": 664,
+            "end": 680
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 712,
-            "end": 713
+            "start": 681,
+            "end": 682
         },
         {
             "kind": "Identifier",
             "text": "en",
-            "start": 714,
-            "end": 716
+            "start": 683,
+            "end": 685
         },
         {
             "kind": "Identifier",
             "text": "supported_languages",
-            "start": 718,
-            "end": 737
+            "start": 686,
+            "end": 705
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 738,
-            "end": 739
+            "start": 706,
+            "end": 707
         },
         {
             "kind": "Identifier",
             "text": "en",
-            "start": 740,
-            "end": 742
+            "start": 708,
+            "end": 710
         },
         {
             "kind": "Comma",
             "text": ",",
+            "start": 710,
+            "end": 711
+        },
+        {
+            "kind": "Identifier",
+            "text": "es",
+            "start": 711,
+            "end": 713
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 713,
+            "end": 714
+        },
+        {
+            "kind": "Identifier",
+            "text": "fr",
+            "start": 714,
+            "end": 716
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 716,
+            "end": 717
+        },
+        {
+            "kind": "Identifier",
+            "text": "de",
+            "start": 717,
+            "end": 719
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 719,
+            "end": 720
+        },
+        {
+            "kind": "Identifier",
+            "text": "it",
+            "start": 720,
+            "end": 722
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 722,
+            "end": 723
+        },
+        {
+            "kind": "Identifier",
+            "text": "pt",
+            "start": 723,
+            "end": 725
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 725,
+            "end": 726
+        },
+        {
+            "kind": "Identifier",
+            "text": "zh",
+            "start": 726,
+            "end": 728
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 728,
+            "end": 729
+        },
+        {
+            "kind": "Identifier",
+            "text": "ja",
+            "start": 729,
+            "end": 731
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 733,
+            "end": 734
+        },
+        {
+            "kind": "Identifier",
+            "text": "Security",
+            "start": 734,
+            "end": 742
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
             "start": 742,
             "end": 743
         },
         {
             "kind": "Identifier",
-            "text": "es",
-            "start": 743,
-            "end": 745
+            "text": "session_timeout",
+            "start": 772,
+            "end": 787
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 788,
+            "end": 789
+        },
+        {
+            "kind": "Integer",
+            "text": "3600",
+            "start": 790,
+            "end": 794
+        },
+        {
+            "kind": "Identifier",
+            "text": "password_min_length",
+            "start": 795,
+            "end": 814
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 815,
+            "end": 816
+        },
+        {
+            "kind": "Integer",
+            "text": "8",
+            "start": 817,
+            "end": 818
+        },
+        {
+            "kind": "Identifier",
+            "text": "require_uppercase",
+            "start": 819,
+            "end": 836
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 837,
+            "end": 838
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 839,
+            "end": 843
+        },
+        {
+            "kind": "Identifier",
+            "text": "require_lowercase",
+            "start": 844,
+            "end": 861
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 862,
+            "end": 863
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 864,
+            "end": 868
+        },
+        {
+            "kind": "Identifier",
+            "text": "require_numbers",
+            "start": 869,
+            "end": 884
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 885,
+            "end": 886
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 887,
+            "end": 891
+        },
+        {
+            "kind": "Identifier",
+            "text": "require_special_chars",
+            "start": 892,
+            "end": 913
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 914,
+            "end": 915
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 916,
+            "end": 920
+        },
+        {
+            "kind": "Identifier",
+            "text": "max_login_attempts",
+            "start": 921,
+            "end": 939
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 940,
+            "end": 941
+        },
+        {
+            "kind": "Integer",
+            "text": "5",
+            "start": 942,
+            "end": 943
+        },
+        {
+            "kind": "Identifier",
+            "text": "lockout_duration",
+            "start": 944,
+            "end": 960
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 961,
+            "end": 962
+        },
+        {
+            "kind": "Integer",
+            "text": "300",
+            "start": 963,
+            "end": 966
+        },
+        {
+            "kind": "Identifier",
+            "text": "jwt_secret",
+            "start": 967,
+            "end": 977
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 978,
+            "end": 979
+        },
+        {
+            "kind": "Identifier",
+            "text": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+            "start": 980,
+            "end": 1016
+        },
+        {
+            "kind": "Identifier",
+            "text": "jwt_expiration",
+            "start": 1017,
+            "end": 1031
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1032,
+            "end": 1033
+        },
+        {
+            "kind": "Integer",
+            "text": "86400",
+            "start": 1034,
+            "end": 1039
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1041,
+            "end": 1042
+        },
+        {
+            "kind": "Identifier",
+            "text": "Email",
+            "start": 1042,
+            "end": 1047
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1047,
+            "end": 1048
+        },
+        {
+            "kind": "Identifier",
+            "text": "smtp_host",
+            "start": 1079,
+            "end": 1088
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1089,
+            "end": 1090
+        },
+        {
+            "kind": "Identifier",
+            "text": "smtp",
+            "start": 1091,
+            "end": 1095
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1095,
+            "end": 1096
+        },
+        {
+            "kind": "Identifier",
+            "text": "gmail",
+            "start": 1096,
+            "end": 1101
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1101,
+            "end": 1102
+        },
+        {
+            "kind": "Identifier",
+            "text": "com",
+            "start": 1102,
+            "end": 1105
+        },
+        {
+            "kind": "Identifier",
+            "text": "smtp_port",
+            "start": 1106,
+            "end": 1115
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1116,
+            "end": 1117
+        },
+        {
+            "kind": "Integer",
+            "text": "587",
+            "start": 1118,
+            "end": 1121
+        },
+        {
+            "kind": "Identifier",
+            "text": "smtp_username",
+            "start": 1122,
+            "end": 1135
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1136,
+            "end": 1137
+        },
+        {
+            "kind": "Identifier",
+            "text": "noreply",
+            "start": 1138,
+            "end": 1145
+        },
+        {
+            "kind": "Identifier",
+            "text": "myapp",
+            "start": 1146,
+            "end": 1151
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1151,
+            "end": 1152
+        },
+        {
+            "kind": "Identifier",
+            "text": "com",
+            "start": 1152,
+            "end": 1155
+        },
+        {
+            "kind": "Identifier",
+            "text": "smtp_password",
+            "start": 1156,
+            "end": 1169
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1170,
+            "end": 1171
+        },
+        {
+            "kind": "Identifier",
+            "text": "email_password_123",
+            "start": 1172,
+            "end": 1190
+        },
+        {
+            "kind": "Identifier",
+            "text": "use_tls",
+            "start": 1191,
+            "end": 1198
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1199,
+            "end": 1200
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 1201,
+            "end": 1205
+        },
+        {
+            "kind": "Identifier",
+            "text": "from_address",
+            "start": 1206,
+            "end": 1218
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1219,
+            "end": 1220
+        },
+        {
+            "kind": "Identifier",
+            "text": "noreply",
+            "start": 1221,
+            "end": 1228
+        },
+        {
+            "kind": "Identifier",
+            "text": "myapp",
+            "start": 1229,
+            "end": 1234
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1234,
+            "end": 1235
+        },
+        {
+            "kind": "Identifier",
+            "text": "com",
+            "start": 1235,
+            "end": 1238
+        },
+        {
+            "kind": "Identifier",
+            "text": "from_name",
+            "start": 1239,
+            "end": 1248
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1249,
+            "end": 1250
+        },
+        {
+            "kind": "Identifier",
+            "text": "MyApp",
+            "start": 1251,
+            "end": 1256
+        },
+        {
+            "kind": "Identifier",
+            "text": "Notifications",
+            "start": 1257,
+            "end": 1270
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1272,
+            "end": 1273
+        },
+        {
+            "kind": "Identifier",
+            "text": "Cache",
+            "start": 1273,
+            "end": 1278
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1278,
+            "end": 1279
+        },
+        {
+            "kind": "Identifier",
+            "text": "cache_enabled",
+            "start": 1302,
+            "end": 1315
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1316,
+            "end": 1317
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 1318,
+            "end": 1322
+        },
+        {
+            "kind": "Identifier",
+            "text": "cache_type",
+            "start": 1323,
+            "end": 1333
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1334,
+            "end": 1335
+        },
+        {
+            "kind": "Identifier",
+            "text": "redis",
+            "start": 1336,
+            "end": 1341
+        },
+        {
+            "kind": "Identifier",
+            "text": "redis_host",
+            "start": 1342,
+            "end": 1352
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1353,
+            "end": 1354
+        },
+        {
+            "kind": "Identifier",
+            "text": "localhost",
+            "start": 1355,
+            "end": 1364
+        },
+        {
+            "kind": "Identifier",
+            "text": "redis_port",
+            "start": 1365,
+            "end": 1375
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1376,
+            "end": 1377
+        },
+        {
+            "kind": "Integer",
+            "text": "6379",
+            "start": 1378,
+            "end": 1382
+        },
+        {
+            "kind": "Identifier",
+            "text": "redis_password",
+            "start": 1383,
+            "end": 1397
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1398,
+            "end": 1399
+        },
+        {
+            "kind": "Identifier",
+            "text": "redis_database",
+            "start": 1401,
+            "end": 1415
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1416,
+            "end": 1417
+        },
+        {
+            "kind": "Integer",
+            "text": "0",
+            "start": 1418,
+            "end": 1419
+        },
+        {
+            "kind": "Identifier",
+            "text": "cache_ttl",
+            "start": 1420,
+            "end": 1429
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1430,
+            "end": 1431
+        },
+        {
+            "kind": "Integer",
+            "text": "3600",
+            "start": 1432,
+            "end": 1436
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1438,
+            "end": 1439
+        },
+        {
+            "kind": "Identifier",
+            "text": "Features",
+            "start": 1439,
+            "end": 1447
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1447,
+            "end": 1448
+        },
+        {
+            "kind": "Identifier",
+            "text": "enable_user_registration",
+            "start": 1465,
+            "end": 1489
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1490,
+            "end": 1491
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 1492,
+            "end": 1496
+        },
+        {
+            "kind": "Identifier",
+            "text": "enable_social_login",
+            "start": 1497,
+            "end": 1516
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1517,
+            "end": 1518
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 1519,
+            "end": 1523
+        },
+        {
+            "kind": "Identifier",
+            "text": "enable_two_factor_auth",
+            "start": 1524,
+            "end": 1546
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1547,
+            "end": 1548
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 1549,
+            "end": 1553
+        },
+        {
+            "kind": "Identifier",
+            "text": "enable_email_verification",
+            "start": 1554,
+            "end": 1579
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1580,
+            "end": 1581
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 1582,
+            "end": 1586
+        },
+        {
+            "kind": "Identifier",
+            "text": "enable_password_reset",
+            "start": 1587,
+            "end": 1608
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1609,
+            "end": 1610
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 1611,
+            "end": 1615
+        },
+        {
+            "kind": "Identifier",
+            "text": "enable_file_upload",
+            "start": 1616,
+            "end": 1634
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1635,
+            "end": 1636
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 1637,
+            "end": 1641
+        },
+        {
+            "kind": "Identifier",
+            "text": "max_file_size",
+            "start": 1642,
+            "end": 1655
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1656,
+            "end": 1657
+        },
+        {
+            "kind": "Integer",
+            "text": "5",
+            "start": 1658,
+            "end": 1659
+        },
+        {
+            "kind": "Identifier",
+            "text": "MB",
+            "start": 1659,
+            "end": 1661
+        },
+        {
+            "kind": "Identifier",
+            "text": "allowed_file_types",
+            "start": 1662,
+            "end": 1680
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1681,
+            "end": 1682
+        },
+        {
+            "kind": "Identifier",
+            "text": "jpg",
+            "start": 1683,
+            "end": 1686
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 745,
-            "end": 746
+            "start": 1686,
+            "end": 1687
         },
         {
             "kind": "Identifier",
-            "text": "fr",
-            "start": 746,
-            "end": 748
+            "text": "jpeg",
+            "start": 1687,
+            "end": 1691
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 748,
-            "end": 749
+            "start": 1691,
+            "end": 1692
         },
         {
             "kind": "Identifier",
-            "text": "de",
-            "start": 749,
-            "end": 751
+            "text": "png",
+            "start": 1692,
+            "end": 1695
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 751,
-            "end": 752
+            "start": 1695,
+            "end": 1696
         },
         {
             "kind": "Identifier",
-            "text": "it",
-            "start": 752,
-            "end": 754
+            "text": "gif",
+            "start": 1696,
+            "end": 1699
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 754,
-            "end": 755
+            "start": 1699,
+            "end": 1700
         },
         {
             "kind": "Identifier",
-            "text": "pt",
-            "start": 755,
-            "end": 757
+            "text": "pdf",
+            "start": 1700,
+            "end": 1703
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 757,
-            "end": 758
+            "start": 1703,
+            "end": 1704
         },
         {
             "kind": "Identifier",
-            "text": "zh",
-            "start": 758,
-            "end": 760
+            "text": "doc",
+            "start": 1704,
+            "end": 1707
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 760,
-            "end": 761
+            "start": 1707,
+            "end": 1708
         },
         {
             "kind": "Identifier",
-            "text": "ja",
-            "start": 761,
-            "end": 763
+            "text": "docx",
+            "start": 1708,
+            "end": 1712
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1714,
+            "end": 1715
+        },
+        {
+            "kind": "Identifier",
+            "text": "API",
+            "start": 1715,
+            "end": 1718
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1718,
+            "end": 1719
+        },
+        {
+            "kind": "Identifier",
+            "text": "api_rate_limit",
+            "start": 1740,
+            "end": 1754
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1755,
+            "end": 1756
+        },
+        {
+            "kind": "Integer",
+            "text": "1000",
+            "start": 1757,
+            "end": 1761
+        },
+        {
+            "kind": "Identifier",
+            "text": "api_rate_limit_window",
+            "start": 1762,
+            "end": 1783
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1784,
+            "end": 1785
+        },
+        {
+            "kind": "Integer",
+            "text": "3600",
+            "start": 1786,
+            "end": 1790
+        },
+        {
+            "kind": "Identifier",
+            "text": "api_key_header",
+            "start": 1791,
+            "end": 1805
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1806,
+            "end": 1807
+        },
+        {
+            "kind": "Identifier",
+            "text": "X-API-Key",
+            "start": 1808,
+            "end": 1817
+        },
+        {
+            "kind": "Identifier",
+            "text": "api_version",
+            "start": 1818,
+            "end": 1829
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1830,
+            "end": 1831
+        },
+        {
+            "kind": "Identifier",
+            "text": "v1",
+            "start": 1832,
+            "end": 1834
+        },
+        {
+            "kind": "Identifier",
+            "text": "base_url",
+            "start": 1835,
+            "end": 1843
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1844,
+            "end": 1845
+        },
+        {
+            "kind": "Identifier",
+            "text": "https",
+            "start": 1846,
+            "end": 1851
+        },
+        {
+            "kind": "Identifier",
+            "text": "api",
+            "start": 1854,
+            "end": 1857
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1857,
+            "end": 1858
+        },
+        {
+            "kind": "Identifier",
+            "text": "myapp",
+            "start": 1858,
+            "end": 1863
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1863,
+            "end": 1864
+        },
+        {
+            "kind": "Identifier",
+            "text": "com",
+            "start": 1864,
+            "end": 1867
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1869,
+            "end": 1870
+        },
+        {
+            "kind": "Identifier",
+            "text": "Logging",
+            "start": 1870,
+            "end": 1877
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1877,
+            "end": 1878
+        },
+        {
+            "kind": "Identifier",
+            "text": "log_file",
+            "start": 1903,
+            "end": 1911
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1912,
+            "end": 1913
+        },
+        {
+            "kind": "Identifier",
+            "text": "var",
+            "start": 1915,
+            "end": 1918
+        },
+        {
+            "kind": "Identifier",
+            "text": "log",
+            "start": 1919,
+            "end": 1922
+        },
+        {
+            "kind": "Identifier",
+            "text": "myapp",
+            "start": 1923,
+            "end": 1928
+        },
+        {
+            "kind": "Identifier",
+            "text": "app",
+            "start": 1929,
+            "end": 1932
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1932,
+            "end": 1933
+        },
+        {
+            "kind": "Identifier",
+            "text": "log",
+            "start": 1933,
+            "end": 1936
+        },
+        {
+            "kind": "Identifier",
+            "text": "log_max_size",
+            "start": 1937,
+            "end": 1949
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1950,
+            "end": 1951
+        },
+        {
+            "kind": "Integer",
+            "text": "100",
+            "start": 1952,
+            "end": 1955
+        },
+        {
+            "kind": "Identifier",
+            "text": "MB",
+            "start": 1955,
+            "end": 1957
+        },
+        {
+            "kind": "Identifier",
+            "text": "log_max_files",
+            "start": 1958,
+            "end": 1971
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1972,
+            "end": 1973
+        },
+        {
+            "kind": "Integer",
+            "text": "10",
+            "start": 1974,
+            "end": 1976
+        },
+        {
+            "kind": "Identifier",
+            "text": "log_format",
+            "start": 1977,
+            "end": 1987
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1988,
+            "end": 1989
+        },
+        {
+            "kind": "Identifier",
+            "text": "json",
+            "start": 1990,
+            "end": 1994
+        },
+        {
+            "kind": "Identifier",
+            "text": "log_timestamp_format",
+            "start": 1995,
+            "end": 2015
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2016,
+            "end": 2017
+        },
+        {
+            "kind": "Identifier",
+            "text": "ISO8601",
+            "start": 2018,
+            "end": 2025
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2079,
+            "end": 2080
+        },
+        {
+            "kind": "Identifier",
+            "text": "Advanced",
+            "start": 2080,
+            "end": 2088
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2088,
+            "end": 2089
+        },
+        {
+            "kind": "Identifier",
+            "text": "complex_setting",
+            "start": 2090,
+            "end": 2105
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2106,
+            "end": 2107
+        },
+        {
+            "kind": "Identifier",
+            "text": "line1",
+            "start": 2108,
+            "end": 2113
+        },
+        {
+            "kind": "Identifier",
+            "text": "line2",
+            "start": 2118,
+            "end": 2123
+        },
+        {
+            "kind": "Identifier",
+            "text": "line3",
+            "start": 2128,
+            "end": 2133
+        },
+        {
+            "kind": "Identifier",
+            "text": "line4",
+            "start": 2138,
+            "end": 2143
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2160,
+            "end": 2161
+        },
+        {
+            "kind": "Identifier",
+            "text": "EmptyValues",
+            "start": 2161,
+            "end": 2172
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2172,
+            "end": 2173
+        },
+        {
+            "kind": "Identifier",
+            "text": "empty_string",
+            "start": 2174,
+            "end": 2186
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2187,
+            "end": 2188
+        },
+        {
+            "kind": "Identifier",
+            "text": "null_value",
+            "start": 2190,
+            "end": 2200
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2201,
+            "end": 2202
+        },
+        {
+            "kind": "Identifier",
+            "text": "NULL",
+            "start": 2203,
+            "end": 2207
+        },
+        {
+            "kind": "Identifier",
+            "text": "zero_value",
+            "start": 2208,
+            "end": 2218
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2219,
+            "end": 2220
+        },
+        {
+            "kind": "Integer",
+            "text": "0",
+            "start": 2221,
+            "end": 2222
+        },
+        {
+            "kind": "Identifier",
+            "text": "false_value",
+            "start": 2223,
+            "end": 2234
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2235,
+            "end": 2236
+        },
+        {
+            "kind": "Boolean",
+            "text": "false",
+            "start": 2237,
+            "end": 2242
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 2242,
+            "end": 2242
         }
     ],
     "errors": []

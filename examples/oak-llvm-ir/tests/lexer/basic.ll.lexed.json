@@ -1,149 +1,161 @@
 {
     "success": true,
-    "count": 100,
+    "count": 617,
     "tokens": [
         {
             "kind": "Keyword",
-            "text": "source_filename",
-            "start": 25,
-            "end": 40
-        },
-        {
-            "kind": "Equal",
-            "text": "=",
-            "start": 41,
-            "end": 42
-        },
-        {
-            "kind": "String",
-            "text": "\"basic.c\"",
-            "start": 43,
-            "end": 52
-        },
-        {
-            "kind": "Keyword",
             "text": "target",
-            "start": 54,
-            "end": 60
+            "start": 73,
+            "end": 79
         },
         {
             "kind": "Keyword",
             "text": "datalayout",
-            "start": 61,
-            "end": 71
+            "start": 80,
+            "end": 90
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 72,
-            "end": 73
+            "start": 91,
+            "end": 92
         },
         {
             "kind": "String",
-            "text": "\"e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"",
-            "start": 74,
-            "end": 146
+            "text": "\"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"",
+            "start": 93,
+            "end": 165
         },
         {
             "kind": "Keyword",
             "text": "target",
-            "start": 148,
-            "end": 154
+            "start": 166,
+            "end": 172
         },
         {
             "kind": "Keyword",
             "text": "triple",
-            "start": 155,
-            "end": 161
+            "start": 173,
+            "end": 179
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 162,
-            "end": 163
+            "start": 180,
+            "end": 181
         },
         {
             "kind": "String",
-            "text": "\"x86_64-pc-windows-msvc19.29.30146\"",
-            "start": 164,
-            "end": 199
+            "text": "\"x86_64-unknown-linux-gnu\"",
+            "start": 182,
+            "end": 208
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%struct.Node",
+            "start": 232,
+            "end": 244
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 245,
+            "end": 246
         },
         {
             "kind": "Keyword",
-            "text": "define",
-            "start": 256,
-            "end": 262
-        },
-        {
-            "kind": "Keyword",
-            "text": "dso_local",
-            "start": 263,
-            "end": 272
-        },
-        {
-            "kind": "Keyword",
-            "text": "i32",
-            "start": 273,
-            "end": 276
-        },
-        {
-            "kind": "GlobalVar",
-            "text": "@main",
-            "start": 277,
-            "end": 282
-        },
-        {
-            "kind": "LParen",
-            "text": "(",
-            "start": 282,
-            "end": 283
-        },
-        {
-            "kind": "RParen",
-            "text": ")",
-            "start": 283,
-            "end": 284
-        },
-        {
-            "kind": "Error",
-            "text": "#",
-            "start": 285,
-            "end": 286
-        },
-        {
-            "kind": "Number",
-            "text": "0",
-            "start": 286,
-            "end": 287
+            "text": "type",
+            "start": 247,
+            "end": 251
         },
         {
             "kind": "LBrace",
             "text": "{",
-            "start": 288,
-            "end": 289
-        },
-        {
-            "kind": "LocalVar",
-            "text": "%1",
-            "start": 293,
-            "end": 295
-        },
-        {
-            "kind": "Equal",
-            "text": "=",
-            "start": 296,
-            "end": 297
-        },
-        {
-            "kind": "Keyword",
-            "text": "alloca",
-            "start": 298,
-            "end": 304
+            "start": 252,
+            "end": 253
         },
         {
             "kind": "Keyword",
             "text": "i32",
+            "start": 254,
+            "end": 257
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 257,
+            "end": 258
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%struct.Node",
+            "start": 259,
+            "end": 271
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 271,
+            "end": 272
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 273,
+            "end": 274
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%class.MyClass",
+            "start": 275,
+            "end": 289
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 290,
+            "end": 291
+        },
+        {
+            "kind": "Keyword",
+            "text": "type",
+            "start": 292,
+            "end": 296
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 297,
+            "end": 298
+        },
+        {
+            "kind": "LBracket",
+            "text": "[",
+            "start": 299,
+            "end": 300
+        },
+        {
+            "kind": "Number",
+            "text": "10",
+            "start": 300,
+            "end": 302
+        },
+        {
+            "kind": "Keyword",
+            "text": "x",
+            "start": 303,
+            "end": 304
+        },
+        {
+            "kind": "Keyword",
+            "text": "i8",
             "start": 305,
+            "end": 307
+        },
+        {
+            "kind": "RBracket",
+            "text": "]",
+            "start": 307,
             "end": 308
         },
         {
@@ -154,453 +166,3543 @@
         },
         {
             "kind": "Keyword",
-            "text": "align",
+            "text": "i32",
             "start": 310,
+            "end": 313
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 314,
             "end": 315
         },
         {
-            "kind": "Number",
-            "text": "4",
+            "kind": "GlobalVar",
+            "text": "@MyGlobal",
             "start": 316,
-            "end": 317
-        },
-        {
-            "kind": "LocalVar",
-            "text": "%2",
-            "start": 321,
-            "end": 323
+            "end": 325
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 324,
-            "end": 325
-        },
-        {
-            "kind": "Keyword",
-            "text": "alloca",
             "start": 326,
-            "end": 332
+            "end": 327
+        },
+        {
+            "kind": "Keyword",
+            "text": "global",
+            "start": 328,
+            "end": 334
         },
         {
             "kind": "Keyword",
             "text": "i32",
-            "start": 333,
-            "end": 336
+            "start": 335,
+            "end": 338
+        },
+        {
+            "kind": "Number",
+            "text": "42",
+            "start": 339,
+            "end": 341
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 336,
-            "end": 337
+            "start": 341,
+            "end": 342
         },
         {
             "kind": "Keyword",
             "text": "align",
-            "start": 338,
-            "end": 343
+            "start": 343,
+            "end": 348
         },
         {
             "kind": "Number",
             "text": "4",
-            "start": 344,
-            "end": 345
-        },
-        {
-            "kind": "Keyword",
-            "text": "store",
             "start": 349,
-            "end": 354
+            "end": 350
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@.str",
+            "start": 372,
+            "end": 377
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 378,
+            "end": 379
         },
         {
             "kind": "Keyword",
-            "text": "i32",
-            "start": 355,
-            "end": 358
-        },
-        {
-            "kind": "Number",
-            "text": "0",
-            "start": 359,
-            "end": 360
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 360,
-            "end": 361
-        },
-        {
-            "kind": "Keyword",
-            "text": "i32",
-            "start": 362,
-            "end": 365
-        },
-        {
-            "kind": "Star",
-            "text": "*",
-            "start": 365,
-            "end": 366
-        },
-        {
-            "kind": "LocalVar",
-            "text": "%1",
-            "start": 367,
-            "end": 369
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 369,
-            "end": 370
-        },
-        {
-            "kind": "Keyword",
-            "text": "align",
-            "start": 371,
-            "end": 376
-        },
-        {
-            "kind": "Number",
-            "text": "4",
-            "start": 377,
-            "end": 378
-        },
-        {
-            "kind": "Keyword",
-            "text": "store",
-            "start": 382,
+            "text": "private",
+            "start": 380,
             "end": 387
         },
         {
             "kind": "Keyword",
-            "text": "i32",
+            "text": "unnamed_addr",
             "start": 388,
-            "end": 391
-        },
-        {
-            "kind": "Number",
-            "text": "5",
-            "start": 392,
-            "end": 393
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 393,
-            "end": 394
+            "end": 400
         },
         {
             "kind": "Keyword",
-            "text": "i32",
-            "start": 395,
-            "end": 398
-        },
-        {
-            "kind": "Star",
-            "text": "*",
-            "start": 398,
-            "end": 399
-        },
-        {
-            "kind": "LocalVar",
-            "text": "%2",
-            "start": 400,
-            "end": 402
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 402,
-            "end": 403
-        },
-        {
-            "kind": "Keyword",
-            "text": "align",
-            "start": 404,
+            "text": "constant",
+            "start": 401,
             "end": 409
         },
         {
-            "kind": "Number",
-            "text": "4",
+            "kind": "LBracket",
+            "text": "[",
             "start": 410,
             "end": 411
         },
         {
-            "kind": "LocalVar",
-            "text": "%3",
-            "start": 415,
-            "end": 417
+            "kind": "Number",
+            "text": "13",
+            "start": 411,
+            "end": 413
         },
         {
-            "kind": "Equal",
-            "text": "=",
+            "kind": "Keyword",
+            "text": "x",
+            "start": 414,
+            "end": 415
+        },
+        {
+            "kind": "Keyword",
+            "text": "i8",
+            "start": 416,
+            "end": 418
+        },
+        {
+            "kind": "RBracket",
+            "text": "]",
             "start": 418,
             "end": 419
         },
         {
             "kind": "Keyword",
-            "text": "load",
+            "text": "c",
             "start": 420,
-            "end": 424
+            "end": 421
         },
         {
-            "kind": "Keyword",
-            "text": "i32",
-            "start": 425,
-            "end": 428
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 428,
-            "end": 429
-        },
-        {
-            "kind": "Keyword",
-            "text": "i32",
-            "start": 430,
-            "end": 433
-        },
-        {
-            "kind": "Star",
-            "text": "*",
-            "start": 433,
-            "end": 434
-        },
-        {
-            "kind": "LocalVar",
-            "text": "%2",
-            "start": 435,
-            "end": 437
+            "kind": "String",
+            "text": "\"hello world\\0A\\00\"",
+            "start": 421,
+            "end": 440
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 437,
-            "end": 438
+            "start": 440,
+            "end": 441
         },
         {
             "kind": "Keyword",
             "text": "align",
-            "start": 439,
-            "end": 444
+            "start": 442,
+            "end": 447
         },
         {
             "kind": "Number",
-            "text": "4",
-            "start": 445,
-            "end": 446
-        },
-        {
-            "kind": "LocalVar",
-            "text": "%4",
-            "start": 450,
-            "end": 452
-        },
-        {
-            "kind": "Equal",
-            "text": "=",
-            "start": 453,
-            "end": 454
+            "text": "1",
+            "start": 448,
+            "end": 449
         },
         {
             "kind": "Keyword",
-            "text": "add",
-            "start": 455,
-            "end": 458
-        },
-        {
-            "kind": "Keyword",
-            "text": "nsw",
-            "start": 459,
-            "end": 462
+            "text": "define",
+            "start": 481,
+            "end": 487
         },
         {
             "kind": "Keyword",
             "text": "i32",
-            "start": 463,
-            "end": 466
+            "start": 488,
+            "end": 491
         },
         {
-            "kind": "LocalVar",
-            "text": "%3",
-            "start": 467,
-            "end": 469
+            "kind": "GlobalVar",
+            "text": "@main",
+            "start": 492,
+            "end": 497
         },
         {
-            "kind": "Comma",
-            "text": ",",
-            "start": 469,
-            "end": 470
-        },
-        {
-            "kind": "Number",
-            "text": "10",
-            "start": 471,
-            "end": 473
-        },
-        {
-            "kind": "Keyword",
-            "text": "store",
-            "start": 477,
-            "end": 482
-        },
-        {
-            "kind": "Keyword",
-            "text": "i32",
-            "start": 483,
-            "end": 486
-        },
-        {
-            "kind": "LocalVar",
-            "text": "%4",
-            "start": 487,
-            "end": 489
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 489,
-            "end": 490
-        },
-        {
-            "kind": "Keyword",
-            "text": "i32",
-            "start": 491,
-            "end": 494
-        },
-        {
-            "kind": "Star",
-            "text": "*",
-            "start": 494,
-            "end": 495
-        },
-        {
-            "kind": "LocalVar",
-            "text": "%2",
-            "start": 496,
+            "kind": "LParen",
+            "text": "(",
+            "start": 497,
             "end": 498
         },
         {
-            "kind": "Comma",
-            "text": ",",
-            "start": 498,
-            "end": 499
-        },
-        {
             "kind": "Keyword",
-            "text": "align",
-            "start": 500,
-            "end": 505
-        },
-        {
-            "kind": "Number",
-            "text": "4",
-            "start": 506,
-            "end": 507
+            "text": "i32",
+            "start": 498,
+            "end": 501
         },
         {
             "kind": "LocalVar",
-            "text": "%5",
-            "start": 511,
-            "end": 513
-        },
-        {
-            "kind": "Equal",
-            "text": "=",
-            "start": 514,
-            "end": 515
-        },
-        {
-            "kind": "Keyword",
-            "text": "load",
-            "start": 516,
-            "end": 520
-        },
-        {
-            "kind": "Keyword",
-            "text": "i32",
-            "start": 521,
-            "end": 524
+            "text": "%argc",
+            "start": 502,
+            "end": 507
         },
         {
             "kind": "Comma",
             "text": ",",
+            "start": 507,
+            "end": 508
+        },
+        {
+            "kind": "Keyword",
+            "text": "i8",
+            "start": 509,
+            "end": 511
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 511,
+            "end": 512
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 512,
+            "end": 513
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%argv",
+            "start": 514,
+            "end": 519
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 519,
+            "end": 520
+        },
+        {
+            "kind": "Error",
+            "text": "#",
+            "start": 521,
+            "end": 522
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 522,
+            "end": 523
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
             "start": 524,
             "end": 525
         },
         {
             "kind": "Keyword",
-            "text": "i32",
+            "text": "entry",
             "start": 526,
-            "end": 529
+            "end": 531
         },
         {
-            "kind": "Star",
-            "text": "*",
-            "start": 529,
-            "end": 530
+            "kind": "Colon",
+            "text": ":",
+            "start": 531,
+            "end": 532
         },
         {
             "kind": "LocalVar",
-            "text": "%2",
-            "start": 531,
-            "end": 533
+            "text": "%retval",
+            "start": 537,
+            "end": 544
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 545,
+            "end": 546
+        },
+        {
+            "kind": "Keyword",
+            "text": "alloca",
+            "start": 547,
+            "end": 553
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 554,
+            "end": 557
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 533,
-            "end": 534
+            "start": 557,
+            "end": 558
         },
         {
             "kind": "Keyword",
             "text": "align",
-            "start": 535,
-            "end": 540
+            "start": 559,
+            "end": 564
         },
         {
             "kind": "Number",
             "text": "4",
-            "start": 541,
-            "end": 542
+            "start": 565,
+            "end": 566
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%argc.addr",
+            "start": 571,
+            "end": 581
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 582,
+            "end": 583
         },
         {
             "kind": "Keyword",
-            "text": "ret",
-            "start": 546,
-            "end": 549
+            "text": "alloca",
+            "start": 584,
+            "end": 590
         },
         {
             "kind": "Keyword",
             "text": "i32",
-            "start": 550,
-            "end": 553
+            "start": 591,
+            "end": 594
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 594,
+            "end": 595
+        },
+        {
+            "kind": "Keyword",
+            "text": "align",
+            "start": 596,
+            "end": 601
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 602,
+            "end": 603
+        },
+        {
+            "kind": "Keyword",
+            "text": "store",
+            "start": 608,
+            "end": 613
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 614,
+            "end": 617
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 618,
+            "end": 619
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 619,
+            "end": 620
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 621,
+            "end": 624
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 624,
+            "end": 625
         },
         {
             "kind": "LocalVar",
-            "text": "%5",
-            "start": 554,
-            "end": 556
+            "text": "%retval",
+            "start": 626,
+            "end": 633
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 633,
+            "end": 634
+        },
+        {
+            "kind": "Keyword",
+            "text": "align",
+            "start": 635,
+            "end": 640
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 641,
+            "end": 642
+        },
+        {
+            "kind": "Keyword",
+            "text": "store",
+            "start": 647,
+            "end": 652
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 653,
+            "end": 656
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%argc",
+            "start": 657,
+            "end": 662
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 662,
+            "end": 663
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 664,
+            "end": 667
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 667,
+            "end": 668
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%argc.addr",
+            "start": 669,
+            "end": 679
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 679,
+            "end": 680
+        },
+        {
+            "kind": "Keyword",
+            "text": "align",
+            "start": 681,
+            "end": 686
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 687,
+            "end": 688
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%0",
+            "start": 734,
+            "end": 736
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 737,
+            "end": 738
+        },
+        {
+            "kind": "Keyword",
+            "text": "load",
+            "start": 739,
+            "end": 743
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 744,
+            "end": 747
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 747,
+            "end": 748
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 749,
+            "end": 752
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 752,
+            "end": 753
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%argc.addr",
+            "start": 754,
+            "end": 764
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 764,
+            "end": 765
+        },
+        {
+            "kind": "Keyword",
+            "text": "align",
+            "start": 766,
+            "end": 771
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 772,
+            "end": 773
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%add",
+            "start": 778,
+            "end": 782
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 783,
+            "end": 784
+        },
+        {
+            "kind": "Keyword",
+            "text": "add",
+            "start": 785,
+            "end": 788
+        },
+        {
+            "kind": "Keyword",
+            "text": "nsw",
+            "start": 789,
+            "end": 792
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 793,
+            "end": 796
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%0",
+            "start": 797,
+            "end": 799
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 799,
+            "end": 800
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 801,
+            "end": 802
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%sub",
+            "start": 807,
+            "end": 811
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 812,
+            "end": 813
+        },
+        {
+            "kind": "Keyword",
+            "text": "sub",
+            "start": 814,
+            "end": 817
+        },
+        {
+            "kind": "Keyword",
+            "text": "nsw",
+            "start": 818,
+            "end": 821
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 822,
+            "end": 825
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%add",
+            "start": 826,
+            "end": 830
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 830,
+            "end": 831
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 832,
+            "end": 833
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%mul",
+            "start": 838,
+            "end": 842
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 843,
+            "end": 844
+        },
+        {
+            "kind": "Keyword",
+            "text": "mul",
+            "start": 845,
+            "end": 848
+        },
+        {
+            "kind": "Keyword",
+            "text": "nsw",
+            "start": 849,
+            "end": 852
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 853,
+            "end": 856
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%sub",
+            "start": 857,
+            "end": 861
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 861,
+            "end": 862
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 863,
+            "end": 864
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%div",
+            "start": 869,
+            "end": 873
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 874,
+            "end": 875
+        },
+        {
+            "kind": "Keyword",
+            "text": "sdiv",
+            "start": 876,
+            "end": 880
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 881,
+            "end": 884
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%mul",
+            "start": 885,
+            "end": 889
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 889,
+            "end": 890
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 891,
+            "end": 892
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%rem",
+            "start": 897,
+            "end": 901
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 902,
+            "end": 903
+        },
+        {
+            "kind": "Keyword",
+            "text": "srem",
+            "start": 904,
+            "end": 908
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 909,
+            "end": 912
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%div",
+            "start": 913,
+            "end": 917
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 917,
+            "end": 918
+        },
+        {
+            "kind": "Number",
+            "text": "5",
+            "start": 919,
+            "end": 920
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%shl",
+            "start": 961,
+            "end": 965
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 966,
+            "end": 967
+        },
+        {
+            "kind": "Keyword",
+            "text": "shl",
+            "start": 968,
+            "end": 971
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 972,
+            "end": 975
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%rem",
+            "start": 976,
+            "end": 980
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 980,
+            "end": 981
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 982,
+            "end": 983
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%lshr",
+            "start": 988,
+            "end": 993
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 994,
+            "end": 995
+        },
+        {
+            "kind": "Keyword",
+            "text": "lshr",
+            "start": 996,
+            "end": 1000
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 1001,
+            "end": 1004
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%shl",
+            "start": 1005,
+            "end": 1009
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1009,
+            "end": 1010
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 1011,
+            "end": 1012
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%ashr",
+            "start": 1017,
+            "end": 1022
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1023,
+            "end": 1024
+        },
+        {
+            "kind": "Keyword",
+            "text": "ashr",
+            "start": 1025,
+            "end": 1029
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 1030,
+            "end": 1033
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%lshr",
+            "start": 1034,
+            "end": 1039
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1039,
+            "end": 1040
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 1041,
+            "end": 1042
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%and",
+            "start": 1047,
+            "end": 1051
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1052,
+            "end": 1053
+        },
+        {
+            "kind": "Keyword",
+            "text": "and",
+            "start": 1054,
+            "end": 1057
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 1058,
+            "end": 1061
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%ashr",
+            "start": 1062,
+            "end": 1067
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1067,
+            "end": 1068
+        },
+        {
+            "kind": "Number",
+            "text": "15",
+            "start": 1069,
+            "end": 1071
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%or",
+            "start": 1076,
+            "end": 1079
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1080,
+            "end": 1081
+        },
+        {
+            "kind": "Keyword",
+            "text": "or",
+            "start": 1082,
+            "end": 1084
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 1085,
+            "end": 1088
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%and",
+            "start": 1089,
+            "end": 1093
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1093,
+            "end": 1094
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 1095,
+            "end": 1096
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%xor",
+            "start": 1101,
+            "end": 1105
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1106,
+            "end": 1107
+        },
+        {
+            "kind": "Keyword",
+            "text": "xor",
+            "start": 1108,
+            "end": 1111
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 1112,
+            "end": 1115
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%or",
+            "start": 1116,
+            "end": 1119
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1119,
+            "end": 1120
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1121,
+            "end": 1122
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%conv",
+            "start": 1159,
+            "end": 1164
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1165,
+            "end": 1166
+        },
+        {
+            "kind": "Keyword",
+            "text": "sitofp",
+            "start": 1167,
+            "end": 1173
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 1174,
+            "end": 1177
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%xor",
+            "start": 1178,
+            "end": 1182
+        },
+        {
+            "kind": "Keyword",
+            "text": "to",
+            "start": 1183,
+            "end": 1185
+        },
+        {
+            "kind": "Keyword",
+            "text": "double",
+            "start": 1186,
+            "end": 1192
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%fadd",
+            "start": 1197,
+            "end": 1202
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1203,
+            "end": 1204
+        },
+        {
+            "kind": "Keyword",
+            "text": "fadd",
+            "start": 1205,
+            "end": 1209
+        },
+        {
+            "kind": "Keyword",
+            "text": "double",
+            "start": 1210,
+            "end": 1216
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%conv",
+            "start": 1217,
+            "end": 1222
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1222,
+            "end": 1223
+        },
+        {
+            "kind": "Number",
+            "text": "1.000000",
+            "start": 1224,
+            "end": 1232
+        },
+        {
+            "kind": "Keyword",
+            "text": "e",
+            "start": 1232,
+            "end": 1233
+        },
+        {
+            "kind": "Error",
+            "text": "+",
+            "start": 1233,
+            "end": 1234
+        },
+        {
+            "kind": "Number",
+            "text": "00",
+            "start": 1234,
+            "end": 1236
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%fsub",
+            "start": 1241,
+            "end": 1246
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1247,
+            "end": 1248
+        },
+        {
+            "kind": "Keyword",
+            "text": "fsub",
+            "start": 1249,
+            "end": 1253
+        },
+        {
+            "kind": "Keyword",
+            "text": "double",
+            "start": 1254,
+            "end": 1260
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%fadd",
+            "start": 1261,
+            "end": 1266
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1266,
+            "end": 1267
+        },
+        {
+            "kind": "Number",
+            "text": "0.5",
+            "start": 1268,
+            "end": 1271
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%cmp",
+            "start": 1306,
+            "end": 1310
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1311,
+            "end": 1312
+        },
+        {
+            "kind": "Keyword",
+            "text": "icmp",
+            "start": 1313,
+            "end": 1317
+        },
+        {
+            "kind": "Keyword",
+            "text": "eq",
+            "start": 1318,
+            "end": 1320
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 1321,
+            "end": 1324
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%xor",
+            "start": 1325,
+            "end": 1329
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1329,
+            "end": 1330
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1331,
+            "end": 1332
+        },
+        {
+            "kind": "Keyword",
+            "text": "br",
+            "start": 1337,
+            "end": 1339
+        },
+        {
+            "kind": "Keyword",
+            "text": "i1",
+            "start": 1340,
+            "end": 1342
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%cmp",
+            "start": 1343,
+            "end": 1347
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1347,
+            "end": 1348
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 1349,
+            "end": 1354
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%if.then",
+            "start": 1355,
+            "end": 1363
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1363,
+            "end": 1364
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 1365,
+            "end": 1370
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%if.else",
+            "start": 1371,
+            "end": 1379
+        },
+        {
+            "kind": "Keyword",
+            "text": "if.then",
+            "start": 1381,
+            "end": 1388
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1388,
+            "end": 1389
+        },
+        {
+            "kind": "Keyword",
+            "text": "call",
+            "start": 1452,
+            "end": 1456
+        },
+        {
+            "kind": "Keyword",
+            "text": "void",
+            "start": 1457,
+            "end": 1461
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@foo",
+            "start": 1462,
+            "end": 1466
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 1466,
+            "end": 1467
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 1467,
+            "end": 1468
+        },
+        {
+            "kind": "Keyword",
+            "text": "br",
+            "start": 1473,
+            "end": 1475
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 1476,
+            "end": 1481
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%if.end",
+            "start": 1482,
+            "end": 1489
+        },
+        {
+            "kind": "Keyword",
+            "text": "if.else",
+            "start": 1491,
+            "end": 1498
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1498,
+            "end": 1499
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%call",
+            "start": 1562,
+            "end": 1567
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1568,
+            "end": 1569
+        },
+        {
+            "kind": "Keyword",
+            "text": "call",
+            "start": 1570,
+            "end": 1574
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 1575,
+            "end": 1578
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 1579,
+            "end": 1580
+        },
+        {
+            "kind": "Keyword",
+            "text": "i8",
+            "start": 1580,
+            "end": 1582
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 1582,
+            "end": 1583
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1583,
+            "end": 1584
+        },
+        {
+            "kind": "Keyword",
+            "text": "...",
+            "start": 1585,
+            "end": 1588
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 1588,
+            "end": 1589
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@printf",
+            "start": 1590,
+            "end": 1597
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 1597,
+            "end": 1598
+        },
+        {
+            "kind": "Keyword",
+            "text": "i8",
+            "start": 1598,
+            "end": 1600
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 1600,
+            "end": 1601
+        },
+        {
+            "kind": "Keyword",
+            "text": "getelementptr",
+            "start": 1602,
+            "end": 1615
+        },
+        {
+            "kind": "Keyword",
+            "text": "inbounds",
+            "start": 1616,
+            "end": 1624
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 1625,
+            "end": 1626
+        },
+        {
+            "kind": "LBracket",
+            "text": "[",
+            "start": 1626,
+            "end": 1627
+        },
+        {
+            "kind": "Number",
+            "text": "13",
+            "start": 1627,
+            "end": 1629
+        },
+        {
+            "kind": "Keyword",
+            "text": "x",
+            "start": 1630,
+            "end": 1631
+        },
+        {
+            "kind": "Keyword",
+            "text": "i8",
+            "start": 1632,
+            "end": 1634
+        },
+        {
+            "kind": "RBracket",
+            "text": "]",
+            "start": 1634,
+            "end": 1635
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1635,
+            "end": 1636
+        },
+        {
+            "kind": "LBracket",
+            "text": "[",
+            "start": 1637,
+            "end": 1638
+        },
+        {
+            "kind": "Number",
+            "text": "13",
+            "start": 1638,
+            "end": 1640
+        },
+        {
+            "kind": "Keyword",
+            "text": "x",
+            "start": 1641,
+            "end": 1642
+        },
+        {
+            "kind": "Keyword",
+            "text": "i8",
+            "start": 1643,
+            "end": 1645
+        },
+        {
+            "kind": "RBracket",
+            "text": "]",
+            "start": 1645,
+            "end": 1646
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 1646,
+            "end": 1647
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@.str",
+            "start": 1648,
+            "end": 1653
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1653,
+            "end": 1654
+        },
+        {
+            "kind": "Keyword",
+            "text": "i64",
+            "start": 1655,
+            "end": 1658
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1659,
+            "end": 1660
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1660,
+            "end": 1661
+        },
+        {
+            "kind": "Keyword",
+            "text": "i64",
+            "start": 1662,
+            "end": 1665
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1666,
+            "end": 1667
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 1667,
+            "end": 1668
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 1668,
+            "end": 1669
+        },
+        {
+            "kind": "Keyword",
+            "text": "br",
+            "start": 1674,
+            "end": 1676
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 1677,
+            "end": 1682
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%if.end",
+            "start": 1683,
+            "end": 1690
+        },
+        {
+            "kind": "Keyword",
+            "text": "if.end",
+            "start": 1692,
+            "end": 1698
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1698,
+            "end": 1699
+        },
+        {
+            "kind": "Keyword",
+            "text": "ret",
+            "start": 1775,
+            "end": 1778
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 1779,
+            "end": 1782
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1783,
+            "end": 1784
         },
         {
             "kind": "RBrace",
             "text": "}",
-            "start": 558,
-            "end": 559
+            "start": 1785,
+            "end": 1786
+        },
+        {
+            "kind": "Keyword",
+            "text": "declare",
+            "start": 1819,
+            "end": 1826
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 1827,
+            "end": 1830
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@printf",
+            "start": 1831,
+            "end": 1838
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 1838,
+            "end": 1839
+        },
+        {
+            "kind": "Keyword",
+            "text": "i8",
+            "start": 1839,
+            "end": 1841
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 1841,
+            "end": 1842
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1842,
+            "end": 1843
+        },
+        {
+            "kind": "Keyword",
+            "text": "...",
+            "start": 1844,
+            "end": 1847
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 1847,
+            "end": 1848
+        },
+        {
+            "kind": "Error",
+            "text": "#",
+            "start": 1849,
+            "end": 1850
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 1850,
+            "end": 1851
+        },
+        {
+            "kind": "Keyword",
+            "text": "attributes",
+            "start": 1874,
+            "end": 1884
+        },
+        {
+            "kind": "Error",
+            "text": "#",
+            "start": 1885,
+            "end": 1886
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1886,
+            "end": 1887
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1888,
+            "end": 1889
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 1890,
+            "end": 1891
+        },
+        {
+            "kind": "Keyword",
+            "text": "noinline",
+            "start": 1892,
+            "end": 1900
+        },
+        {
+            "kind": "Keyword",
+            "text": "nounwind",
+            "start": 1901,
+            "end": 1909
+        },
+        {
+            "kind": "Keyword",
+            "text": "optnone",
+            "start": 1910,
+            "end": 1917
+        },
+        {
+            "kind": "Keyword",
+            "text": "uwtable",
+            "start": 1918,
+            "end": 1925
+        },
+        {
+            "kind": "String",
+            "text": "\"frame-pointer\"",
+            "start": 1926,
+            "end": 1941
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1941,
+            "end": 1942
+        },
+        {
+            "kind": "String",
+            "text": "\"all\"",
+            "start": 1942,
+            "end": 1947
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 1948,
+            "end": 1949
+        },
+        {
+            "kind": "Keyword",
+            "text": "attributes",
+            "start": 1950,
+            "end": 1960
+        },
+        {
+            "kind": "Error",
+            "text": "#",
+            "start": 1961,
+            "end": 1962
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 1962,
+            "end": 1963
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1964,
+            "end": 1965
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 1966,
+            "end": 1967
+        },
+        {
+            "kind": "String",
+            "text": "\"no-trapping-math\"",
+            "start": 1968,
+            "end": 1986
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1986,
+            "end": 1987
+        },
+        {
+            "kind": "String",
+            "text": "\"true\"",
+            "start": 1987,
+            "end": 1993
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 1994,
+            "end": 1995
+        },
+        {
+            "kind": "Metadata",
+            "text": "!llvm.module.flags",
+            "start": 2016,
+            "end": 2034
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2035,
+            "end": 2036
+        },
+        {
+            "kind": "Metadata",
+            "text": "!",
+            "start": 2037,
+            "end": 2038
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 2038,
+            "end": 2039
+        },
+        {
+            "kind": "Metadata",
+            "text": "!0",
+            "start": 2039,
+            "end": 2041
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2041,
+            "end": 2042
+        },
+        {
+            "kind": "Metadata",
+            "text": "!1",
+            "start": 2043,
+            "end": 2045
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2045,
+            "end": 2046
+        },
+        {
+            "kind": "Metadata",
+            "text": "!2",
+            "start": 2047,
+            "end": 2049
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 2049,
+            "end": 2050
+        },
+        {
+            "kind": "Metadata",
+            "text": "!llvm.ident",
+            "start": 2051,
+            "end": 2062
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2063,
+            "end": 2064
+        },
+        {
+            "kind": "Metadata",
+            "text": "!",
+            "start": 2065,
+            "end": 2066
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 2066,
+            "end": 2067
+        },
+        {
+            "kind": "Metadata",
+            "text": "!3",
+            "start": 2067,
+            "end": 2069
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 2069,
+            "end": 2070
+        },
+        {
+            "kind": "Metadata",
+            "text": "!0",
+            "start": 2072,
+            "end": 2074
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2075,
+            "end": 2076
+        },
+        {
+            "kind": "Metadata",
+            "text": "!",
+            "start": 2077,
+            "end": 2078
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 2078,
+            "end": 2079
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2079,
+            "end": 2082
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 2083,
+            "end": 2084
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2084,
+            "end": 2085
+        },
+        {
+            "kind": "Metadata",
+            "text": "!",
+            "start": 2086,
+            "end": 2087
+        },
+        {
+            "kind": "String",
+            "text": "\"wchar_size\"",
+            "start": 2087,
+            "end": 2099
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2099,
+            "end": 2100
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2101,
+            "end": 2104
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 2105,
+            "end": 2106
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 2106,
+            "end": 2107
+        },
+        {
+            "kind": "Metadata",
+            "text": "!1",
+            "start": 2108,
+            "end": 2110
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2111,
+            "end": 2112
+        },
+        {
+            "kind": "Metadata",
+            "text": "!",
+            "start": 2113,
+            "end": 2114
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 2114,
+            "end": 2115
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2115,
+            "end": 2118
+        },
+        {
+            "kind": "Number",
+            "text": "7",
+            "start": 2119,
+            "end": 2120
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2120,
+            "end": 2121
+        },
+        {
+            "kind": "Metadata",
+            "text": "!",
+            "start": 2122,
+            "end": 2123
+        },
+        {
+            "kind": "String",
+            "text": "\"uwtable\"",
+            "start": 2123,
+            "end": 2132
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2132,
+            "end": 2133
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2134,
+            "end": 2137
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 2138,
+            "end": 2139
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 2139,
+            "end": 2140
+        },
+        {
+            "kind": "Metadata",
+            "text": "!2",
+            "start": 2141,
+            "end": 2143
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2144,
+            "end": 2145
+        },
+        {
+            "kind": "Metadata",
+            "text": "!",
+            "start": 2146,
+            "end": 2147
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 2147,
+            "end": 2148
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2148,
+            "end": 2151
+        },
+        {
+            "kind": "Number",
+            "text": "7",
+            "start": 2152,
+            "end": 2153
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2153,
+            "end": 2154
+        },
+        {
+            "kind": "Metadata",
+            "text": "!",
+            "start": 2155,
+            "end": 2156
+        },
+        {
+            "kind": "String",
+            "text": "\"frame-pointer\"",
+            "start": 2156,
+            "end": 2171
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2171,
+            "end": 2172
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2173,
+            "end": 2176
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 2177,
+            "end": 2178
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 2178,
+            "end": 2179
+        },
+        {
+            "kind": "Metadata",
+            "text": "!3",
+            "start": 2180,
+            "end": 2182
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2183,
+            "end": 2184
+        },
+        {
+            "kind": "Metadata",
+            "text": "!",
+            "start": 2185,
+            "end": 2186
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 2186,
+            "end": 2187
+        },
+        {
+            "kind": "Metadata",
+            "text": "!",
+            "start": 2187,
+            "end": 2188
+        },
+        {
+            "kind": "String",
+            "text": "\"clang version 15.0.0\"",
+            "start": 2188,
+            "end": 2210
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 2210,
+            "end": 2211
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@alias_name",
+            "start": 2231,
+            "end": 2242
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2243,
+            "end": 2244
+        },
+        {
+            "kind": "Keyword",
+            "text": "alias",
+            "start": 2245,
+            "end": 2250
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2251,
+            "end": 2254
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2254,
+            "end": 2255
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2256,
+            "end": 2259
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 2259,
+            "end": 2260
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@MyGlobal",
+            "start": 2261,
+            "end": 2270
         },
         {
             "kind": "Keyword",
             "text": "define",
-            "start": 616,
-            "end": 622
+            "start": 2298,
+            "end": 2304
         },
         {
             "kind": "Keyword",
-            "text": "dso_local",
-            "start": 623,
-            "end": 632
+            "text": "void",
+            "start": 2305,
+            "end": 2309
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@asm_test",
+            "start": 2310,
+            "end": 2319
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 2319,
+            "end": 2320
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 2320,
+            "end": 2321
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 2322,
+            "end": 2323
+        },
+        {
+            "kind": "Keyword",
+            "text": "call",
+            "start": 2328,
+            "end": 2332
+        },
+        {
+            "kind": "Keyword",
+            "text": "void",
+            "start": 2333,
+            "end": 2337
+        },
+        {
+            "kind": "Keyword",
+            "text": "asm",
+            "start": 2338,
+            "end": 2341
+        },
+        {
+            "kind": "Keyword",
+            "text": "sideeffect",
+            "start": 2342,
+            "end": 2352
+        },
+        {
+            "kind": "String",
+            "text": "\"nop\"",
+            "start": 2353,
+            "end": 2358
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2358,
+            "end": 2359
+        },
+        {
+            "kind": "String",
+            "text": "\"~{dirflag},~{fpsr},~{flags}\"",
+            "start": 2360,
+            "end": 2389
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 2389,
+            "end": 2390
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 2390,
+            "end": 2391
+        },
+        {
+            "kind": "Keyword",
+            "text": "ret",
+            "start": 2396,
+            "end": 2399
+        },
+        {
+            "kind": "Keyword",
+            "text": "void",
+            "start": 2400,
+            "end": 2404
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 2405,
+            "end": 2406
+        },
+        {
+            "kind": "Keyword",
+            "text": "define",
+            "start": 2431,
+            "end": 2437
+        },
+        {
+            "kind": "Error",
+            "text": "<",
+            "start": 2438,
+            "end": 2439
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 2439,
+            "end": 2440
+        },
+        {
+            "kind": "Keyword",
+            "text": "x",
+            "start": 2441,
+            "end": 2442
+        },
+        {
+            "kind": "Keyword",
+            "text": "float",
+            "start": 2443,
+            "end": 2448
+        },
+        {
+            "kind": "Error",
+            "text": ">",
+            "start": 2448,
+            "end": 2449
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@vector_ops",
+            "start": 2450,
+            "end": 2461
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 2461,
+            "end": 2462
+        },
+        {
+            "kind": "Error",
+            "text": "<",
+            "start": 2462,
+            "end": 2463
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 2463,
+            "end": 2464
+        },
+        {
+            "kind": "Keyword",
+            "text": "x",
+            "start": 2465,
+            "end": 2466
+        },
+        {
+            "kind": "Keyword",
+            "text": "float",
+            "start": 2467,
+            "end": 2472
+        },
+        {
+            "kind": "Error",
+            "text": ">",
+            "start": 2472,
+            "end": 2473
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%a",
+            "start": 2474,
+            "end": 2476
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2476,
+            "end": 2477
+        },
+        {
+            "kind": "Error",
+            "text": "<",
+            "start": 2478,
+            "end": 2479
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 2479,
+            "end": 2480
+        },
+        {
+            "kind": "Keyword",
+            "text": "x",
+            "start": 2481,
+            "end": 2482
+        },
+        {
+            "kind": "Keyword",
+            "text": "float",
+            "start": 2483,
+            "end": 2488
+        },
+        {
+            "kind": "Error",
+            "text": ">",
+            "start": 2488,
+            "end": 2489
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%b",
+            "start": 2490,
+            "end": 2492
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 2492,
+            "end": 2493
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 2494,
+            "end": 2495
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%1",
+            "start": 2500,
+            "end": 2502
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2503,
+            "end": 2504
+        },
+        {
+            "kind": "Keyword",
+            "text": "fadd",
+            "start": 2505,
+            "end": 2509
+        },
+        {
+            "kind": "Error",
+            "text": "<",
+            "start": 2510,
+            "end": 2511
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 2511,
+            "end": 2512
+        },
+        {
+            "kind": "Keyword",
+            "text": "x",
+            "start": 2513,
+            "end": 2514
+        },
+        {
+            "kind": "Keyword",
+            "text": "float",
+            "start": 2515,
+            "end": 2520
+        },
+        {
+            "kind": "Error",
+            "text": ">",
+            "start": 2520,
+            "end": 2521
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%a",
+            "start": 2522,
+            "end": 2524
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2524,
+            "end": 2525
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%b",
+            "start": 2526,
+            "end": 2528
+        },
+        {
+            "kind": "Keyword",
+            "text": "ret",
+            "start": 2533,
+            "end": 2536
+        },
+        {
+            "kind": "Error",
+            "text": "<",
+            "start": 2537,
+            "end": 2538
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 2538,
+            "end": 2539
+        },
+        {
+            "kind": "Keyword",
+            "text": "x",
+            "start": 2540,
+            "end": 2541
+        },
+        {
+            "kind": "Keyword",
+            "text": "float",
+            "start": 2542,
+            "end": 2547
+        },
+        {
+            "kind": "Error",
+            "text": ">",
+            "start": 2547,
+            "end": 2548
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%1",
+            "start": 2549,
+            "end": 2551
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 2552,
+            "end": 2553
+        },
+        {
+            "kind": "Keyword",
+            "text": "define",
+            "start": 2579,
+            "end": 2585
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2586,
+            "end": 2589
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@gep_test",
+            "start": 2590,
+            "end": 2599
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 2599,
+            "end": 2600
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%struct.Node",
+            "start": 2600,
+            "end": 2612
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 2612,
+            "end": 2613
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%node",
+            "start": 2614,
+            "end": 2619
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 2619,
+            "end": 2620
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 2621,
+            "end": 2622
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%next_ptr",
+            "start": 2627,
+            "end": 2636
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2637,
+            "end": 2638
+        },
+        {
+            "kind": "Keyword",
+            "text": "getelementptr",
+            "start": 2639,
+            "end": 2652
+        },
+        {
+            "kind": "Keyword",
+            "text": "inbounds",
+            "start": 2653,
+            "end": 2661
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%struct.Node",
+            "start": 2662,
+            "end": 2674
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2674,
+            "end": 2675
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%struct.Node",
+            "start": 2676,
+            "end": 2688
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 2688,
+            "end": 2689
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%node",
+            "start": 2690,
+            "end": 2695
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2695,
+            "end": 2696
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2697,
+            "end": 2700
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 2701,
+            "end": 2702
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2702,
+            "end": 2703
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2704,
+            "end": 2707
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 2708,
+            "end": 2709
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%next",
+            "start": 2714,
+            "end": 2719
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2720,
+            "end": 2721
+        },
+        {
+            "kind": "Keyword",
+            "text": "load",
+            "start": 2722,
+            "end": 2726
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%struct.Node",
+            "start": 2727,
+            "end": 2739
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 2739,
+            "end": 2740
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2740,
+            "end": 2741
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%struct.Node",
+            "start": 2742,
+            "end": 2754
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 2754,
+            "end": 2755
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 2755,
+            "end": 2756
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%next_ptr",
+            "start": 2757,
+            "end": 2766
+        },
+        {
+            "kind": "Keyword",
+            "text": "ret",
+            "start": 2771,
+            "end": 2774
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2775,
+            "end": 2778
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 2779,
+            "end": 2780
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 2781,
+            "end": 2782
+        },
+        {
+            "kind": "Keyword",
+            "text": "define",
+            "start": 2801,
+            "end": 2807
+        },
+        {
+            "kind": "Keyword",
+            "text": "void",
+            "start": 2808,
+            "end": 2812
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@switch_test",
+            "start": 2813,
+            "end": 2825
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 2825,
+            "end": 2826
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2826,
+            "end": 2829
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%val",
+            "start": 2830,
+            "end": 2834
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 2834,
+            "end": 2835
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 2836,
+            "end": 2837
+        },
+        {
+            "kind": "Keyword",
+            "text": "entry",
+            "start": 2838,
+            "end": 2843
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 2843,
+            "end": 2844
+        },
+        {
+            "kind": "Keyword",
+            "text": "switch",
+            "start": 2849,
+            "end": 2855
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2856,
+            "end": 2859
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%val",
+            "start": 2860,
+            "end": 2864
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2864,
+            "end": 2865
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 2866,
+            "end": 2871
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%default",
+            "start": 2872,
+            "end": 2880
+        },
+        {
+            "kind": "LBracket",
+            "text": "[",
+            "start": 2881,
+            "end": 2882
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2891,
+            "end": 2894
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 2895,
+            "end": 2896
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2896,
+            "end": 2897
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 2898,
+            "end": 2903
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%case0",
+            "start": 2904,
+            "end": 2910
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 2919,
+            "end": 2922
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 2923,
+            "end": 2924
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2924,
+            "end": 2925
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 2926,
+            "end": 2931
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%case1",
+            "start": 2932,
+            "end": 2938
+        },
+        {
+            "kind": "RBracket",
+            "text": "]",
+            "start": 2943,
+            "end": 2944
+        },
+        {
+            "kind": "Keyword",
+            "text": "case0",
+            "start": 2946,
+            "end": 2951
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 2951,
+            "end": 2952
+        },
+        {
+            "kind": "Keyword",
+            "text": "br",
+            "start": 2957,
+            "end": 2959
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 2960,
+            "end": 2965
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%end",
+            "start": 2966,
+            "end": 2970
+        },
+        {
+            "kind": "Keyword",
+            "text": "case1",
+            "start": 2971,
+            "end": 2976
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 2976,
+            "end": 2977
+        },
+        {
+            "kind": "Keyword",
+            "text": "br",
+            "start": 2982,
+            "end": 2984
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 2985,
+            "end": 2990
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%end",
+            "start": 2991,
+            "end": 2995
+        },
+        {
+            "kind": "Keyword",
+            "text": "default",
+            "start": 2996,
+            "end": 3003
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3003,
+            "end": 3004
+        },
+        {
+            "kind": "Keyword",
+            "text": "br",
+            "start": 3009,
+            "end": 3011
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 3012,
+            "end": 3017
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%end",
+            "start": 3018,
+            "end": 3022
+        },
+        {
+            "kind": "Keyword",
+            "text": "end",
+            "start": 3023,
+            "end": 3026
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3026,
+            "end": 3027
+        },
+        {
+            "kind": "Keyword",
+            "text": "ret",
+            "start": 3032,
+            "end": 3035
+        },
+        {
+            "kind": "Keyword",
+            "text": "void",
+            "start": 3036,
+            "end": 3040
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 3041,
+            "end": 3042
+        },
+        {
+            "kind": "Keyword",
+            "text": "define",
+            "start": 3061,
+            "end": 3067
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 3068,
+            "end": 3071
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@select_test",
+            "start": 3072,
+            "end": 3084
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 3084,
+            "end": 3085
+        },
+        {
+            "kind": "Keyword",
+            "text": "i1",
+            "start": 3085,
+            "end": 3087
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%cond",
+            "start": 3088,
+            "end": 3093
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 3093,
+            "end": 3094
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 3095,
+            "end": 3096
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%val",
+            "start": 3101,
+            "end": 3105
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3106,
+            "end": 3107
+        },
+        {
+            "kind": "Keyword",
+            "text": "select",
+            "start": 3108,
+            "end": 3114
+        },
+        {
+            "kind": "Keyword",
+            "text": "i1",
+            "start": 3115,
+            "end": 3117
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%cond",
+            "start": 3118,
+            "end": 3123
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3123,
+            "end": 3124
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 3125,
+            "end": 3128
+        },
+        {
+            "kind": "Number",
+            "text": "10",
+            "start": 3129,
+            "end": 3131
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3131,
+            "end": 3132
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 3133,
+            "end": 3136
+        },
+        {
+            "kind": "Number",
+            "text": "20",
+            "start": 3137,
+            "end": 3139
+        },
+        {
+            "kind": "Keyword",
+            "text": "ret",
+            "start": 3144,
+            "end": 3147
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 3148,
+            "end": 3151
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%val",
+            "start": 3152,
+            "end": 3156
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 3157,
+            "end": 3158
+        },
+        {
+            "kind": "Keyword",
+            "text": "define",
+            "start": 3179,
+            "end": 3185
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 3186,
+            "end": 3189
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@phi_test",
+            "start": 3190,
+            "end": 3199
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 3199,
+            "end": 3200
+        },
+        {
+            "kind": "Keyword",
+            "text": "i1",
+            "start": 3200,
+            "end": 3202
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%cond",
+            "start": 3203,
+            "end": 3208
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 3208,
+            "end": 3209
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 3210,
+            "end": 3211
+        },
+        {
+            "kind": "Keyword",
+            "text": "entry",
+            "start": 3212,
+            "end": 3217
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3217,
+            "end": 3218
+        },
+        {
+            "kind": "Keyword",
+            "text": "br",
+            "start": 3223,
+            "end": 3225
+        },
+        {
+            "kind": "Keyword",
+            "text": "i1",
+            "start": 3226,
+            "end": 3228
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%cond",
+            "start": 3229,
+            "end": 3234
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3234,
+            "end": 3235
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 3236,
+            "end": 3241
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%true_block",
+            "start": 3242,
+            "end": 3253
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3253,
+            "end": 3254
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 3255,
+            "end": 3260
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%false_block",
+            "start": 3261,
+            "end": 3273
+        },
+        {
+            "kind": "Keyword",
+            "text": "true_block",
+            "start": 3275,
+            "end": 3285
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3285,
+            "end": 3286
+        },
+        {
+            "kind": "Keyword",
+            "text": "br",
+            "start": 3291,
+            "end": 3293
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 3294,
+            "end": 3299
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%merge",
+            "start": 3300,
+            "end": 3306
+        },
+        {
+            "kind": "Keyword",
+            "text": "false_block",
+            "start": 3308,
+            "end": 3319
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3319,
+            "end": 3320
+        },
+        {
+            "kind": "Keyword",
+            "text": "br",
+            "start": 3325,
+            "end": 3327
+        },
+        {
+            "kind": "Keyword",
+            "text": "label",
+            "start": 3328,
+            "end": 3333
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%merge",
+            "start": 3334,
+            "end": 3340
+        },
+        {
+            "kind": "Keyword",
+            "text": "merge",
+            "start": 3342,
+            "end": 3347
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3347,
+            "end": 3348
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%result",
+            "start": 3353,
+            "end": 3360
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3361,
+            "end": 3362
+        },
+        {
+            "kind": "Keyword",
+            "text": "phi",
+            "start": 3363,
+            "end": 3366
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 3367,
+            "end": 3370
+        },
+        {
+            "kind": "LBracket",
+            "text": "[",
+            "start": 3371,
+            "end": 3372
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 3373,
+            "end": 3374
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3374,
+            "end": 3375
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%true_block",
+            "start": 3376,
+            "end": 3387
+        },
+        {
+            "kind": "RBracket",
+            "text": "]",
+            "start": 3388,
+            "end": 3389
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3389,
+            "end": 3390
+        },
+        {
+            "kind": "LBracket",
+            "text": "[",
+            "start": 3391,
+            "end": 3392
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 3393,
+            "end": 3394
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3394,
+            "end": 3395
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%false_block",
+            "start": 3396,
+            "end": 3408
+        },
+        {
+            "kind": "RBracket",
+            "text": "]",
+            "start": 3409,
+            "end": 3410
+        },
+        {
+            "kind": "Keyword",
+            "text": "ret",
+            "start": 3415,
+            "end": 3418
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 3419,
+            "end": 3422
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%result",
+            "start": 3423,
+            "end": 3430
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 3431,
+            "end": 3432
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 3433,
+            "end": 3433
         }
     ],
     "errors": []

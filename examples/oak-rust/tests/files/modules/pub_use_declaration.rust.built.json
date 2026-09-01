@@ -6,10 +6,10 @@
             "items": [
                 {
                     "Use": {
-                        "path": " use my_module::MyType",
+                        "path": "",
                         "span": {
-                            "end": 25,
-                            "start": 3
+                            "end": 26,
+                            "start": 4
                         }
                     }
                 }

@@ -3,7 +3,7 @@
     "count": 8,
     "tokens": [
         {
-            "kind": "Keyword(Const)",
+            "kind": "Const",
             "text": "const",
             "start": 0,
             "end": 5

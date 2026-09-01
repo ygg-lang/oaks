@@ -1,185 +1,227 @@
 {
     "success": true,
-    "count": 100,
+    "count": 336,
     "tokens": [
         {
             "kind": "Identifier",
-            "text": "set",
-            "start": 48,
-            "end": 51
-        },
-        {
-            "kind": "Operator",
-            "text": "-",
-            "start": 52,
-            "end": 53
-        },
-        {
-            "kind": "Identifier",
-            "text": "euo",
-            "start": 53,
-            "end": 56
-        },
-        {
-            "kind": "Identifier",
-            "text": "pipefail",
+            "text": "NAME",
             "start": 57,
-            "end": 65
-        },
-        {
-            "kind": "Identifier",
-            "text": "greet",
-            "start": 101,
-            "end": 106
-        },
-        {
-            "kind": "Delimiter",
-            "text": "(",
-            "start": 106,
-            "end": 107
-        },
-        {
-            "kind": "Delimiter",
-            "text": ")",
-            "start": 107,
-            "end": 108
-        },
-        {
-            "kind": "Delimiter",
-            "text": "{",
-            "start": 109,
-            "end": 110
-        },
-        {
-            "kind": "Keyword",
-            "text": "local",
-            "start": 116,
-            "end": 121
-        },
-        {
-            "kind": "Identifier",
-            "text": "name",
-            "start": 122,
-            "end": 126
+            "end": 61
         },
         {
             "kind": "Operator",
             "text": "=",
-            "start": 126,
-            "end": 127
+            "start": 61,
+            "end": 62
         },
         {
             "kind": "StringLiteral",
-            "text": "\"$1\"",
-            "start": 127,
-            "end": 131
+            "text": "\"World\"",
+            "start": 62,
+            "end": 69
+        },
+        {
+            "kind": "Identifier",
+            "text": "COUNT",
+            "start": 70,
+            "end": 75
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 75,
+            "end": 76
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 76,
+            "end": 78
+        },
+        {
+            "kind": "Identifier",
+            "text": "PI",
+            "start": 79,
+            "end": 81
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 81,
+            "end": 82
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 82,
+            "end": 83
+        },
+        {
+            "kind": "Delimiter",
+            "text": ".",
+            "start": 83,
+            "end": 84
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "14",
+            "start": 84,
+            "end": 86
         },
         {
             "kind": "Identifier",
             "text": "echo",
-            "start": 137,
-            "end": 141
+            "start": 110,
+            "end": 114
         },
         {
             "kind": "StringLiteral",
-            "text": "\"Hello, $name!\"",
-            "start": 142,
-            "end": 157
-        },
-        {
-            "kind": "Delimiter",
-            "text": "}",
-            "start": 159,
-            "end": 160
-        },
-        {
-            "kind": "Keyword",
-            "text": "readonly",
-            "start": 189,
-            "end": 197
+            "text": "\"Hello, ${NAME}!\"",
+            "start": 115,
+            "end": 132
         },
         {
             "kind": "Identifier",
-            "text": "SCRIPT_DIR",
-            "start": 198,
-            "end": 208
+            "text": "echo",
+            "start": 133,
+            "end": 137
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Default: ${UNDEFINED:-DefaultValue}\"",
+            "start": 138,
+            "end": 175
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 176,
+            "end": 180
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Length: ${#NAME}\"",
+            "start": 181,
+            "end": 199
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 200,
+            "end": 204
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Substring: ${NAME:0:3}\"",
+            "start": 205,
+            "end": 229
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 230,
+            "end": 234
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Replacement: ${NAME/World/Bash}\"",
+            "start": 235,
+            "end": 268
+        },
+        {
+            "kind": "Identifier",
+            "text": "DATE",
+            "start": 293,
+            "end": 297
         },
         {
             "kind": "Operator",
             "text": "=",
-            "start": 208,
-            "end": 209
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"$(cd \"",
-            "start": 209,
-            "end": 216
+            "start": 297,
+            "end": 298
         },
         {
             "kind": "SpecialChar",
             "text": "$",
-            "start": 216,
-            "end": 217
+            "start": 298,
+            "end": 299
         },
         {
             "kind": "Delimiter",
             "text": "(",
-            "start": 217,
-            "end": 218
+            "start": 299,
+            "end": 300
         },
         {
             "kind": "Identifier",
-            "text": "dirname",
-            "start": 218,
-            "end": 225
+            "text": "date",
+            "start": 300,
+            "end": 304
         },
         {
-            "kind": "StringLiteral",
-            "text": "\"${BASH_SOURCE[0]}\"",
-            "start": 226,
-            "end": 245
+            "kind": "Operator",
+            "text": "+",
+            "start": 305,
+            "end": 306
+        },
+        {
+            "kind": "Operator",
+            "text": "%",
+            "start": 306,
+            "end": 307
+        },
+        {
+            "kind": "Identifier",
+            "text": "Y",
+            "start": 307,
+            "end": 308
+        },
+        {
+            "kind": "Operator",
+            "text": "-",
+            "start": 308,
+            "end": 309
+        },
+        {
+            "kind": "Operator",
+            "text": "%",
+            "start": 309,
+            "end": 310
+        },
+        {
+            "kind": "Identifier",
+            "text": "m",
+            "start": 310,
+            "end": 311
+        },
+        {
+            "kind": "Operator",
+            "text": "-",
+            "start": 311,
+            "end": 312
+        },
+        {
+            "kind": "Operator",
+            "text": "%",
+            "start": 312,
+            "end": 313
+        },
+        {
+            "kind": "Identifier",
+            "text": "d",
+            "start": 313,
+            "end": 314
         },
         {
             "kind": "Delimiter",
             "text": ")",
-            "start": 245,
-            "end": 246
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\" && pwd)\"",
-            "start": 246,
-            "end": 256
-        },
-        {
-            "kind": "Keyword",
-            "text": "readonly",
-            "start": 258,
-            "end": 266
+            "start": 314,
+            "end": 315
         },
         {
             "kind": "Identifier",
-            "text": "LOG_FILE",
-            "start": 267,
-            "end": 275
-        },
-        {
-            "kind": "Operator",
-            "text": "=",
-            "start": 275,
-            "end": 276
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"/tmp/test.log\"",
-            "start": 276,
-            "end": 291
-        },
-        {
-            "kind": "Identifier",
-            "text": "fruits",
-            "start": 315,
+            "text": "FILES",
+            "start": 316,
             "end": 321
         },
         {
@@ -189,418 +231,1792 @@
             "end": 322
         },
         {
-            "kind": "Delimiter",
-            "text": "(",
+            "kind": "SpecialChar",
+            "text": "`",
             "start": 322,
             "end": 323
         },
         {
-            "kind": "StringLiteral",
-            "text": "\"apple\"",
+            "kind": "Identifier",
+            "text": "ls",
             "start": 323,
+            "end": 325
+        },
+        {
+            "kind": "Operator",
+            "text": "-",
+            "start": 326,
+            "end": 327
+        },
+        {
+            "kind": "Identifier",
+            "text": "la",
+            "start": 327,
+            "end": 329
+        },
+        {
+            "kind": "SpecialChar",
+            "text": "`",
+            "start": 329,
             "end": 330
         },
         {
-            "kind": "StringLiteral",
-            "text": "\"banana\"",
-            "start": 331,
-            "end": 339
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"orange\"",
-            "start": 340,
-            "end": 348
-        },
-        {
-            "kind": "Delimiter",
-            "text": ")",
-            "start": 348,
-            "end": 349
-        },
-        {
-            "kind": "Keyword",
-            "text": "for",
-            "start": 351,
-            "end": 354
-        },
-        {
             "kind": "Identifier",
-            "text": "fruit",
+            "text": "RESULT",
             "start": 355,
-            "end": 360
+            "end": 361
         },
         {
-            "kind": "Keyword",
-            "text": "in",
+            "kind": "Operator",
+            "text": "=",
             "start": 361,
+            "end": 362
+        },
+        {
+            "kind": "SpecialChar",
+            "text": "$",
+            "start": 362,
             "end": 363
         },
         {
-            "kind": "StringLiteral",
-            "text": "\"${fruits[@]}\"",
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 363,
+            "end": 364
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
             "start": 364,
-            "end": 378
-        },
-        {
-            "kind": "Delimiter",
-            "text": ";",
-            "start": 378,
-            "end": 379
-        },
-        {
-            "kind": "Keyword",
-            "text": "do",
-            "start": 380,
-            "end": 382
+            "end": 365
         },
         {
             "kind": "Identifier",
-            "text": "echo",
-            "start": 388,
-            "end": 392
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"Processing $fruit\"",
-            "start": 393,
-            "end": 412
-        },
-        {
-            "kind": "Keyword",
-            "text": "done",
-            "start": 414,
-            "end": 418
-        },
-        {
-            "kind": "Keyword",
-            "text": "if",
-            "start": 448,
-            "end": 450
-        },
-        {
-            "kind": "Delimiter",
-            "text": "[",
-            "start": 451,
-            "end": 452
-        },
-        {
-            "kind": "Delimiter",
-            "text": "[",
-            "start": 452,
-            "end": 453
+            "text": "COUNT",
+            "start": 365,
+            "end": 370
         },
         {
             "kind": "Operator",
-            "text": "-",
-            "start": 454,
-            "end": 455
+            "text": "+",
+            "start": 371,
+            "end": 372
         },
         {
-            "kind": "Identifier",
-            "text": "f",
-            "start": 455,
-            "end": 456
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"$LOG_FILE\"",
-            "start": 457,
-            "end": 468
-        },
-        {
-            "kind": "Delimiter",
-            "text": "]",
-            "start": 469,
-            "end": 470
-        },
-        {
-            "kind": "Delimiter",
-            "text": "]",
-            "start": 470,
-            "end": 471
-        },
-        {
-            "kind": "Delimiter",
-            "text": ";",
-            "start": 471,
-            "end": 472
-        },
-        {
-            "kind": "Keyword",
-            "text": "then",
-            "start": 473,
-            "end": 477
-        },
-        {
-            "kind": "Identifier",
-            "text": "echo",
-            "start": 483,
-            "end": 487
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"Log file exists\"",
-            "start": 488,
-            "end": 505
-        },
-        {
-            "kind": "Keyword",
-            "text": "elif",
-            "start": 507,
-            "end": 511
-        },
-        {
-            "kind": "Delimiter",
-            "text": "[",
-            "start": 512,
-            "end": 513
-        },
-        {
-            "kind": "Delimiter",
-            "text": "[",
-            "start": 513,
-            "end": 514
-        },
-        {
-            "kind": "Operator",
-            "text": "-",
-            "start": 515,
-            "end": 516
-        },
-        {
-            "kind": "Identifier",
-            "text": "d",
-            "start": 516,
-            "end": 517
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"/tmp\"",
-            "start": 518,
-            "end": 524
-        },
-        {
-            "kind": "Delimiter",
-            "text": "]",
-            "start": 525,
-            "end": 526
-        },
-        {
-            "kind": "Delimiter",
-            "text": "]",
-            "start": 526,
-            "end": 527
-        },
-        {
-            "kind": "Delimiter",
-            "text": ";",
-            "start": 527,
-            "end": 528
-        },
-        {
-            "kind": "Keyword",
-            "text": "then",
-            "start": 529,
-            "end": 533
-        },
-        {
-            "kind": "Identifier",
-            "text": "echo",
-            "start": 539,
-            "end": 543
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"Temp directory exists\"",
-            "start": 544,
-            "end": 567
-        },
-        {
-            "kind": "Keyword",
-            "text": "else",
-            "start": 569,
-            "end": 573
-        },
-        {
-            "kind": "Identifier",
-            "text": "echo",
-            "start": 579,
-            "end": 583
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"Neither file nor directory found\"",
-            "start": 584,
-            "end": 618
-        },
-        {
-            "kind": "Keyword",
-            "text": "fi",
-            "start": 620,
-            "end": 622
-        },
-        {
-            "kind": "Keyword",
-            "text": "case",
-            "start": 644,
-            "end": 648
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"$1\"",
-            "start": 649,
-            "end": 653
-        },
-        {
-            "kind": "Keyword",
-            "text": "in",
-            "start": 654,
-            "end": 656
-        },
-        {
-            "kind": "Identifier",
-            "text": "start",
-            "start": 662,
-            "end": 667
-        },
-        {
-            "kind": "Delimiter",
-            "text": ")",
-            "start": 667,
-            "end": 668
-        },
-        {
-            "kind": "Identifier",
-            "text": "echo",
-            "start": 678,
-            "end": 682
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"Starting service...\"",
-            "start": 683,
-            "end": 704
-        },
-        {
-            "kind": "Delimiter",
-            "text": ";",
-            "start": 714,
-            "end": 715
-        },
-        {
-            "kind": "Delimiter",
-            "text": ";",
-            "start": 715,
-            "end": 716
-        },
-        {
-            "kind": "Identifier",
-            "text": "stop",
-            "start": 722,
-            "end": 726
-        },
-        {
-            "kind": "Delimiter",
-            "text": ")",
-            "start": 726,
-            "end": 727
-        },
-        {
-            "kind": "Identifier",
-            "text": "echo",
-            "start": 737,
-            "end": 741
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"Stopping service...\"",
-            "start": 742,
-            "end": 763
-        },
-        {
-            "kind": "Delimiter",
-            "text": ";",
-            "start": 773,
-            "end": 774
-        },
-        {
-            "kind": "Delimiter",
-            "text": ";",
-            "start": 774,
-            "end": 775
-        },
-        {
-            "kind": "Identifier",
-            "text": "restart",
-            "start": 781,
-            "end": 788
-        },
-        {
-            "kind": "Delimiter",
-            "text": ")",
-            "start": 788,
-            "end": 789
-        },
-        {
-            "kind": "Identifier",
-            "text": "echo",
-            "start": 799,
-            "end": 803
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"Restarting service...\"",
-            "start": 804,
-            "end": 827
-        },
-        {
-            "kind": "Delimiter",
-            "text": ";",
-            "start": 837,
-            "end": 838
-        },
-        {
-            "kind": "Delimiter",
-            "text": ";",
-            "start": 838,
-            "end": 839
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 373,
+            "end": 374
         },
         {
             "kind": "Operator",
             "text": "*",
-            "start": 845,
-            "end": 846
+            "start": 375,
+            "end": 376
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 377,
+            "end": 378
         },
         {
             "kind": "Delimiter",
             "text": ")",
-            "start": 846,
-            "end": 847
+            "start": 378,
+            "end": 379
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 379,
+            "end": 380
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 381,
+            "end": 382
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 382,
+            "end": 383
+        },
+        {
+            "kind": "Identifier",
+            "text": "COUNT",
+            "start": 383,
+            "end": 388
+        },
+        {
+            "kind": "Operator",
+            "text": "++",
+            "start": 388,
+            "end": 390
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 390,
+            "end": 391
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 391,
+            "end": 392
+        },
+        {
+            "kind": "Identifier",
+            "text": "FRUITS",
+            "start": 403,
+            "end": 409
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 409,
+            "end": 410
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 410,
+            "end": 411
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Apple\"",
+            "start": 411,
+            "end": 418
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Banana\"",
+            "start": 419,
+            "end": 427
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Cherry\"",
+            "start": 428,
+            "end": 436
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 436,
+            "end": 437
         },
         {
             "kind": "Identifier",
             "text": "echo",
-            "start": 857,
-            "end": 861
+            "start": 438,
+            "end": 442
         },
         {
             "kind": "StringLiteral",
-            "text": "\"Unknown command: $1\"",
-            "start": 862,
-            "end": 883
+            "text": "\"First fruit: ${FRUITS[0]}\"",
+            "start": 443,
+            "end": 470
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 471,
+            "end": 475
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"All fruits: ${FRUITS[@]}\"",
+            "start": 476,
+            "end": 502
+        },
+        {
+            "kind": "Keyword",
+            "text": "declare",
+            "start": 503,
+            "end": 510
+        },
+        {
+            "kind": "Operator",
+            "text": "-",
+            "start": 511,
+            "end": 512
+        },
+        {
+            "kind": "Identifier",
+            "text": "A",
+            "start": 512,
+            "end": 513
+        },
+        {
+            "kind": "Identifier",
+            "text": "DICT",
+            "start": 514,
+            "end": 518
+        },
+        {
+            "kind": "Identifier",
+            "text": "DICT",
+            "start": 519,
+            "end": 523
+        },
+        {
+            "kind": "Delimiter",
+            "text": "[",
+            "start": 523,
+            "end": 524
+        },
+        {
+            "kind": "Identifier",
+            "text": "key",
+            "start": 524,
+            "end": 527
+        },
+        {
+            "kind": "Delimiter",
+            "text": "]",
+            "start": 527,
+            "end": 528
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 528,
+            "end": 529
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"value\"",
+            "start": 529,
+            "end": 536
+        },
+        {
+            "kind": "Keyword",
+            "text": "if",
+            "start": 553,
+            "end": 555
+        },
+        {
+            "kind": "Delimiter",
+            "text": "[",
+            "start": 556,
+            "end": 557
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"$COUNT\"",
+            "start": 558,
+            "end": 566
+        },
+        {
+            "kind": "Operator",
+            "text": "-",
+            "start": 567,
+            "end": 568
+        },
+        {
+            "kind": "Identifier",
+            "text": "gt",
+            "start": 568,
+            "end": 570
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 571,
+            "end": 573
+        },
+        {
+            "kind": "Delimiter",
+            "text": "]",
+            "start": 574,
+            "end": 575
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 575,
+            "end": 576
+        },
+        {
+            "kind": "Keyword",
+            "text": "then",
+            "start": 577,
+            "end": 581
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 586,
+            "end": 590
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Count is greater than 10\"",
+            "start": 591,
+            "end": 617
+        },
+        {
+            "kind": "Keyword",
+            "text": "elif",
+            "start": 618,
+            "end": 622
+        },
+        {
+            "kind": "Delimiter",
+            "text": "[",
+            "start": 623,
+            "end": 624
+        },
+        {
+            "kind": "Delimiter",
+            "text": "[",
+            "start": 624,
+            "end": 625
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"$NAME\"",
+            "start": 626,
+            "end": 633
+        },
+        {
+            "kind": "Operator",
+            "text": "==",
+            "start": 634,
+            "end": 636
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"World\"",
+            "start": 637,
+            "end": 644
+        },
+        {
+            "kind": "Operator",
+            "text": "&&",
+            "start": 645,
+            "end": 647
+        },
+        {
+            "kind": "Operator",
+            "text": "-",
+            "start": 648,
+            "end": 649
+        },
+        {
+            "kind": "Identifier",
+            "text": "f",
+            "start": 649,
+            "end": 650
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"file.txt\"",
+            "start": 651,
+            "end": 661
+        },
+        {
+            "kind": "Delimiter",
+            "text": "]",
+            "start": 662,
+            "end": 663
+        },
+        {
+            "kind": "Delimiter",
+            "text": "]",
+            "start": 663,
+            "end": 664
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 664,
+            "end": 665
+        },
+        {
+            "kind": "Keyword",
+            "text": "then",
+            "start": 666,
+            "end": 670
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 675,
+            "end": 679
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello World and file exists\"",
+            "start": 680,
+            "end": 709
+        },
+        {
+            "kind": "Keyword",
+            "text": "else",
+            "start": 710,
+            "end": 714
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 719,
+            "end": 723
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Condition not met\"",
+            "start": 724,
+            "end": 743
+        },
+        {
+            "kind": "Keyword",
+            "text": "fi",
+            "start": 744,
+            "end": 746
+        },
+        {
+            "kind": "Keyword",
+            "text": "case",
+            "start": 765,
+            "end": 769
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"$1\"",
+            "start": 770,
+            "end": 774
+        },
+        {
+            "kind": "Keyword",
+            "text": "in",
+            "start": 775,
+            "end": 777
+        },
+        {
+            "kind": "Identifier",
+            "text": "start",
+            "start": 782,
+            "end": 787
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 787,
+            "end": 788
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 797,
+            "end": 801
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Starting...\"",
+            "start": 802,
+            "end": 815
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 824,
+            "end": 825
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 825,
+            "end": 826
+        },
+        {
+            "kind": "Identifier",
+            "text": "stop",
+            "start": 831,
+            "end": 835
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 835,
+            "end": 836
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 845,
+            "end": 849
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Stopping...\"",
+            "start": 850,
+            "end": 863
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 872,
+            "end": 873
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 873,
+            "end": 874
+        },
+        {
+            "kind": "Operator",
+            "text": "*",
+            "start": 879,
+            "end": 880
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 880,
+            "end": 881
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 890,
+            "end": 894
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Usage: $0 {start|stop}\"",
+            "start": 895,
+            "end": 919
         },
         {
             "kind": "Keyword",
             "text": "exit",
-            "start": 893,
-            "end": 897
+            "start": 928,
+            "end": 932
         },
         {
             "kind": "NumberLiteral",
             "text": "1",
-            "start": 898,
-            "end": 899
+            "start": 933,
+            "end": 934
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 943,
+            "end": 944
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 944,
+            "end": 945
+        },
+        {
+            "kind": "Keyword",
+            "text": "esac",
+            "start": 946,
+            "end": 950
+        },
+        {
+            "kind": "Keyword",
+            "text": "for",
+            "start": 960,
+            "end": 963
+        },
+        {
+            "kind": "Identifier",
+            "text": "fruit",
+            "start": 964,
+            "end": 969
+        },
+        {
+            "kind": "Keyword",
+            "text": "in",
+            "start": 970,
+            "end": 972
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"${FRUITS[@]}\"",
+            "start": 973,
+            "end": 987
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 987,
+            "end": 988
+        },
+        {
+            "kind": "Keyword",
+            "text": "do",
+            "start": 989,
+            "end": 991
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 996,
+            "end": 1000
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"I like $fruit\"",
+            "start": 1001,
+            "end": 1016
+        },
+        {
+            "kind": "Keyword",
+            "text": "done",
+            "start": 1017,
+            "end": 1021
+        },
+        {
+            "kind": "Keyword",
+            "text": "for",
+            "start": 1023,
+            "end": 1026
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 1027,
+            "end": 1028
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 1028,
+            "end": 1029
+        },
+        {
+            "kind": "Identifier",
+            "text": "i",
+            "start": 1029,
+            "end": 1030
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 1030,
+            "end": 1031
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 1031,
+            "end": 1032
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 1032,
+            "end": 1033
+        },
+        {
+            "kind": "Identifier",
+            "text": "i",
+            "start": 1034,
+            "end": 1035
+        },
+        {
+            "kind": "Operator",
+            "text": "<",
+            "start": 1035,
+            "end": 1036
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 1036,
+            "end": 1037
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 1037,
+            "end": 1038
+        },
+        {
+            "kind": "Identifier",
+            "text": "i",
+            "start": 1039,
+            "end": 1040
+        },
+        {
+            "kind": "Operator",
+            "text": "++",
+            "start": 1040,
+            "end": 1042
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 1042,
+            "end": 1043
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 1043,
+            "end": 1044
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 1044,
+            "end": 1045
+        },
+        {
+            "kind": "Keyword",
+            "text": "do",
+            "start": 1046,
+            "end": 1048
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 1053,
+            "end": 1057
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Number $i\"",
+            "start": 1058,
+            "end": 1069
+        },
+        {
+            "kind": "Keyword",
+            "text": "done",
+            "start": 1070,
+            "end": 1074
+        },
+        {
+            "kind": "Keyword",
+            "text": "while",
+            "start": 1076,
+            "end": 1081
+        },
+        {
+            "kind": "Delimiter",
+            "text": "[",
+            "start": 1082,
+            "end": 1083
+        },
+        {
+            "kind": "Variable",
+            "text": "$COUNT",
+            "start": 1084,
+            "end": 1090
+        },
+        {
+            "kind": "Operator",
+            "text": "-",
+            "start": 1091,
+            "end": 1092
+        },
+        {
+            "kind": "Identifier",
+            "text": "gt",
+            "start": 1092,
+            "end": 1094
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 1095,
+            "end": 1096
+        },
+        {
+            "kind": "Delimiter",
+            "text": "]",
+            "start": 1097,
+            "end": 1098
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 1098,
+            "end": 1099
+        },
+        {
+            "kind": "Keyword",
+            "text": "do",
+            "start": 1100,
+            "end": 1102
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 1107,
+            "end": 1111
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Countdown: $COUNT\"",
+            "start": 1112,
+            "end": 1131
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 1136,
+            "end": 1137
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 1137,
+            "end": 1138
+        },
+        {
+            "kind": "Identifier",
+            "text": "COUNT",
+            "start": 1138,
+            "end": 1143
+        },
+        {
+            "kind": "Operator",
+            "text": "--",
+            "start": 1143,
+            "end": 1145
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 1145,
+            "end": 1146
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 1146,
+            "end": 1147
+        },
+        {
+            "kind": "Keyword",
+            "text": "done",
+            "start": 1148,
+            "end": 1152
+        },
+        {
+            "kind": "Keyword",
+            "text": "until",
+            "start": 1154,
+            "end": 1159
+        },
+        {
+            "kind": "Delimiter",
+            "text": "[",
+            "start": 1160,
+            "end": 1161
+        },
+        {
+            "kind": "Variable",
+            "text": "$COUNT",
+            "start": 1162,
+            "end": 1168
+        },
+        {
+            "kind": "Operator",
+            "text": "-",
+            "start": 1169,
+            "end": 1170
+        },
+        {
+            "kind": "Identifier",
+            "text": "eq",
+            "start": 1170,
+            "end": 1172
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 1173,
+            "end": 1174
+        },
+        {
+            "kind": "Delimiter",
+            "text": "]",
+            "start": 1175,
+            "end": 1176
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 1176,
+            "end": 1177
+        },
+        {
+            "kind": "Keyword",
+            "text": "do",
+            "start": 1178,
+            "end": 1180
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 1185,
+            "end": 1186
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 1186,
+            "end": 1187
+        },
+        {
+            "kind": "Identifier",
+            "text": "COUNT",
+            "start": 1187,
+            "end": 1192
+        },
+        {
+            "kind": "Operator",
+            "text": "++",
+            "start": 1192,
+            "end": 1194
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 1194,
+            "end": 1195
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 1195,
+            "end": 1196
+        },
+        {
+            "kind": "Keyword",
+            "text": "done",
+            "start": 1197,
+            "end": 1201
+        },
+        {
+            "kind": "Keyword",
+            "text": "function",
+            "start": 1215,
+            "end": 1223
+        },
+        {
+            "kind": "Identifier",
+            "text": "my_func",
+            "start": 1224,
+            "end": 1231
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 1231,
+            "end": 1232
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 1232,
+            "end": 1233
+        },
+        {
+            "kind": "Delimiter",
+            "text": "{",
+            "start": 1234,
+            "end": 1235
+        },
+        {
+            "kind": "Keyword",
+            "text": "local",
+            "start": 1240,
+            "end": 1245
+        },
+        {
+            "kind": "Identifier",
+            "text": "var",
+            "start": 1246,
+            "end": 1249
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 1249,
+            "end": 1250
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"local\"",
+            "start": 1250,
+            "end": 1257
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 1262,
+            "end": 1266
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Arguments: $1, $2\"",
+            "start": 1267,
+            "end": 1286
+        },
+        {
+            "kind": "Keyword",
+            "text": "return",
+            "start": 1291,
+            "end": 1297
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 1298,
+            "end": 1299
+        },
+        {
+            "kind": "Delimiter",
+            "text": "}",
+            "start": 1300,
+            "end": 1301
+        },
+        {
+            "kind": "Identifier",
+            "text": "simple_func",
+            "start": 1303,
+            "end": 1314
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 1314,
+            "end": 1315
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 1315,
+            "end": 1316
+        },
+        {
+            "kind": "Delimiter",
+            "text": "{",
+            "start": 1317,
+            "end": 1318
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 1323,
+            "end": 1327
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Simple function\"",
+            "start": 1328,
+            "end": 1345
+        },
+        {
+            "kind": "Delimiter",
+            "text": "}",
+            "start": 1346,
+            "end": 1347
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 1373,
+            "end": 1377
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Log\"",
+            "start": 1378,
+            "end": 1383
+        },
+        {
+            "kind": "Operator",
+            "text": ">",
+            "start": 1384,
+            "end": 1385
+        },
+        {
+            "kind": "Identifier",
+            "text": "log",
+            "start": 1386,
+            "end": 1389
+        },
+        {
+            "kind": "Delimiter",
+            "text": ".",
+            "start": 1389,
+            "end": 1390
+        },
+        {
+            "kind": "Identifier",
+            "text": "txt",
+            "start": 1390,
+            "end": 1393
+        },
+        {
+            "kind": "Identifier",
+            "text": "cat",
+            "start": 1394,
+            "end": 1397
+        },
+        {
+            "kind": "Operator",
+            "text": "<",
+            "start": 1398,
+            "end": 1399
+        },
+        {
+            "kind": "Identifier",
+            "text": "input",
+            "start": 1400,
+            "end": 1405
+        },
+        {
+            "kind": "Delimiter",
+            "text": ".",
+            "start": 1405,
+            "end": 1406
+        },
+        {
+            "kind": "Identifier",
+            "text": "txt",
+            "start": 1406,
+            "end": 1409
+        },
+        {
+            "kind": "Operator",
+            "text": ">>",
+            "start": 1410,
+            "end": 1412
+        },
+        {
+            "kind": "Identifier",
+            "text": "output",
+            "start": 1413,
+            "end": 1419
+        },
+        {
+            "kind": "Delimiter",
+            "text": ".",
+            "start": 1419,
+            "end": 1420
+        },
+        {
+            "kind": "Identifier",
+            "text": "txt",
+            "start": 1420,
+            "end": 1423
+        },
+        {
+            "kind": "Identifier",
+            "text": "ls",
+            "start": 1424,
+            "end": 1426
+        },
+        {
+            "kind": "Operator",
+            "text": "|",
+            "start": 1427,
+            "end": 1428
+        },
+        {
+            "kind": "Identifier",
+            "text": "grep",
+            "start": 1429,
+            "end": 1433
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"txt\"",
+            "start": 1434,
+            "end": 1439
+        },
+        {
+            "kind": "Operator",
+            "text": "|",
+            "start": 1440,
+            "end": 1441
+        },
+        {
+            "kind": "Identifier",
+            "text": "sort",
+            "start": 1442,
+            "end": 1446
+        },
+        {
+            "kind": "Identifier",
+            "text": "cat",
+            "start": 1459,
+            "end": 1462
+        },
+        {
+            "kind": "Operator",
+            "text": "<<",
+            "start": 1463,
+            "end": 1465
+        },
+        {
+            "kind": "Identifier",
+            "text": "EOF",
+            "start": 1465,
+            "end": 1468
+        },
+        {
+            "kind": "Identifier",
+            "text": "This",
+            "start": 1469,
+            "end": 1473
+        },
+        {
+            "kind": "Identifier",
+            "text": "is",
+            "start": 1474,
+            "end": 1476
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 1477,
+            "end": 1478
+        },
+        {
+            "kind": "Identifier",
+            "text": "heredoc",
+            "start": 1479,
+            "end": 1486
+        },
+        {
+            "kind": "Delimiter",
+            "text": ".",
+            "start": 1486,
+            "end": 1487
+        },
+        {
+            "kind": "Identifier",
+            "text": "Variables",
+            "start": 1488,
+            "end": 1497
+        },
+        {
+            "kind": "Identifier",
+            "text": "like",
+            "start": 1498,
+            "end": 1502
+        },
+        {
+            "kind": "Variable",
+            "text": "$NAME",
+            "start": 1503,
+            "end": 1508
+        },
+        {
+            "kind": "Identifier",
+            "text": "are",
+            "start": 1509,
+            "end": 1512
+        },
+        {
+            "kind": "Identifier",
+            "text": "expanded",
+            "start": 1513,
+            "end": 1521
+        },
+        {
+            "kind": "Delimiter",
+            "text": ".",
+            "start": 1521,
+            "end": 1522
+        },
+        {
+            "kind": "Identifier",
+            "text": "EOF",
+            "start": 1523,
+            "end": 1526
+        },
+        {
+            "kind": "Identifier",
+            "text": "cat",
+            "start": 1528,
+            "end": 1531
+        },
+        {
+            "kind": "Operator",
+            "text": "<<",
+            "start": 1532,
+            "end": 1534
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'EOF'",
+            "start": 1534,
+            "end": 1539
+        },
+        {
+            "kind": "Identifier",
+            "text": "This",
+            "start": 1540,
+            "end": 1544
+        },
+        {
+            "kind": "Identifier",
+            "text": "is",
+            "start": 1545,
+            "end": 1547
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 1548,
+            "end": 1549
+        },
+        {
+            "kind": "Identifier",
+            "text": "literal",
+            "start": 1550,
+            "end": 1557
+        },
+        {
+            "kind": "Identifier",
+            "text": "heredoc",
+            "start": 1558,
+            "end": 1565
+        },
+        {
+            "kind": "Delimiter",
+            "text": ".",
+            "start": 1565,
+            "end": 1566
+        },
+        {
+            "kind": "Identifier",
+            "text": "Variables",
+            "start": 1567,
+            "end": 1576
+        },
+        {
+            "kind": "Identifier",
+            "text": "like",
+            "start": 1577,
+            "end": 1581
+        },
+        {
+            "kind": "Variable",
+            "text": "$NAME",
+            "start": 1582,
+            "end": 1587
+        },
+        {
+            "kind": "Identifier",
+            "text": "are",
+            "start": 1588,
+            "end": 1591
+        },
+        {
+            "kind": "Identifier",
+            "text": "NOT",
+            "start": 1592,
+            "end": 1595
+        },
+        {
+            "kind": "Identifier",
+            "text": "expanded",
+            "start": 1596,
+            "end": 1604
+        },
+        {
+            "kind": "Delimiter",
+            "text": ".",
+            "start": 1604,
+            "end": 1605
+        },
+        {
+            "kind": "Identifier",
+            "text": "EOF",
+            "start": 1606,
+            "end": 1609
+        },
+        {
+            "kind": "Identifier",
+            "text": "diff",
+            "start": 1634,
+            "end": 1638
+        },
+        {
+            "kind": "Operator",
+            "text": "<",
+            "start": 1639,
+            "end": 1640
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 1640,
+            "end": 1641
+        },
+        {
+            "kind": "Identifier",
+            "text": "ls",
+            "start": 1641,
+            "end": 1643
+        },
+        {
+            "kind": "Identifier",
+            "text": "dir1",
+            "start": 1644,
+            "end": 1648
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 1648,
+            "end": 1649
+        },
+        {
+            "kind": "Operator",
+            "text": "<",
+            "start": 1650,
+            "end": 1651
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 1651,
+            "end": 1652
+        },
+        {
+            "kind": "Identifier",
+            "text": "ls",
+            "start": 1652,
+            "end": 1654
+        },
+        {
+            "kind": "Identifier",
+            "text": "dir2",
+            "start": 1655,
+            "end": 1659
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 1659,
+            "end": 1660
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 1682,
+            "end": 1686
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Script name: $0\"",
+            "start": 1687,
+            "end": 1704
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 1705,
+            "end": 1709
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Arguments: $@\"",
+            "start": 1710,
+            "end": 1725
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 1726,
+            "end": 1730
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Arg count: $#\"",
+            "start": 1731,
+            "end": 1746
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 1747,
+            "end": 1751
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Exit status: $?\"",
+            "start": 1752,
+            "end": 1769
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 1770,
+            "end": 1774
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"PID: $$\"",
+            "start": 1775,
+            "end": 1784
+        },
+        {
+            "kind": "Keyword",
+            "text": "coproc",
+            "start": 1800,
+            "end": 1806
+        },
+        {
+            "kind": "Identifier",
+            "text": "my_proc",
+            "start": 1807,
+            "end": 1814
+        },
+        {
+            "kind": "Delimiter",
+            "text": "{",
+            "start": 1815,
+            "end": 1816
+        },
+        {
+            "kind": "Identifier",
+            "text": "read",
+            "start": 1821,
+            "end": 1825
+        },
+        {
+            "kind": "Identifier",
+            "text": "line",
+            "start": 1826,
+            "end": 1830
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 1835,
+            "end": 1839
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Processed: $line\"",
+            "start": 1840,
+            "end": 1858
+        },
+        {
+            "kind": "Delimiter",
+            "text": "}",
+            "start": 1859,
+            "end": 1860
+        },
+        {
+            "kind": "Identifier",
+            "text": "echo",
+            "start": 1880,
+            "end": 1884
+        },
+        {
+            "kind": "Delimiter",
+            "text": "{",
+            "start": 1885,
+            "end": 1886
+        },
+        {
+            "kind": "Identifier",
+            "text": "A",
+            "start": 1886,
+            "end": 1887
+        },
+        {
+            "kind": "Delimiter",
+            "text": ",",
+            "start": 1887,
+            "end": 1888
+        },
+        {
+            "kind": "Identifier",
+            "text": "B",
+            "start": 1888,
+            "end": 1889
+        },
+        {
+            "kind": "Delimiter",
+            "text": ",",
+            "start": 1889,
+            "end": 1890
+        },
+        {
+            "kind": "Identifier",
+            "text": "C",
+            "start": 1890,
+            "end": 1891
+        },
+        {
+            "kind": "Delimiter",
+            "text": "}",
+            "start": 1891,
+            "end": 1892
+        },
+        {
+            "kind": "Delimiter",
+            "text": "{",
+            "start": 1892,
+            "end": 1893
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1893,
+            "end": 1894
+        },
+        {
+            "kind": "Delimiter",
+            "text": ",",
+            "start": 1894,
+            "end": 1895
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 1895,
+            "end": 1896
+        },
+        {
+            "kind": "Delimiter",
+            "text": ",",
+            "start": 1896,
+            "end": 1897
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 1897,
+            "end": 1898
+        },
+        {
+            "kind": "Delimiter",
+            "text": "}",
+            "start": 1898,
+            "end": 1899
+        },
+        {
+            "kind": "Identifier",
+            "text": "mkdir",
+            "start": 1900,
+            "end": 1905
+        },
+        {
+            "kind": "Operator",
+            "text": "-",
+            "start": 1906,
+            "end": 1907
+        },
+        {
+            "kind": "Identifier",
+            "text": "p",
+            "start": 1907,
+            "end": 1908
+        },
+        {
+            "kind": "Operator",
+            "text": "/",
+            "start": 1909,
+            "end": 1910
+        },
+        {
+            "kind": "Identifier",
+            "text": "tmp",
+            "start": 1910,
+            "end": 1913
+        },
+        {
+            "kind": "Operator",
+            "text": "/",
+            "start": 1913,
+            "end": 1914
+        },
+        {
+            "kind": "Identifier",
+            "text": "project",
+            "start": 1914,
+            "end": 1921
+        },
+        {
+            "kind": "Operator",
+            "text": "/",
+            "start": 1921,
+            "end": 1922
+        },
+        {
+            "kind": "Delimiter",
+            "text": "{",
+            "start": 1922,
+            "end": 1923
+        },
+        {
+            "kind": "Identifier",
+            "text": "src",
+            "start": 1923,
+            "end": 1926
+        },
+        {
+            "kind": "Delimiter",
+            "text": ",",
+            "start": 1926,
+            "end": 1927
+        },
+        {
+            "kind": "Keyword",
+            "text": "test",
+            "start": 1927,
+            "end": 1931
+        },
+        {
+            "kind": "Delimiter",
+            "text": ",",
+            "start": 1931,
+            "end": 1932
+        },
+        {
+            "kind": "Identifier",
+            "text": "docs",
+            "start": 1932,
+            "end": 1936
+        },
+        {
+            "kind": "Delimiter",
+            "text": "}",
+            "start": 1936,
+            "end": 1937
+        },
+        {
+            "kind": "Delimiter",
+            "text": ":",
+            "start": 1970,
+            "end": 1971
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'\nThis is a\nmultiline comment\nhack\n'",
+            "start": 1972,
+            "end": 2008
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 2009,
+            "end": 2009
         }
     ],
     "errors": []

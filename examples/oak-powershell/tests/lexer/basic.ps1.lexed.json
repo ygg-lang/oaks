@@ -1,606 +1,3342 @@
 {
     "success": true,
-    "count": 100,
+    "count": 556,
     "tokens": [
         {
-            "kind": "Param",
-            "text": "param",
-            "start": 24,
-            "end": 29
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 29,
-            "end": 30
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 36,
-            "end": 37
-        },
-        {
-            "kind": "Identifier",
-            "text": "string",
+            "kind": "Newline",
+            "text": "\n",
             "start": 37,
-            "end": 43
+            "end": 38
         },
         {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 43,
-            "end": 44
+            "kind": "Newline",
+            "text": "\n",
+            "start": 38,
+            "end": 39
         },
         {
-            "kind": "Variable",
-            "text": "$Name",
-            "start": 44,
-            "end": 49
-        },
-        {
-            "kind": "Equal",
-            "text": "=",
+            "kind": "Newline",
+            "text": "\n",
             "start": 50,
             "end": 51
         },
         {
-            "kind": "StringLiteral",
-            "text": "\"World\"",
-            "start": 52,
-            "end": 59
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 59,
-            "end": 60
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 66,
-            "end": 67
-        },
-        {
-            "kind": "Identifier",
-            "text": "int",
-            "start": 67,
-            "end": 70
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 70,
-            "end": 71
-        },
-        {
             "kind": "Variable",
-            "text": "$Count",
-            "start": 71,
-            "end": 77
+            "text": "$name",
+            "start": 51,
+            "end": 56
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 78,
-            "end": 79
-        },
-        {
-            "kind": "NumberLiteral",
-            "text": "1",
-            "start": 80,
-            "end": 81
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 83,
-            "end": 84
-        },
-        {
-            "kind": "Identifier",
-            "text": "Write-Host",
-            "start": 88,
-            "end": 98
+            "start": 57,
+            "end": 58
         },
         {
             "kind": "StringLiteral",
-            "text": "\"Hello, $Name!\"",
-            "start": 99,
-            "end": 114
+            "text": "\"PowerShell\"",
+            "start": 59,
+            "end": 71
         },
         {
-            "kind": "Minus",
-            "text": "-",
-            "start": 115,
-            "end": 116
+            "kind": "Newline",
+            "text": "\n",
+            "start": 71,
+            "end": 72
         },
         {
-            "kind": "Identifier",
-            "text": "ForegroundColor",
-            "start": 116,
+            "kind": "Variable",
+            "text": "$version",
+            "start": 72,
+            "end": 80
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 81,
+            "end": 82
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "7.4",
+            "start": 83,
+            "end": 86
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 86,
+            "end": 87
+        },
+        {
+            "kind": "Variable",
+            "text": "$isCrossPlatform",
+            "start": 87,
+            "end": 103
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 104,
+            "end": 105
+        },
+        {
+            "kind": "Variable",
+            "text": "$true",
+            "start": 106,
+            "end": 111
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 111,
+            "end": 112
+        },
+        {
+            "kind": "Variable",
+            "text": "$nullValue",
+            "start": 112,
+            "end": 122
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 123,
+            "end": 124
+        },
+        {
+            "kind": "Variable",
+            "text": "$null",
+            "start": 125,
+            "end": 130
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 130,
             "end": 131
         },
         {
-            "kind": "Identifier",
-            "text": "Green",
-            "start": 132,
-            "end": 137
+            "kind": "Newline",
+            "text": "\n",
+            "start": 131,
+            "end": 132
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 140,
+            "end": 141
         },
         {
             "kind": "Variable",
             "text": "$numbers",
-            "start": 154,
-            "end": 162
+            "start": 141,
+            "end": 149
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 163,
-            "end": 164
-        },
-        {
-            "kind": "At",
-            "text": "@",
-            "start": 165,
-            "end": 166
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 166,
-            "end": 167
+            "start": 150,
+            "end": 151
         },
         {
             "kind": "NumberLiteral",
             "text": "1",
-            "start": 167,
-            "end": 168
+            "start": 152,
+            "end": 153
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 168,
-            "end": 169
+            "start": 153,
+            "end": 154
         },
         {
             "kind": "NumberLiteral",
             "text": "2",
-            "start": 170,
-            "end": 171
+            "start": 155,
+            "end": 156
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 171,
-            "end": 172
+            "start": 156,
+            "end": 157
         },
         {
             "kind": "NumberLiteral",
             "text": "3",
-            "start": 173,
-            "end": 174
+            "start": 158,
+            "end": 159
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 174,
-            "end": 175
+            "start": 159,
+            "end": 160
         },
         {
             "kind": "NumberLiteral",
             "text": "4",
-            "start": 176,
-            "end": 177
+            "start": 161,
+            "end": 162
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 177,
-            "end": 178
+            "start": 162,
+            "end": 163
         },
         {
             "kind": "NumberLiteral",
             "text": "5",
-            "start": 179,
-            "end": 180
+            "start": 164,
+            "end": 165
         },
         {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 180,
-            "end": 181
+            "kind": "Newline",
+            "text": "\n",
+            "start": 165,
+            "end": 166
         },
         {
             "kind": "Variable",
-            "text": "$hashtable",
-            "start": 183,
-            "end": 193
+            "text": "$colors",
+            "start": 166,
+            "end": 173
         },
         {
             "kind": "Equal",
             "text": "=",
-            "start": 194,
-            "end": 195
+            "start": 174,
+            "end": 175
         },
         {
             "kind": "At",
             "text": "@",
-            "start": 196,
-            "end": 197
+            "start": 176,
+            "end": 177
         },
         {
-            "kind": "LeftBrace",
-            "text": "{",
-            "start": 197,
-            "end": 198
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 177,
+            "end": 178
         },
         {
             "kind": "StringLiteral",
-            "text": "\"key1\"",
-            "start": 204,
-            "end": 210
+            "text": "\"Red\"",
+            "start": 178,
+            "end": 183
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 183,
+            "end": 184
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Green\"",
+            "start": 185,
+            "end": 192
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 192,
+            "end": 193
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Blue\"",
+            "start": 194,
+            "end": 200
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 200,
+            "end": 201
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 201,
+            "end": 202
+        },
+        {
+            "kind": "Variable",
+            "text": "$mixed",
+            "start": 202,
+            "end": 208
         },
         {
             "kind": "Equal",
             "text": "=",
+            "start": 209,
+            "end": 210
+        },
+        {
+            "kind": "At",
+            "text": "@",
             "start": 211,
             "end": 212
         },
         {
-            "kind": "StringLiteral",
-            "text": "\"value1\"",
-            "start": 213,
-            "end": 221
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"key2\"",
-            "start": 227,
-            "end": 233
-        },
-        {
-            "kind": "Equal",
-            "text": "=",
-            "start": 234,
-            "end": 235
-        },
-        {
-            "kind": "StringLiteral",
-            "text": "\"value2\"",
-            "start": 236,
-            "end": 244
-        },
-        {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 246,
-            "end": 247
-        },
-        {
-            "kind": "Function",
-            "text": "function",
-            "start": 264,
-            "end": 272
-        },
-        {
-            "kind": "Identifier",
-            "text": "Get-Square",
-            "start": 273,
-            "end": 283
-        },
-        {
-            "kind": "LeftBrace",
-            "text": "{",
-            "start": 284,
-            "end": 285
-        },
-        {
-            "kind": "Param",
-            "text": "param",
-            "start": 291,
-            "end": 296
-        },
-        {
             "kind": "LeftParen",
             "text": "(",
-            "start": 296,
-            "end": 297
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 297,
-            "end": 298
-        },
-        {
-            "kind": "Identifier",
-            "text": "int",
-            "start": 298,
-            "end": 301
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 301,
-            "end": 302
-        },
-        {
-            "kind": "Variable",
-            "text": "$Number",
-            "start": 302,
-            "end": 309
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 309,
-            "end": 310
-        },
-        {
-            "kind": "Return",
-            "text": "return",
-            "start": 316,
-            "end": 322
-        },
-        {
-            "kind": "Variable",
-            "text": "$Number",
-            "start": 323,
-            "end": 330
-        },
-        {
-            "kind": "Multiply",
-            "text": "*",
-            "start": 331,
-            "end": 332
-        },
-        {
-            "kind": "Variable",
-            "text": "$Number",
-            "start": 333,
-            "end": 340
-        },
-        {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 342,
-            "end": 343
-        },
-        {
-            "kind": "For",
-            "text": "for",
-            "start": 356,
-            "end": 359
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 360,
-            "end": 361
-        },
-        {
-            "kind": "Variable",
-            "text": "$i",
-            "start": 361,
-            "end": 363
-        },
-        {
-            "kind": "Equal",
-            "text": "=",
-            "start": 364,
-            "end": 365
-        },
-        {
-            "kind": "NumberLiteral",
-            "text": "0",
-            "start": 366,
-            "end": 367
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 367,
-            "end": 368
-        },
-        {
-            "kind": "Variable",
-            "text": "$i",
-            "start": 369,
-            "end": 371
-        },
-        {
-            "kind": "Minus",
-            "text": "-",
-            "start": 372,
-            "end": 373
-        },
-        {
-            "kind": "Identifier",
-            "text": "lt",
-            "start": 373,
-            "end": 375
-        },
-        {
-            "kind": "Variable",
-            "text": "$Count",
-            "start": 376,
-            "end": 382
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 382,
-            "end": 383
-        },
-        {
-            "kind": "Variable",
-            "text": "$i",
-            "start": 384,
-            "end": 386
-        },
-        {
-            "kind": "Plus",
-            "text": "++",
-            "start": 386,
-            "end": 388
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 388,
-            "end": 389
-        },
-        {
-            "kind": "LeftBrace",
-            "text": "{",
-            "start": 390,
-            "end": 391
-        },
-        {
-            "kind": "Variable",
-            "text": "$result",
-            "start": 397,
-            "end": 404
-        },
-        {
-            "kind": "Equal",
-            "text": "=",
-            "start": 405,
-            "end": 406
-        },
-        {
-            "kind": "Identifier",
-            "text": "Get-Square",
-            "start": 407,
-            "end": 417
-        },
-        {
-            "kind": "Minus",
-            "text": "-",
-            "start": 418,
-            "end": 419
-        },
-        {
-            "kind": "Identifier",
-            "text": "Number",
-            "start": 419,
-            "end": 425
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 426,
-            "end": 427
-        },
-        {
-            "kind": "Variable",
-            "text": "$i",
-            "start": 427,
-            "end": 429
-        },
-        {
-            "kind": "Plus",
-            "text": "+",
-            "start": 430,
-            "end": 431
+            "start": 212,
+            "end": 213
         },
         {
             "kind": "NumberLiteral",
             "text": "1",
-            "start": 432,
-            "end": 433
+            "start": 213,
+            "end": 214
         },
         {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 433,
-            "end": 434
-        },
-        {
-            "kind": "Identifier",
-            "text": "Write-Output",
-            "start": 440,
-            "end": 452
+            "kind": "Comma",
+            "text": ",",
+            "start": 214,
+            "end": 215
         },
         {
             "kind": "StringLiteral",
-            "text": "\"Square of $($i + 1) is $result\"",
-            "start": 453,
-            "end": 485
+            "text": "\"Two\"",
+            "start": 216,
+            "end": 221
         },
         {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 487,
-            "end": 488
-        },
-        {
-            "kind": "If",
-            "text": "if",
-            "start": 507,
-            "end": 509
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 510,
-            "end": 511
-        },
-        {
-            "kind": "Variable",
-            "text": "$Count",
-            "start": 511,
-            "end": 517
-        },
-        {
-            "kind": "Minus",
-            "text": "-",
-            "start": 518,
-            "end": 519
-        },
-        {
-            "kind": "Identifier",
-            "text": "gt",
-            "start": 519,
-            "end": 521
+            "kind": "Comma",
+            "text": ",",
+            "start": 221,
+            "end": 222
         },
         {
             "kind": "NumberLiteral",
-            "text": "5",
-            "start": 522,
-            "end": 523
+            "text": "3.0",
+            "start": 223,
+            "end": 226
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 523,
-            "end": 524
+            "start": 226,
+            "end": 227
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 227,
+            "end": 228
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 228,
+            "end": 229
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 241,
+            "end": 242
+        },
+        {
+            "kind": "Variable",
+            "text": "$user",
+            "start": 242,
+            "end": 247
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 248,
+            "end": 249
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 250,
+            "end": 251
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 525,
-            "end": 526
+            "start": 251,
+            "end": 252
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 252,
+            "end": 253
         },
         {
             "kind": "Identifier",
-            "text": "Write-Warning",
-            "start": 532,
-            "end": 545
+            "text": "Name",
+            "start": 257,
+            "end": 261
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 262,
+            "end": 263
         },
         {
             "kind": "StringLiteral",
-            "text": "\"Count is greater than 5\"",
-            "start": 546,
-            "end": 571
+            "text": "\"JohnDoe\"",
+            "start": 264,
+            "end": 273
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 273,
+            "end": 274
+        },
+        {
+            "kind": "Identifier",
+            "text": "ID",
+            "start": 278,
+            "end": 280
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 281,
+            "end": 282
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1234",
+            "start": 283,
+            "end": 287
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 287,
+            "end": 288
+        },
+        {
+            "kind": "Identifier",
+            "text": "Roles",
+            "start": 292,
+            "end": 297
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 298,
+            "end": 299
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 300,
+            "end": 301
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 301,
+            "end": 302
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Admin\"",
+            "start": 302,
+            "end": 309
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 309,
+            "end": 310
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"User\"",
+            "start": 311,
+            "end": 317
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 317,
+            "end": 318
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 318,
+            "end": 319
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 573,
-            "end": 574
+            "start": 319,
+            "end": 320
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 320,
+            "end": 321
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 321,
+            "end": 322
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 344,
+            "end": 345
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Host",
+            "start": 345,
+            "end": 355
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"User: $($user.Name)\"",
+            "start": 356,
+            "end": 377
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 377,
+            "end": 378
+        },
+        {
+            "kind": "Variable",
+            "text": "$user",
+            "start": 378,
+            "end": 383
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 383,
+            "end": 384
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"ID\"",
+            "start": 384,
+            "end": 388
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 388,
+            "end": 389
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 390,
+            "end": 391
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5678",
+            "start": 392,
+            "end": 396
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 396,
+            "end": 397
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 397,
+            "end": 398
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 407,
+            "end": 408
+        },
+        {
+            "kind": "Variable",
+            "text": "$singleQuoted",
+            "start": 408,
+            "end": 421
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 422,
+            "end": 423
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'This is a literal string $name'",
+            "start": 424,
+            "end": 456
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 456,
+            "end": 457
+        },
+        {
+            "kind": "Variable",
+            "text": "$doubleQuoted",
+            "start": 457,
+            "end": 470
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 471,
+            "end": 472
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"This expands variable: $name\"",
+            "start": 473,
+            "end": 503
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 503,
+            "end": 504
+        },
+        {
+            "kind": "Variable",
+            "text": "$escaped",
+            "start": 504,
+            "end": 512
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 513,
+            "end": 514
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"This is a backtick `\" and newline `n\"",
+            "start": 515,
+            "end": 553
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 553,
+            "end": 554
+        },
+        {
+            "kind": "Variable",
+            "text": "$hereString",
+            "start": 554,
+            "end": 565
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 566,
+            "end": 567
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 568,
+            "end": 569
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"\nThis is a here-string\nIt can span multiple lines\nVariables like $version work here\n\"",
+            "start": 569,
+            "end": 655
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 655,
+            "end": 656
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 656,
+            "end": 657
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 657,
+            "end": 658
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 672,
+            "end": 673
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 673,
+            "end": 675
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 676,
+            "end": 677
+        },
+        {
+            "kind": "Variable",
+            "text": "$version",
+            "start": 677,
+            "end": 685
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 686,
+            "end": 687
+        },
+        {
+            "kind": "Identifier",
+            "text": "ge",
+            "start": 687,
+            "end": 689
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "7.0",
+            "start": 690,
+            "end": 693
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 693,
+            "end": 694
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 695,
+            "end": 696
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 696,
+            "end": 697
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Output",
+            "start": 701,
+            "end": 713
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Modern PowerShell\"",
+            "start": 714,
+            "end": 733
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 733,
+            "end": 734
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 734,
+            "end": 735
+        },
+        {
+            "kind": "ElseIf",
+            "text": "elseif",
+            "start": 736,
+            "end": 742
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 743,
+            "end": 744
+        },
+        {
+            "kind": "Variable",
+            "text": "$version",
+            "start": 744,
+            "end": 752
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 753,
+            "end": 754
+        },
+        {
+            "kind": "Identifier",
+            "text": "lt",
+            "start": 754,
+            "end": 756
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "6.0",
+            "start": 757,
+            "end": 760
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 760,
+            "end": 761
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 762,
+            "end": 763
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 763,
+            "end": 764
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Output",
+            "start": 768,
+            "end": 780
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Windows PowerShell\"",
+            "start": 781,
+            "end": 801
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 801,
+            "end": 802
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 802,
+            "end": 803
+        },
+        {
+            "kind": "Else",
+            "text": "else",
+            "start": 804,
+            "end": 808
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 809,
+            "end": 810
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 810,
+            "end": 811
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Output",
+            "start": 815,
+            "end": 827
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"PowerShell Core\"",
+            "start": 828,
+            "end": 845
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 845,
+            "end": 846
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 846,
+            "end": 847
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 847,
+            "end": 848
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 848,
+            "end": 849
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 856,
+            "end": 857
+        },
+        {
+            "kind": "For",
+            "text": "for",
+            "start": 857,
+            "end": 860
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 861,
+            "end": 862
+        },
+        {
+            "kind": "Variable",
+            "text": "$i",
+            "start": 862,
+            "end": 864
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 865,
+            "end": 866
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 867,
+            "end": 868
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 868,
+            "end": 869
+        },
+        {
+            "kind": "Variable",
+            "text": "$i",
+            "start": 870,
+            "end": 872
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 873,
+            "end": 874
+        },
+        {
+            "kind": "Identifier",
+            "text": "lt",
+            "start": 874,
+            "end": 876
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 877,
+            "end": 878
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 878,
+            "end": 879
+        },
+        {
+            "kind": "Variable",
+            "text": "$i",
+            "start": 880,
+            "end": 882
+        },
+        {
+            "kind": "Plus",
+            "text": "++",
+            "start": 882,
+            "end": 884
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 884,
+            "end": 885
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 886,
+            "end": 887
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 887,
+            "end": 888
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Host",
+            "start": 892,
+            "end": 902
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Count: $i\"",
+            "start": 903,
+            "end": 914
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 914,
+            "end": 915
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 915,
+            "end": 916
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 916,
+            "end": 917
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 917,
+            "end": 918
+        },
+        {
+            "kind": "ForEach",
+            "text": "foreach",
+            "start": 918,
+            "end": 925
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 926,
+            "end": 927
+        },
+        {
+            "kind": "Variable",
+            "text": "$color",
+            "start": 927,
+            "end": 933
+        },
+        {
+            "kind": "In",
+            "text": "in",
+            "start": 934,
+            "end": 936
+        },
+        {
+            "kind": "Variable",
+            "text": "$colors",
+            "start": 937,
+            "end": 944
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 944,
+            "end": 945
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 946,
+            "end": 947
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 947,
+            "end": 948
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Host",
+            "start": 952,
+            "end": 962
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Color: $color\"",
+            "start": 963,
+            "end": 978
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 978,
+            "end": 979
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 979,
+            "end": 980
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 980,
+            "end": 981
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 981,
+            "end": 982
+        },
+        {
+            "kind": "Variable",
+            "text": "$numbers",
+            "start": 982,
+            "end": 990
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 991,
+            "end": 992
+        },
+        {
+            "kind": "Identifier",
+            "text": "ForEach-Object",
+            "start": 993,
+            "end": 1007
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1008,
+            "end": 1009
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1009,
+            "end": 1010
+        },
+        {
+            "kind": "Variable",
+            "text": "$_",
+            "start": 1014,
+            "end": 1016
+        },
+        {
+            "kind": "Multiply",
+            "text": "*",
+            "start": 1017,
+            "end": 1018
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 1019,
+            "end": 1020
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1020,
+            "end": 1021
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1021,
+            "end": 1022
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1022,
+            "end": 1023
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1023,
+            "end": 1024
+        },
+        {
+            "kind": "While",
+            "text": "while",
+            "start": 1024,
+            "end": 1029
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1030,
+            "end": 1031
+        },
+        {
+            "kind": "Variable",
+            "text": "$true",
+            "start": 1031,
+            "end": 1036
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1036,
+            "end": 1037
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1038,
+            "end": 1039
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1039,
+            "end": 1040
+        },
+        {
+            "kind": "Break",
+            "text": "break",
+            "start": 1044,
+            "end": 1049
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1049,
+            "end": 1050
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1050,
+            "end": 1051
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1051,
+            "end": 1052
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1052,
+            "end": 1053
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1064,
+            "end": 1065
+        },
+        {
+            "kind": "Function",
+            "text": "function",
+            "start": 1065,
+            "end": 1073
+        },
+        {
+            "kind": "Identifier",
+            "text": "Get-Greeting",
+            "start": 1074,
+            "end": 1086
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1087,
+            "end": 1088
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1088,
+            "end": 1089
+        },
+        {
+            "kind": "Param",
+            "text": "param",
+            "start": 1093,
+            "end": 1098
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1099,
+            "end": 1100
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1100,
+            "end": 1101
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1109,
+            "end": 1110
+        },
+        {
+            "kind": "Identifier",
+            "text": "Parameter",
+            "start": 1110,
+            "end": 1119
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1119,
+            "end": 1120
+        },
+        {
+            "kind": "Identifier",
+            "text": "Mandatory",
+            "start": 1120,
+            "end": 1129
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1129,
+            "end": 1130
+        },
+        {
+            "kind": "Variable",
+            "text": "$true",
+            "start": 1130,
+            "end": 1135
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1135,
+            "end": 1136
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1136,
+            "end": 1137
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1137,
+            "end": 1138
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1146,
+            "end": 1147
+        },
+        {
+            "kind": "Identifier",
+            "text": "string",
+            "start": 1147,
+            "end": 1153
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1153,
+            "end": 1154
+        },
+        {
+            "kind": "Variable",
+            "text": "$Name",
+            "start": 1154,
+            "end": 1159
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1159,
+            "end": 1160
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1160,
+            "end": 1161
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1169,
+            "end": 1170
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1178,
+            "end": 1179
+        },
+        {
+            "kind": "Identifier",
+            "text": "int",
+            "start": 1179,
+            "end": 1182
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1182,
+            "end": 1183
+        },
+        {
+            "kind": "Variable",
+            "text": "$Count",
+            "start": 1183,
+            "end": 1189
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1190,
+            "end": 1191
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1192,
+            "end": 1193
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1193,
+            "end": 1194
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1198,
+            "end": 1199
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1199,
+            "end": 1200
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1204,
+            "end": 1205
+        },
+        {
+            "kind": "Process",
+            "text": "process",
+            "start": 1209,
+            "end": 1216
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1217,
+            "end": 1218
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1218,
+            "end": 1219
+        },
+        {
+            "kind": "For",
+            "text": "for",
+            "start": 1227,
+            "end": 1230
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1231,
+            "end": 1232
+        },
+        {
+            "kind": "Variable",
+            "text": "$i",
+            "start": 1232,
+            "end": 1234
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1235,
+            "end": 1236
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 1237,
+            "end": 1238
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1238,
+            "end": 1239
+        },
+        {
+            "kind": "Variable",
+            "text": "$i",
+            "start": 1240,
+            "end": 1242
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1243,
+            "end": 1244
+        },
+        {
+            "kind": "Identifier",
+            "text": "lt",
+            "start": 1244,
+            "end": 1246
+        },
+        {
+            "kind": "Variable",
+            "text": "$Count",
+            "start": 1247,
+            "end": 1253
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1253,
+            "end": 1254
+        },
+        {
+            "kind": "Variable",
+            "text": "$i",
+            "start": 1255,
+            "end": 1257
+        },
+        {
+            "kind": "Plus",
+            "text": "++",
+            "start": 1257,
+            "end": 1259
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1259,
+            "end": 1260
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1261,
+            "end": 1262
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1262,
+            "end": 1263
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Output",
+            "start": 1275,
+            "end": 1287
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello, $Name!\"",
+            "start": 1288,
+            "end": 1303
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1303,
+            "end": 1304
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1312,
+            "end": 1313
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1313,
+            "end": 1314
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1318,
+            "end": 1319
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1319,
+            "end": 1320
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1320,
+            "end": 1321
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1321,
+            "end": 1322
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1322,
+            "end": 1323
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1337,
+            "end": 1338
+        },
+        {
+            "kind": "Identifier",
+            "text": "Get-Greeting",
+            "start": 1338,
+            "end": 1350
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1351,
+            "end": 1352
+        },
+        {
+            "kind": "Identifier",
+            "text": "Name",
+            "start": 1352,
+            "end": 1356
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"World\"",
+            "start": 1357,
+            "end": 1364
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1365,
+            "end": 1366
+        },
+        {
+            "kind": "Identifier",
+            "text": "Count",
+            "start": 1366,
+            "end": 1371
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 1372,
+            "end": 1373
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1373,
+            "end": 1374
+        },
+        {
+            "kind": "Identifier",
+            "text": "Get-ChildItem",
+            "start": 1374,
+            "end": 1387
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1388,
+            "end": 1389
+        },
+        {
+            "kind": "Identifier",
+            "text": "Path",
+            "start": 1389,
+            "end": 1393
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1394,
+            "end": 1395
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1396,
+            "end": 1397
+        },
+        {
+            "kind": "Identifier",
+            "text": "Recurse",
+            "start": 1397,
+            "end": 1404
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1405,
+            "end": 1406
+        },
+        {
+            "kind": "Identifier",
+            "text": "Filter",
+            "start": 1406,
+            "end": 1412
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"*.ps1\"",
+            "start": 1413,
+            "end": 1420
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 1421,
+            "end": 1422
+        },
+        {
+            "kind": "Identifier",
+            "text": "Select-Object",
+            "start": 1423,
+            "end": 1436
+        },
+        {
+            "kind": "Identifier",
+            "text": "Name",
+            "start": 1437,
+            "end": 1441
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1441,
+            "end": 1442
+        },
+        {
+            "kind": "Identifier",
+            "text": "Length",
+            "start": 1443,
+            "end": 1449
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1449,
+            "end": 1450
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1450,
+            "end": 1451
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1461,
+            "end": 1462
+        },
+        {
+            "kind": "Identifier",
+            "text": "Get-Process",
+            "start": 1462,
+            "end": 1473
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 1474,
+            "end": 1475
+        },
+        {
+            "kind": "Identifier",
+            "text": "Where-Object",
+            "start": 1476,
+            "end": 1488
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1489,
+            "end": 1490
+        },
+        {
+            "kind": "Variable",
+            "text": "$_",
+            "start": 1491,
+            "end": 1493
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1493,
+            "end": 1494
+        },
+        {
+            "kind": "Identifier",
+            "text": "CPU",
+            "start": 1494,
+            "end": 1497
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1498,
+            "end": 1499
+        },
+        {
+            "kind": "Identifier",
+            "text": "gt",
+            "start": 1499,
+            "end": 1501
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "100",
+            "start": 1502,
+            "end": 1505
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1506,
+            "end": 1507
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 1508,
+            "end": 1509
+        },
+        {
+            "kind": "Identifier",
+            "text": "Sort-Object",
+            "start": 1510,
+            "end": 1521
+        },
+        {
+            "kind": "Identifier",
+            "text": "CPU",
+            "start": 1522,
+            "end": 1525
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1526,
+            "end": 1527
+        },
+        {
+            "kind": "Identifier",
+            "text": "Descending",
+            "start": 1527,
+            "end": 1537
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 1538,
+            "end": 1539
+        },
+        {
+            "kind": "Identifier",
+            "text": "Select-Object",
+            "start": 1540,
+            "end": 1553
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1554,
+            "end": 1555
+        },
+        {
+            "kind": "Identifier",
+            "text": "First",
+            "start": 1555,
+            "end": 1560
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 1561,
+            "end": 1562
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1562,
+            "end": 1563
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1563,
+            "end": 1564
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1580,
+            "end": 1581
+        },
+        {
+            "kind": "Try",
+            "text": "try",
+            "start": 1581,
+            "end": 1584
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1585,
+            "end": 1586
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1586,
+            "end": 1587
+        },
+        {
+            "kind": "Variable",
+            "text": "$result",
+            "start": 1591,
+            "end": 1598
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1599,
+            "end": 1600
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1601,
+            "end": 1602
+        },
+        {
+            "kind": "Divide",
+            "text": "/",
+            "start": 1603,
+            "end": 1604
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 1605,
+            "end": 1606
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1606,
+            "end": 1607
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1607,
+            "end": 1608
+        },
+        {
+            "kind": "Catch",
+            "text": "catch",
+            "start": 1609,
+            "end": 1614
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1615,
+            "end": 1616
+        },
+        {
+            "kind": "Identifier",
+            "text": "System",
+            "start": 1616,
+            "end": 1622
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1622,
+            "end": 1623
+        },
+        {
+            "kind": "Identifier",
+            "text": "DivideByZeroException",
+            "start": 1623,
+            "end": 1644
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1644,
+            "end": 1645
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1646,
+            "end": 1647
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1647,
+            "end": 1648
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Error",
+            "start": 1652,
+            "end": 1663
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Cannot divide by zero\"",
+            "start": 1664,
+            "end": 1687
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1687,
+            "end": 1688
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1688,
+            "end": 1689
+        },
+        {
+            "kind": "Finally",
+            "text": "finally",
+            "start": 1690,
+            "end": 1697
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1698,
+            "end": 1699
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1699,
+            "end": 1700
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Host",
+            "start": 1704,
+            "end": 1714
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Cleanup\"",
+            "start": 1715,
+            "end": 1724
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1724,
+            "end": 1725
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1725,
+            "end": 1726
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1726,
+            "end": 1727
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1727,
+            "end": 1728
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1742,
+            "end": 1743
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1743,
+            "end": 1744
+        },
+        {
+            "kind": "Identifier",
+            "text": "System",
+            "start": 1744,
+            "end": 1750
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1750,
+            "end": 1751
+        },
+        {
+            "kind": "Identifier",
+            "text": "Math",
+            "start": 1751,
+            "end": 1755
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1755,
+            "end": 1756
+        },
+        {
+            "kind": "DoubleColon",
+            "text": "::",
+            "start": 1756,
+            "end": 1758
+        },
+        {
+            "kind": "Identifier",
+            "text": "Pow",
+            "start": 1758,
+            "end": 1761
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1761,
+            "end": 1762
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 1762,
+            "end": 1763
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1763,
+            "end": 1764
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 1765,
+            "end": 1766
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1766,
+            "end": 1767
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1767,
+            "end": 1768
+        },
+        {
+            "kind": "Variable",
+            "text": "$date",
+            "start": 1768,
+            "end": 1773
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1774,
+            "end": 1775
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1776,
+            "end": 1777
+        },
+        {
+            "kind": "Identifier",
+            "text": "DateTime",
+            "start": 1777,
+            "end": 1785
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1785,
+            "end": 1786
+        },
+        {
+            "kind": "DoubleColon",
+            "text": "::",
+            "start": 1786,
+            "end": 1788
+        },
+        {
+            "kind": "Identifier",
+            "text": "Now",
+            "start": 1788,
+            "end": 1791
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1791,
+            "end": 1792
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1792,
+            "end": 1793
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1820,
+            "end": 1821
+        },
+        {
+            "kind": "Class",
+            "text": "class",
+            "start": 1821,
+            "end": 1826
+        },
+        {
+            "kind": "Identifier",
+            "text": "Animal",
+            "start": 1827,
+            "end": 1833
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1834,
+            "end": 1835
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1835,
+            "end": 1836
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1840,
+            "end": 1841
+        },
+        {
+            "kind": "Identifier",
+            "text": "string",
+            "start": 1841,
+            "end": 1847
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1847,
+            "end": 1848
+        },
+        {
+            "kind": "Variable",
+            "text": "$Name",
+            "start": 1848,
+            "end": 1853
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1853,
+            "end": 1854
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1858,
+            "end": 1859
+        },
+        {
+            "kind": "Identifier",
+            "text": "Animal",
+            "start": 1863,
+            "end": 1869
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1869,
+            "end": 1870
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1870,
+            "end": 1871
+        },
+        {
+            "kind": "Identifier",
+            "text": "string",
+            "start": 1871,
+            "end": 1877
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1877,
+            "end": 1878
+        },
+        {
+            "kind": "Variable",
+            "text": "$name",
+            "start": 1878,
+            "end": 1883
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1883,
+            "end": 1884
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1885,
+            "end": 1886
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1886,
+            "end": 1887
+        },
+        {
+            "kind": "Variable",
+            "text": "$this",
+            "start": 1895,
+            "end": 1900
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1900,
+            "end": 1901
+        },
+        {
+            "kind": "Identifier",
+            "text": "Name",
+            "start": 1901,
+            "end": 1905
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1906,
+            "end": 1907
+        },
+        {
+            "kind": "Variable",
+            "text": "$name",
+            "start": 1908,
+            "end": 1913
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1913,
+            "end": 1914
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1918,
+            "end": 1919
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1919,
+            "end": 1920
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1924,
+            "end": 1925
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1929,
+            "end": 1930
+        },
+        {
+            "kind": "Identifier",
+            "text": "void",
+            "start": 1930,
+            "end": 1934
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1934,
+            "end": 1935
+        },
+        {
+            "kind": "Identifier",
+            "text": "Speak",
+            "start": 1936,
+            "end": 1941
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1941,
+            "end": 1942
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1942,
+            "end": 1943
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1944,
+            "end": 1945
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1945,
+            "end": 1946
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Host",
+            "start": 1954,
+            "end": 1964
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"$($this.Name) makes a sound\"",
+            "start": 1965,
+            "end": 1994
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 1994,
+            "end": 1995
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1999,
+            "end": 2000
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2000,
+            "end": 2001
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2001,
+            "end": 2002
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2002,
+            "end": 2003
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2003,
+            "end": 2004
+        },
+        {
+            "kind": "Class",
+            "text": "class",
+            "start": 2004,
+            "end": 2009
+        },
+        {
+            "kind": "Identifier",
+            "text": "Dog",
+            "start": 2010,
+            "end": 2013
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 2014,
+            "end": 2015
+        },
+        {
+            "kind": "Identifier",
+            "text": "Animal",
+            "start": 2016,
+            "end": 2022
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2023,
+            "end": 2024
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2024,
+            "end": 2025
+        },
+        {
+            "kind": "Identifier",
+            "text": "Dog",
+            "start": 2029,
+            "end": 2032
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2032,
+            "end": 2033
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2033,
+            "end": 2034
+        },
+        {
+            "kind": "Identifier",
+            "text": "string",
+            "start": 2034,
+            "end": 2040
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2040,
+            "end": 2041
+        },
+        {
+            "kind": "Variable",
+            "text": "$name",
+            "start": 2041,
+            "end": 2046
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2046,
+            "end": 2047
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 2048,
+            "end": 2049
+        },
+        {
+            "kind": "Identifier",
+            "text": "base",
+            "start": 2050,
+            "end": 2054
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2054,
+            "end": 2055
+        },
+        {
+            "kind": "Variable",
+            "text": "$name",
+            "start": 2055,
+            "end": 2060
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2060,
+            "end": 2061
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2062,
+            "end": 2063
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2063,
+            "end": 2064
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2064,
+            "end": 2065
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2069,
+            "end": 2070
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2074,
+            "end": 2075
+        },
+        {
+            "kind": "Identifier",
+            "text": "void",
+            "start": 2075,
+            "end": 2079
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2079,
+            "end": 2080
+        },
+        {
+            "kind": "Identifier",
+            "text": "Speak",
+            "start": 2081,
+            "end": 2086
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2086,
+            "end": 2087
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2087,
+            "end": 2088
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2089,
+            "end": 2090
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2090,
+            "end": 2091
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Host",
+            "start": 2099,
+            "end": 2109
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"$($this.Name) barks\"",
+            "start": 2110,
+            "end": 2131
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2131,
+            "end": 2132
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2136,
+            "end": 2137
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2137,
+            "end": 2138
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2138,
+            "end": 2139
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2139,
+            "end": 2140
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2140,
+            "end": 2141
+        },
+        {
+            "kind": "Variable",
+            "text": "$dog",
+            "start": 2141,
+            "end": 2145
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2146,
+            "end": 2147
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2148,
+            "end": 2149
+        },
+        {
+            "kind": "Identifier",
+            "text": "Dog",
+            "start": 2149,
+            "end": 2152
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2152,
+            "end": 2153
+        },
+        {
+            "kind": "DoubleColon",
+            "text": "::",
+            "start": 2153,
+            "end": 2155
+        },
+        {
+            "kind": "Identifier",
+            "text": "new",
+            "start": 2155,
+            "end": 2158
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2158,
+            "end": 2159
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Rex\"",
+            "start": 2159,
+            "end": 2164
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2164,
+            "end": 2165
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2165,
+            "end": 2166
+        },
+        {
+            "kind": "Variable",
+            "text": "$dog",
+            "start": 2166,
+            "end": 2170
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2170,
+            "end": 2171
+        },
+        {
+            "kind": "Identifier",
+            "text": "Speak",
+            "start": 2171,
+            "end": 2176
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2176,
+            "end": 2177
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2177,
+            "end": 2178
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2178,
+            "end": 2179
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2179,
+            "end": 2180
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2190,
+            "end": 2191
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2212,
+            "end": 2213
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2251,
+            "end": 2252
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2252,
+            "end": 2253
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2264,
+            "end": 2265
+        },
+        {
+            "kind": "Variable",
+            "text": "$a",
+            "start": 2265,
+            "end": 2267
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2268,
+            "end": 2269
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 2270,
+            "end": 2272
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2272,
+            "end": 2273
+        },
+        {
+            "kind": "Variable",
+            "text": "$b",
+            "start": 2273,
+            "end": 2275
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2276,
+            "end": 2277
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "20",
+            "start": 2278,
+            "end": 2280
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2280,
+            "end": 2281
+        },
+        {
+            "kind": "Variable",
+            "text": "$sum",
+            "start": 2281,
+            "end": 2285
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2286,
+            "end": 2287
+        },
+        {
+            "kind": "Variable",
+            "text": "$a",
+            "start": 2288,
+            "end": 2290
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 2291,
+            "end": 2292
+        },
+        {
+            "kind": "Variable",
+            "text": "$b",
+            "start": 2293,
+            "end": 2295
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2295,
+            "end": 2296
+        },
+        {
+            "kind": "Variable",
+            "text": "$isEqual",
+            "start": 2296,
+            "end": 2304
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2305,
+            "end": 2306
+        },
+        {
+            "kind": "Variable",
+            "text": "$a",
+            "start": 2307,
+            "end": 2309
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 2310,
+            "end": 2311
+        },
+        {
+            "kind": "Identifier",
+            "text": "eq",
+            "start": 2311,
+            "end": 2313
+        },
+        {
+            "kind": "Variable",
+            "text": "$b",
+            "start": 2314,
+            "end": 2316
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2316,
+            "end": 2317
+        },
+        {
+            "kind": "Variable",
+            "text": "$isNotEqual",
+            "start": 2317,
+            "end": 2328
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2329,
+            "end": 2330
+        },
+        {
+            "kind": "Variable",
+            "text": "$a",
+            "start": 2331,
+            "end": 2333
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 2334,
+            "end": 2335
+        },
+        {
+            "kind": "Identifier",
+            "text": "ne",
+            "start": 2335,
+            "end": 2337
+        },
+        {
+            "kind": "Variable",
+            "text": "$b",
+            "start": 2338,
+            "end": 2340
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2340,
+            "end": 2341
+        },
+        {
+            "kind": "Variable",
+            "text": "$match",
+            "start": 2341,
+            "end": 2347
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2348,
+            "end": 2349
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello\"",
+            "start": 2350,
+            "end": 2357
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 2358,
+            "end": 2359
+        },
+        {
+            "kind": "Identifier",
+            "text": "match",
+            "start": 2359,
+            "end": 2364
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"He.*\"",
+            "start": 2365,
+            "end": 2371
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2371,
+            "end": 2372
+        },
+        {
+            "kind": "Variable",
+            "text": "$replace",
+            "start": 2372,
+            "end": 2380
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2381,
+            "end": 2382
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello\"",
+            "start": 2383,
+            "end": 2390
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 2391,
+            "end": 2392
+        },
+        {
+            "kind": "Identifier",
+            "text": "replace",
+            "start": 2392,
+            "end": 2399
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"He\"",
+            "start": 2400,
+            "end": 2404
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2404,
+            "end": 2405
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Ha\"",
+            "start": 2406,
+            "end": 2410
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2410,
+            "end": 2411
+        },
+        {
+            "kind": "Variable",
+            "text": "$bitwise",
+            "start": 2411,
+            "end": 2419
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2420,
+            "end": 2421
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 2422,
+            "end": 2423
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 2424,
+            "end": 2425
+        },
+        {
+            "kind": "Identifier",
+            "text": "band",
+            "start": 2425,
+            "end": 2429
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 2430,
+            "end": 2431
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2431,
+            "end": 2432
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2432,
+            "end": 2433
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2444,
+            "end": 2445
+        },
+        {
+            "kind": "Variable",
+            "text": "$params",
+            "start": 2445,
+            "end": 2452
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2453,
+            "end": 2454
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 2455,
+            "end": 2456
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2456,
+            "end": 2457
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2457,
+            "end": 2458
+        },
+        {
+            "kind": "Identifier",
+            "text": "Path",
+            "start": 2462,
+            "end": 2466
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2467,
+            "end": 2468
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"C:\\Temp\"",
+            "start": 2469,
+            "end": 2478
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2478,
+            "end": 2479
+        },
+        {
+            "kind": "Identifier",
+            "text": "Recurse",
+            "start": 2483,
+            "end": 2490
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 2491,
+            "end": 2492
+        },
+        {
+            "kind": "Variable",
+            "text": "$true",
+            "start": 2493,
+            "end": 2498
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2498,
+            "end": 2499
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2499,
+            "end": 2500
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2500,
+            "end": 2501
+        },
+        {
+            "kind": "Identifier",
+            "text": "Get-ChildItem",
+            "start": 2501,
+            "end": 2514
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 2515,
+            "end": 2516
+        },
+        {
+            "kind": "Identifier",
+            "text": "params",
+            "start": 2516,
+            "end": 2522
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 2522,
+            "end": 2523
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 2523,
+            "end": 2523
         }
     ],
     "errors": []

@@ -1,109 +1,1465 @@
 {
-  "success": true,
-  "count": 17,
-  "tokens": [
-    {
-      "kind": "Identifier",
-      "text": "A",
-      "start": 21,
-      "end": 22
-    },
-    {
-      "kind": "LeftArrow",
-      "text": "←",
-      "start": 23,
-      "end": 26
-    },
-    {
-      "kind": "NumberLiteral",
-      "text": "1",
-      "start": 27,
-      "end": 28
-    },
-    {
-      "kind": "NumberLiteral",
-      "text": "2",
-      "start": 29,
-      "end": 30
-    },
-    {
-      "kind": "NumberLiteral",
-      "text": "3",
-      "start": 31,
-      "end": 32
-    },
-    {
-      "kind": "Identifier",
-      "text": "B",
-      "start": 33,
-      "end": 34
-    },
-    {
-      "kind": "LeftArrow",
-      "text": "←",
-      "start": 35,
-      "end": 38
-    },
-    {
-      "kind": "NumberLiteral",
-      "text": "4",
-      "start": 39,
-      "end": 40
-    },
-    {
-      "kind": "NumberLiteral",
-      "text": "5",
-      "start": 41,
-      "end": 42
-    },
-    {
-      "kind": "NumberLiteral",
-      "text": "6",
-      "start": 43,
-      "end": 44
-    },
-    {
-      "kind": "Identifier",
-      "text": "C",
-      "start": 45,
-      "end": 46
-    },
-    {
-      "kind": "LeftArrow",
-      "text": "←",
-      "start": 47,
-      "end": 50
-    },
-    {
-      "kind": "Identifier",
-      "text": "A",
-      "start": 51,
-      "end": 52
-    },
-    {
-      "kind": "Plus",
-      "text": "+",
-      "start": 53,
-      "end": 54
-    },
-    {
-      "kind": "Identifier",
-      "text": "B",
-      "start": 55,
-      "end": 56
-    },
-    {
-      "kind": "Identifier",
-      "text": "C",
-      "start": 57,
-      "end": 58
-    },
-    {
-      "kind": "Eof",
-      "text": "",
-      "start": 59,
-      "end": 59
-    }
-  ],
-  "errors": []
+    "success": true,
+    "count": 243,
+    "tokens": [
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 102,
+            "end": 103
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 104,
+            "end": 105
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 106,
+            "end": 107
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 108,
+            "end": 109
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 110,
+            "end": 111
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 112,
+            "end": 113
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 114,
+            "end": 115
+        },
+        {
+            "kind": "Times",
+            "text": "×",
+            "start": 116,
+            "end": 118
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "4",
+            "start": 119,
+            "end": 120
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 121,
+            "end": 123
+        },
+        {
+            "kind": "Divide",
+            "text": "÷",
+            "start": 124,
+            "end": 126
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 127,
+            "end": 128
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 129,
+            "end": 130
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 131,
+            "end": 132
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 133,
+            "end": 134
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 159,
+            "end": 160
+        },
+        {
+            "kind": "UpStile",
+            "text": "⌈",
+            "start": 161,
+            "end": 164
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "4",
+            "start": 165,
+            "end": 166
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 184,
+            "end": 185
+        },
+        {
+            "kind": "DownStile",
+            "text": "⌊",
+            "start": 186,
+            "end": 189
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "4",
+            "start": 190,
+            "end": 191
+        },
+        {
+            "kind": "Bar",
+            "text": "|",
+            "start": 209,
+            "end": 210
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "¯5",
+            "start": 211,
+            "end": 214
+        },
+        {
+            "kind": "Factorial",
+            "text": "!",
+            "start": 252,
+            "end": 253
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 254,
+            "end": 255
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 307,
+            "end": 308
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 309,
+            "end": 310
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 311,
+            "end": 312
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "4",
+            "start": 313,
+            "end": 314
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 315,
+            "end": 316
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2.5",
+            "start": 317,
+            "end": 320
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3.14",
+            "start": 321,
+            "end": 325
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "¯1.5",
+            "start": 326,
+            "end": 331
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'Hello'",
+            "start": 332,
+            "end": 339
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'World'",
+            "start": 340,
+            "end": 347
+        },
+        {
+            "kind": "Iota",
+            "text": "⍳",
+            "start": 378,
+            "end": 381
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 382,
+            "end": 384
+        },
+        {
+            "kind": "Rho",
+            "text": "⍴",
+            "start": 418,
+            "end": 421
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 422,
+            "end": 423
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 424,
+            "end": 425
+        },
+        {
+            "kind": "Error",
+            "text": ",",
+            "start": 456,
+            "end": 457
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 458,
+            "end": 459
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 460,
+            "end": 461
+        },
+        {
+            "kind": "Rho",
+            "text": "⍴",
+            "start": 462,
+            "end": 465
+        },
+        {
+            "kind": "Iota",
+            "text": "⍳",
+            "start": 466,
+            "end": 469
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "9",
+            "start": 469,
+            "end": 470
+        },
+        {
+            "kind": "Error",
+            "text": "⌽",
+            "start": 491,
+            "end": 494
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 495,
+            "end": 496
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 497,
+            "end": 498
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 499,
+            "end": 500
+        },
+        {
+            "kind": "Error",
+            "text": "⊖",
+            "start": 516,
+            "end": 519
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 520,
+            "end": 521
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 522,
+            "end": 523
+        },
+        {
+            "kind": "Rho",
+            "text": "⍴",
+            "start": 524,
+            "end": 527
+        },
+        {
+            "kind": "Iota",
+            "text": "⍳",
+            "start": 528,
+            "end": 531
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "9",
+            "start": 531,
+            "end": 532
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 556,
+            "end": 557
+        },
+        {
+            "kind": "SlashBar",
+            "text": "⌿",
+            "start": 557,
+            "end": 560
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 561,
+            "end": 562
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 563,
+            "end": 564
+        },
+        {
+            "kind": "Rho",
+            "text": "⍴",
+            "start": 565,
+            "end": 568
+        },
+        {
+            "kind": "Iota",
+            "text": "⍳",
+            "start": 569,
+            "end": 572
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "9",
+            "start": 572,
+            "end": 573
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 609,
+            "end": 610
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 610,
+            "end": 611
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 612,
+            "end": 613
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 614,
+            "end": 615
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 616,
+            "end": 617
+        },
+        {
+            "kind": "Times",
+            "text": "×",
+            "start": 638,
+            "end": 640
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 640,
+            "end": 641
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 642,
+            "end": 643
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 644,
+            "end": 645
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 646,
+            "end": 647
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 718,
+            "end": 719
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 719,
+            "end": 720
+        },
+        {
+            "kind": "Times",
+            "text": "×",
+            "start": 720,
+            "end": 722
+        },
+        {
+            "kind": "Jot",
+            "text": "∘",
+            "start": 772,
+            "end": 775
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 775,
+            "end": 776
+        },
+        {
+            "kind": "Times",
+            "text": "×",
+            "start": 776,
+            "end": 778
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 804,
+            "end": 805
+        },
+        {
+            "kind": "Backslash",
+            "text": "\\",
+            "start": 843,
+            "end": 844
+        },
+        {
+            "kind": "Diaeresis",
+            "text": "¨",
+            "start": 875,
+            "end": 877
+        },
+        {
+            "kind": "Power",
+            "text": "⍣",
+            "start": 896,
+            "end": 899
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 938,
+            "end": 939
+        },
+        {
+            "kind": "Jot",
+            "text": "∘",
+            "start": 981,
+            "end": 984
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1060,
+            "end": 1061
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1062,
+            "end": 1063
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1064,
+            "end": 1065
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1066,
+            "end": 1067
+        },
+        {
+            "kind": "NotEqual",
+            "text": "≠",
+            "start": 1068,
+            "end": 1071
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 1072,
+            "end": 1073
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 1074,
+            "end": 1075
+        },
+        {
+            "kind": "LessThan",
+            "text": "<",
+            "start": 1076,
+            "end": 1077
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 1078,
+            "end": 1079
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 1080,
+            "end": 1081
+        },
+        {
+            "kind": "GreaterThan",
+            "text": ">",
+            "start": 1082,
+            "end": 1083
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 1084,
+            "end": 1085
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 1086,
+            "end": 1087
+        },
+        {
+            "kind": "LessEqual",
+            "text": "≤",
+            "start": 1088,
+            "end": 1091
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 1092,
+            "end": 1093
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 1094,
+            "end": 1095
+        },
+        {
+            "kind": "GreaterEqual",
+            "text": "≥",
+            "start": 1096,
+            "end": 1099
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 1100,
+            "end": 1101
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1102,
+            "end": 1103
+        },
+        {
+            "kind": "And",
+            "text": "∧",
+            "start": 1104,
+            "end": 1107
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1108,
+            "end": 1109
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1123,
+            "end": 1124
+        },
+        {
+            "kind": "Or",
+            "text": "∨",
+            "start": 1125,
+            "end": 1128
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 1129,
+            "end": 1130
+        },
+        {
+            "kind": "Tilde",
+            "text": "~",
+            "start": 1143,
+            "end": 1144
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1145,
+            "end": 1146
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1162,
+            "end": 1163
+        },
+        {
+            "kind": "Nand",
+            "text": "⍲",
+            "start": 1164,
+            "end": 1167
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 1168,
+            "end": 1169
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1184,
+            "end": 1185
+        },
+        {
+            "kind": "Nor",
+            "text": "⍱",
+            "start": 1186,
+            "end": 1189
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 1190,
+            "end": 1191
+        },
+        {
+            "kind": "Circle",
+            "text": "○",
+            "start": 1241,
+            "end": 1244
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1245,
+            "end": 1246
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1267,
+            "end": 1268
+        },
+        {
+            "kind": "Circle",
+            "text": "○",
+            "start": 1269,
+            "end": 1272
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0.5",
+            "start": 1273,
+            "end": 1276
+        },
+        {
+            "kind": "Log",
+            "text": "⍟",
+            "start": 1320,
+            "end": 1323
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 1324,
+            "end": 1326
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 1349,
+            "end": 1351
+        },
+        {
+            "kind": "Log",
+            "text": "⍟",
+            "start": 1352,
+            "end": 1355
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "100",
+            "start": 1356,
+            "end": 1359
+        },
+        {
+            "kind": "Error",
+            "text": "√",
+            "start": 1378,
+            "end": 1381
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "9",
+            "start": 1382,
+            "end": 1383
+        },
+        {
+            "kind": "Rho",
+            "text": "⍴",
+            "start": 1457,
+            "end": 1460
+        },
+        {
+            "kind": "Tally",
+            "text": "≢",
+            "start": 1480,
+            "end": 1483
+        },
+        {
+            "kind": "Error",
+            "text": "⍋",
+            "start": 1511,
+            "end": 1514
+        },
+        {
+            "kind": "Error",
+            "text": "⍒",
+            "start": 1559,
+            "end": 1562
+        },
+        {
+            "kind": "Error",
+            "text": "⍉",
+            "start": 1587,
+            "end": 1590
+        },
+        {
+            "kind": "UpArrow",
+            "text": "↑",
+            "start": 1614,
+            "end": 1617
+        },
+        {
+            "kind": "DownArrow",
+            "text": "↓",
+            "start": 1636,
+            "end": 1639
+        },
+        {
+            "kind": "Error",
+            "text": "⊂",
+            "start": 1658,
+            "end": 1661
+        },
+        {
+            "kind": "Error",
+            "text": "⊃",
+            "start": 1683,
+            "end": 1686
+        },
+        {
+            "kind": "Epsilon",
+            "text": "∊",
+            "start": 1717,
+            "end": 1720
+        },
+        {
+            "kind": "Error",
+            "text": "⍷",
+            "start": 1745,
+            "end": 1748
+        },
+        {
+            "kind": "Error",
+            "text": "∪",
+            "start": 1767,
+            "end": 1770
+        },
+        {
+            "kind": "Error",
+            "text": "∩",
+            "start": 1791,
+            "end": 1794
+        },
+        {
+            "kind": "Tilde",
+            "text": "~",
+            "start": 1821,
+            "end": 1822
+        },
+        {
+            "kind": "Identifier",
+            "text": "X",
+            "start": 1886,
+            "end": 1887
+        },
+        {
+            "kind": "LeftArrow",
+            "text": "←",
+            "start": 1888,
+            "end": 1891
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 1892,
+            "end": 1894
+        },
+        {
+            "kind": "Identifier",
+            "text": "Y",
+            "start": 1895,
+            "end": 1896
+        },
+        {
+            "kind": "LeftArrow",
+            "text": "←",
+            "start": 1897,
+            "end": 1900
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "20",
+            "start": 1901,
+            "end": 1903
+        },
+        {
+            "kind": "Identifier",
+            "text": "Z",
+            "start": 1904,
+            "end": 1905
+        },
+        {
+            "kind": "LeftArrow",
+            "text": "←",
+            "start": 1906,
+            "end": 1909
+        },
+        {
+            "kind": "Identifier",
+            "text": "X",
+            "start": 1910,
+            "end": 1911
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 1912,
+            "end": 1913
+        },
+        {
+            "kind": "Identifier",
+            "text": "Y",
+            "start": 1914,
+            "end": 1915
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vector",
+            "start": 1916,
+            "end": 1922
+        },
+        {
+            "kind": "LeftArrow",
+            "text": "←",
+            "start": 1923,
+            "end": 1926
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1927,
+            "end": 1928
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 1929,
+            "end": 1930
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 1931,
+            "end": 1932
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "4",
+            "start": 1933,
+            "end": 1934
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 1935,
+            "end": 1936
+        },
+        {
+            "kind": "Identifier",
+            "text": "Matrix",
+            "start": 1937,
+            "end": 1943
+        },
+        {
+            "kind": "LeftArrow",
+            "text": "←",
+            "start": 1944,
+            "end": 1947
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 1948,
+            "end": 1949
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 1950,
+            "end": 1951
+        },
+        {
+            "kind": "Rho",
+            "text": "⍴",
+            "start": 1952,
+            "end": 1955
+        },
+        {
+            "kind": "Iota",
+            "text": "⍳",
+            "start": 1956,
+            "end": 1959
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "9",
+            "start": 1959,
+            "end": 1960
+        },
+        {
+            "kind": "Identifier",
+            "text": "Mean",
+            "start": 2004,
+            "end": 2008
+        },
+        {
+            "kind": "LeftArrow",
+            "text": "←",
+            "start": 2009,
+            "end": 2012
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2013,
+            "end": 2014
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2015,
+            "end": 2016
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 2016,
+            "end": 2017
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 2017,
+            "end": 2018
+        },
+        {
+            "kind": "Omega",
+            "text": "⍵",
+            "start": 2018,
+            "end": 2021
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2021,
+            "end": 2022
+        },
+        {
+            "kind": "Divide",
+            "text": "÷",
+            "start": 2023,
+            "end": 2025
+        },
+        {
+            "kind": "Tally",
+            "text": "≢",
+            "start": 2026,
+            "end": 2029
+        },
+        {
+            "kind": "Omega",
+            "text": "⍵",
+            "start": 2029,
+            "end": 2032
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2033,
+            "end": 2034
+        },
+        {
+            "kind": "Identifier",
+            "text": "Mean",
+            "start": 2035,
+            "end": 2039
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 2040,
+            "end": 2041
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 2042,
+            "end": 2043
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 2044,
+            "end": 2045
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "4",
+            "start": 2046,
+            "end": 2047
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 2048,
+            "end": 2049
+        },
+        {
+            "kind": "Identifier",
+            "text": "Hypotenuse",
+            "start": 2051,
+            "end": 2061
+        },
+        {
+            "kind": "LeftArrow",
+            "text": "←",
+            "start": 2062,
+            "end": 2065
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2066,
+            "end": 2067
+        },
+        {
+            "kind": "Error",
+            "text": "√",
+            "start": 2068,
+            "end": 2071
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2072,
+            "end": 2073
+        },
+        {
+            "kind": "Alpha",
+            "text": "⍺",
+            "start": 2073,
+            "end": 2076
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 2076,
+            "end": 2077
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 2077,
+            "end": 2078
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2078,
+            "end": 2079
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 2080,
+            "end": 2081
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2082,
+            "end": 2083
+        },
+        {
+            "kind": "Omega",
+            "text": "⍵",
+            "start": 2083,
+            "end": 2086
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 2086,
+            "end": 2087
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 2087,
+            "end": 2088
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2088,
+            "end": 2089
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2090,
+            "end": 2091
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 2092,
+            "end": 2093
+        },
+        {
+            "kind": "Identifier",
+            "text": "Hypotenuse",
+            "start": 2094,
+            "end": 2104
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "4",
+            "start": 2105,
+            "end": 2106
+        },
+        {
+            "kind": "Del",
+            "text": "∇",
+            "start": 2152,
+            "end": 2155
+        },
+        {
+            "kind": "Identifier",
+            "text": "R",
+            "start": 2156,
+            "end": 2157
+        },
+        {
+            "kind": "LeftArrow",
+            "text": "←",
+            "start": 2158,
+            "end": 2161
+        },
+        {
+            "kind": "Identifier",
+            "text": "Add",
+            "start": 2162,
+            "end": 2165
+        },
+        {
+            "kind": "Identifier",
+            "text": "A",
+            "start": 2166,
+            "end": 2167
+        },
+        {
+            "kind": "Identifier",
+            "text": "B",
+            "start": 2168,
+            "end": 2169
+        },
+        {
+            "kind": "Identifier",
+            "text": "R",
+            "start": 2172,
+            "end": 2173
+        },
+        {
+            "kind": "LeftArrow",
+            "text": "←",
+            "start": 2174,
+            "end": 2177
+        },
+        {
+            "kind": "Identifier",
+            "text": "A",
+            "start": 2178,
+            "end": 2179
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 2180,
+            "end": 2181
+        },
+        {
+            "kind": "Identifier",
+            "text": "B",
+            "start": 2182,
+            "end": 2183
+        },
+        {
+            "kind": "Del",
+            "text": "∇",
+            "start": 2184,
+            "end": 2187
+        },
+        {
+            "kind": "Zilde",
+            "text": "⍬",
+            "start": 2217,
+            "end": 2220
+        },
+        {
+            "kind": "Alpha",
+            "text": "⍺",
+            "start": 2263,
+            "end": 2266
+        },
+        {
+            "kind": "Omega",
+            "text": "⍵",
+            "start": 2304,
+            "end": 2307
+        },
+        {
+            "kind": "QuoteQuad",
+            "text": "⍞",
+            "start": 2346,
+            "end": 2349
+        },
+        {
+            "kind": "Quad",
+            "text": "⎕",
+            "start": 2386,
+            "end": 2389
+        },
+        {
+            "kind": "Identifier",
+            "text": "⍙",
+            "start": 2426,
+            "end": 2429
+        },
+        {
+            "kind": "Identifier",
+            "text": "∆",
+            "start": 2471,
+            "end": 2474
+        },
+        {
+            "kind": "Error",
+            "text": "⍇",
+            "start": 2494,
+            "end": 2497
+        },
+        {
+            "kind": "Error",
+            "text": "⍈",
+            "start": 2536,
+            "end": 2539
+        },
+        {
+            "kind": "Error",
+            "text": "⍐",
+            "start": 2564,
+            "end": 2567
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 2617,
+            "end": 2618
+        },
+        {
+            "kind": "Identifier",
+            "text": "J2",
+            "start": 2618,
+            "end": 2620
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3.5",
+            "start": 2639,
+            "end": 2642
+        },
+        {
+            "kind": "Identifier",
+            "text": "J",
+            "start": 2642,
+            "end": 2643
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "¯1.2",
+            "start": 2643,
+            "end": 2648
+        },
+        {
+            "kind": "Quad",
+            "text": "⎕",
+            "start": 2696,
+            "end": 2699
+        },
+        {
+            "kind": "Identifier",
+            "text": "IO",
+            "start": 2699,
+            "end": 2701
+        },
+        {
+            "kind": "LeftArrow",
+            "text": "←",
+            "start": 2702,
+            "end": 2705
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 2706,
+            "end": 2707
+        },
+        {
+            "kind": "Quad",
+            "text": "⎕",
+            "start": 2728,
+            "end": 2731
+        },
+        {
+            "kind": "Identifier",
+            "text": "PP",
+            "start": 2731,
+            "end": 2733
+        },
+        {
+            "kind": "LeftArrow",
+            "text": "←",
+            "start": 2734,
+            "end": 2737
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 2738,
+            "end": 2740
+        },
+        {
+            "kind": "Quad",
+            "text": "⎕",
+            "start": 2763,
+            "end": 2766
+        },
+        {
+            "kind": "Identifier",
+            "text": "WA",
+            "start": 2766,
+            "end": 2768
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 2800,
+            "end": 2800
+        }
+    ],
+    "errors": []
 }
