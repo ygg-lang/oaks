@@ -56,7 +56,7 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
         async move {
             let source = source?;
             let language = LLvmLanguage::default();
-            let parser = crate::parser::LLvmParser::new(&language);
+            let parser = crate::parser::LLirParser::new(&language);
             let lexer = crate::lexer::LLvmLexer::new(&language);
             let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
             let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
@@ -101,7 +101,7 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
         async move {
             let source = source?;
             let language = LLvmLanguage::default();
-            let parser = crate::parser::LLvmParser::new(&language);
+            let parser = crate::parser::LLirParser::new(&language);
             let lexer = crate::lexer::LLvmLexer::new(&language);
             let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
             let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);

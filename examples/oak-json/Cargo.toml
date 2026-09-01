@@ -22,7 +22,6 @@ oak-hover = { workspace = true, optional = true }
 oak-vfs = { workspace = true, optional = true }
 oak-navigation = { workspace = true, optional = true }
 oak-mcp = { workspace = true, optional = true }
-dashmap = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 futures = { workspace = true, optional = true }
@@ -40,3 +39,7 @@ mcp = ["lsp", "oak-mcp/io-std", "dep:tokio"]
 
 [package.metadata.docs.rs]
 all-features = true
+
+[[test]]
+name = "main"
+required-features = ["serde"]

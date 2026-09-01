@@ -12,13 +12,13 @@ use oak_core::{
 };
 
 /// Prolog parser.
-pub struct PrologParser {
-    language: PrologLanguage,
+pub struct PrologParser<'config> {
+    language: &'config PrologLanguage,
 }
 
-impl PrologParser {
+impl<'config> PrologParser<'config> {
     /// Creates a new `PrologParser` with the given language configuration.
-    pub fn new(language: PrologLanguage) -> Self {
+    pub fn new(language: &'config PrologLanguage) -> Self {
         Self { language }
     }
 
@@ -52,9 +52,9 @@ impl PrologParser {
     }
 }
 
-impl Parser<PrologLanguage> for PrologParser {
+impl<'config> Parser<PrologLanguage> for PrologParser<'config> {
     fn parse<'s, S: Source + ?Sized>(&self, text: &'s S, edits: &[TextEdit], cache: &'s mut impl ParseCache<PrologLanguage>) -> ParseOutput<'s, PrologLanguage> {
-        let lexer = PrologLexer::new(&self.language);
+        let lexer = PrologLexer::new(self.language);
         oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| {
             let checkpoint = state.checkpoint();
             while state.not_at_end() {

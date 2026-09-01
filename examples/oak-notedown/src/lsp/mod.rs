@@ -55,7 +55,7 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
         async move {
             let source = source?;
             let language = NotedownLanguage::default();
-            let parser = crate::parser::NotedownParser::new(&language);
+            let parser = crate::parser::NoteParser::new(&language);
             let lexer = crate::lexer::NotedownLexer::new(&language);
             let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
             let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);

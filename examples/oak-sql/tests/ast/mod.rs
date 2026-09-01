@@ -39,8 +39,8 @@ fn test_sql_to_doc() {
     assert!(result.result.is_ok());
     let root = result.result.unwrap();
 
-    let doc = root.as_document();
-    let formatted = doc.render(oak_pretty_print::FormatConfig::default());
+    let doc = root.as_document(&());
+    let formatted = doc.render();
     println!("Formatted doc:\n{}", formatted);
 
     assert!(formatted.contains("SELECT"));
@@ -193,8 +193,8 @@ fn test_sql_pretty_print_complex() {
     assert!(result.result.is_ok());
     let root = result.result.unwrap();
 
-    let doc = root.as_document();
-    let formatted = doc.render(oak_pretty_print::FormatConfig::default());
+    let doc = root.as_document(&());
+    let formatted = doc.render();
     println!("Formatted CREATE TABLE:\n{}", formatted);
 
     assert!(formatted.contains("CREATE TABLE users"));

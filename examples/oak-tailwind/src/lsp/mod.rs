@@ -7,7 +7,12 @@ pub mod highlighter;
 use crate::language::TailwindLanguage;
 
 #[cfg(feature = "lsp")]
-use {oak_lsp::LanguageService, oak_vfs::MemoryVfs};
+use {
+    oak_core::tree::RedNode,
+    oak_lsp::LanguageService,
+    oak_vfs::{MemoryVfs, Vfs},
+    std::future::Future,
+};
 
 #[cfg(feature = "lsp")]
 /// Language service implementation for Tailwind CSS.
@@ -47,8 +52,8 @@ impl LanguageService for TailwindLanguageService {
         async move {
             let source = source?;
             let language = TailwindLanguage::default();
-            let parser = crate::parser::TailwindParser::new(&language);
-            let lexer = crate::lexer::TailwindLexer::new(&language);
+            let parser = crate::parser::TailwindParser::new(language);
+            let lexer = crate::lexer::TailwindLexer::new(language);
             let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
             let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
             let green = parse_out.result.ok()?;

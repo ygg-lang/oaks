@@ -14,3 +14,7 @@ serde = { workspace = true, optional = true, features = ["derive"] }
 
 [features]
 serde = ["oak-core/serde", "dep:serde"]
+
+[[test]]
+name = "main"
+required-features = ["serde"]

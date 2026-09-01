@@ -16,7 +16,7 @@ impl HtmlBuilder {
 
 impl Builder<HtmlLanguage> for HtmlBuilder {
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<HtmlLanguage>) -> BuildOutput<HtmlLanguage> {
-        let parser = HtmlParser::new(self.config);
+        let parser = HtmlParser::new(&self.config);
 
         let mut parse_cache = oak_core::parser::session::ParseSession::<HtmlLanguage>::default();
         let parse_result = parser.parse(source, edits, &mut parse_cache);

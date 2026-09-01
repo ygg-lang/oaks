@@ -1,18 +1,23 @@
-#[cfg(feature = "lsp")]
+#[cfg(feature = "oak-highlight")]
 pub mod highlighter;
 
-#[cfg(feature = "lsp")]
+#[cfg(feature = "oak-pretty-print")]
 pub mod formatter;
 
-#[cfg(feature = "lsp")]
+#[cfg(feature = "oak-highlight")]
 pub use highlighter::GlobHighlighter;
 
-#[cfg(feature = "lsp")]
+#[cfg(feature = "oak-pretty-print")]
 pub use formatter::GlobFormatter;
 
 #[cfg(feature = "lsp")]
+use oak_core::tree::RedNode;
+#[cfg(feature = "lsp")]
 use oak_lsp::service::LanguageService;
-use oak_vfs::Vfs;
+#[cfg(feature = "lsp")]
+use oak_vfs::{Vfs, WritableVfs};
+#[cfg(feature = "lsp")]
+use std::future::Future;
 
 #[cfg(feature = "lsp")]
 /// Language service for glob patterns.
@@ -30,7 +35,7 @@ impl<V: Vfs> GlobLanguageService<V> {
 }
 
 #[cfg(feature = "lsp")]
-impl<V: Vfs> LanguageService for GlobLanguageService<V> {
+impl<V: Vfs + Send + Sync + 'static + WritableVfs> LanguageService for GlobLanguageService<V> {
     type Lang = crate::language::GlobLanguage;
     type Vfs = V;
 
@@ -48,12 +53,5 @@ impl<V: Vfs> LanguageService for GlobLanguageService<V> {
         F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
     {
         async { None }
-    }
-}
-
-#[cfg(feature = "lsp")]
-impl Default for GlobLanguageService<oak_vfs::DiskVfs> {
-    fn default() -> Self {
-        Self::new(oak_vfs::DiskVfs::default())
     }
 }

@@ -19,3 +19,7 @@ serde = ["oak-core/serde", "dep:serde"]
 
 [dev-dependencies]
 oak-testing = { workspace = true }
+
+[[test]]
+name = "main"
+required-features = ["serde"]

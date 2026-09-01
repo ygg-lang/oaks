@@ -21,3 +21,7 @@ serde_json = { workspace = true, optional = true }
 [features]
 default = ["serde"]
 serde = ["dep:serde", "dep:serde_json", "oak-core/serde"]
+
+[[test]]
+name = "theme_tests"
+required-features = ["serde"]

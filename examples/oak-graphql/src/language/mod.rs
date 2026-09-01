@@ -2,7 +2,7 @@
 use oak_core::{Language, LanguageCategory};
 
 /// Implementation of the GraphQL language.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct GraphQLLanguage {}
 
 impl Language for GraphQLLanguage {

@@ -4,8 +4,7 @@ pub mod highlighter;
 
 use crate::{JsonLanguage, lexer::token_type::JsonTokenType};
 use core::range::Range;
-use dashmap::DashMap;
-use oak_core::{ParseCache, TokenType, parser::session::ParseSession, source::Source, tree::RedNode};
+use oak_core::{TokenType, source::Source, tree::RedNode};
 #[cfg(feature = "lsp")]
 use {
     futures::Future,
@@ -43,12 +42,11 @@ pub struct JsonLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
     hover_provider: JsonHoverProvider,
-    sessions: DashMap<String, Box<ParseSession<JsonLanguage>>>,
 }
 impl<V: Vfs> JsonLanguageService<V> {
     /// Creates a new `JsonLanguageService`.
     pub fn new(vfs: V) -> Self {
-        Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: JsonHoverProvider, sessions: DashMap::new() }
+        Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: JsonHoverProvider }
     }
     fn collect_definitions(&self, node: &RedNode<JsonLanguage>, name: &str, source: &V::Source, uri: &str, definitions: &mut Vec<oak_lsp::LocationRange>) {
         use oak_core::{
@@ -109,28 +107,33 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
     fn definition<'a>(&'a self, uri: &'a str, range: Range<usize>) -> impl Future<Output = Vec<oak_lsp::LocationRange>> + Send + 'a {
         let uri = uri.to_string();
         async move {
-            let Some(root) = self.get_root(&uri).await
+            let name = self
+                .with_root(&uri, |root| {
+                    let source = self.vfs().get_source(&uri)?;
+                    let leaf = root.leaf_at_offset(range.start)?;
+                    let text = source.get_text_in(leaf.span.clone());
+                    Some(text.trim_matches('"').to_string())
+                })
+                .await
+                .flatten();
+            let Some(name) = name
             else {
                 return vec![];
             };
-            let Some(source) = self.vfs().get_source(&uri)
-            else {
-                return vec![];
-            };
-            let Some(leaf) = root.leaf_at_offset(range.start)
-            else {
-                return vec![];
-            };
-            let text = source.get_text_in(leaf.span.clone());
-            let name = text.trim_matches('"');
-            // Search for definitions in all files in the workspace
             let mut all_definitions = Vec::new();
             let files = self.list_all_files(&uri).await;
             for file_uri in files {
-                if let Some(file_root) = self.get_root(&file_uri).await {
-                    if let Some(file_source) = self.vfs().get_source(&file_uri) {
-                        self.collect_definitions(&file_root, name, &file_source, &file_uri, &mut all_definitions);
-                    }
+                if let Some(defs) = self
+                    .with_root(&file_uri, |file_root| {
+                        let mut defs = Vec::new();
+                        if let Some(file_source) = self.vfs().get_source(&file_uri) {
+                            self.collect_definitions(&file_root, &name, &file_source, &file_uri, &mut defs);
+                        }
+                        defs
+                    })
+                    .await
+                {
+                    all_definitions.extend(defs);
                 }
             }
             all_definitions
@@ -139,29 +142,33 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
     fn references<'a>(&'a self, uri: &'a str, range: Range<usize>) -> impl Future<Output = Vec<oak_lsp::LocationRange>> + Send + 'a {
         let uri = uri.to_string();
         async move {
-            let Some(root) = self.get_root(&uri).await
+            let name = self
+                .with_root(&uri, |root| {
+                    let source = self.vfs().get_source(&uri)?;
+                    let leaf = root.leaf_at_offset(range.start)?;
+                    let text = source.get_text_in(leaf.span.clone());
+                    Some(text.trim_matches('"').to_string())
+                })
+                .await
+                .flatten();
+            let Some(name) = name
             else {
                 return vec![];
             };
-            let Some(source) = self.vfs().get_source(&uri)
-            else {
-                return vec![];
-            };
-            let Some(leaf) = root.leaf_at_offset(range.start)
-            else {
-                return vec![];
-            };
-            let text = source.get_text_in(leaf.span.clone());
-            let name = text.trim_matches('"');
-            // Search for references in all files in the workspace
             let mut all_refs = Vec::new();
             let files = self.list_all_files(&uri).await;
             for file_uri in files {
-                if let Some(file_root) = self.get_root(&file_uri).await {
-                    if let Some(file_source) = self.vfs().get_source(&file_uri) {
-                        // In JSON, we use collect_definitions as a proxy for finding key references
-                        self.collect_definitions(&file_root, name, &file_source, &file_uri, &mut all_refs);
-                    }
+                if let Some(refs) = self
+                    .with_root(&file_uri, |file_root| {
+                        let mut refs = Vec::new();
+                        if let Some(file_source) = self.vfs().get_source(&file_uri) {
+                            self.collect_definitions(&file_root, &name, &file_source, &file_uri, &mut refs);
+                        }
+                        refs
+                    })
+                    .await
+                {
+                    all_refs.extend(refs);
                 }
             }
             all_refs

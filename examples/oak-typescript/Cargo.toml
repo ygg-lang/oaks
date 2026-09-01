@@ -17,3 +17,6 @@ serde = { workspace = true, optional = true }
 default = ["serde"]
 serde = ["dep:serde", "oak-core/serde"]
 
+[[test]]
+name = "main"
+required-features = ["serde"]

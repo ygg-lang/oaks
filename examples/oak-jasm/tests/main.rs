@@ -219,10 +219,15 @@ return
     let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
 
-    let root = result.result.unwrap();
+    let _green = result.result.unwrap();
     #[cfg(feature = "oak-pretty-print")]
     {
-        use oak_jasm::JasmFormatter;
+        use oak_core::Builder;
+        use oak_jasm::{JasmBuilder, JasmFormatter};
+        let builder = JasmBuilder::new(&language);
+        let mut build_cache = oak_core::parser::ParseSession::default();
+        let typed = builder.build(&source, &[], &mut build_cache);
+        let root = typed.result.expect("jasm typed root");
         let formatter = JasmFormatter::new();
         let formatted = formatter.format(&root);
         assert!(!formatted.is_empty());

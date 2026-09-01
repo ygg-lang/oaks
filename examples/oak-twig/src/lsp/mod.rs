@@ -3,7 +3,12 @@
 pub mod highlighter;
 
 #[cfg(feature = "lsp")]
-use {oak_lsp::LanguageService, oak_vfs::MemoryVfs};
+use {
+    futures::Future,
+    oak_core::tree::RedNode,
+    oak_lsp::LanguageService,
+    oak_vfs::{MemoryVfs, Vfs},
+};
 #[cfg(feature = "oak-pretty-print")]
 pub mod formatter;
 use crate::language::TwigLanguage;

@@ -29,3 +29,7 @@ serde = ["dep:serde", "oak-core/serde"]
 
 [package.metadata.docs.rs]
 all-features = true
+
+[[test]]
+name = "main"
+required-features = ["serde"]

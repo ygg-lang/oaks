@@ -12,28 +12,28 @@ use {
 
 #[cfg(feature = "oak-pretty-print")]
 pub mod formatter;
-use crate::language::TypeScriptLanguage;
+use crate::language::EjsLanguage;
 use core::range::Range;
 use oak_core::tree::RedNode;
 
-/// TypeScript language service.
+/// EJS language service.
 #[cfg(feature = "lsp")]
-pub struct TypeScriptLanguageService<V: Vfs = MemoryVfs> {
+pub struct EjsLanguageService<V: Vfs = MemoryVfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
 
 #[cfg(feature = "lsp")]
-impl<V: Vfs> TypeScriptLanguageService<V> {
-    /// Creates a new `TypeScriptLanguageService`.
+impl<V: Vfs> EjsLanguageService<V> {
+    /// Creates a new `EjsLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default() }
     }
 }
 
 #[cfg(feature = "lsp")]
-impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for TypeScriptLanguageService<V> {
-    type Lang = TypeScriptLanguage;
+impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for EjsLanguageService<V> {
+    type Lang = EjsLanguage;
     type Vfs = V;
     fn vfs(&self) -> &Self::Vfs {
         &self.vfs
@@ -49,9 +49,9 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
         let source = self.vfs().get_source(uri);
         async move {
             let source = source?;
-            let language = TypeScriptLanguage::default();
-            let parser = crate::parser::TypeScriptParser::new(&language);
-            let lexer = crate::lexer::TypeScriptLexer::new(&language);
+            let language = EjsLanguage::default();
+            let parser = crate::parser::EjsParser::new(&language);
+            let lexer = crate::lexer::EjsLexer::new(&language);
             let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
             let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
             let green = parse_out.result.ok()?;

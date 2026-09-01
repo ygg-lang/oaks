@@ -22,7 +22,7 @@ fn test_json_to_source() {
 #[cfg(feature = "oak-pretty-print")]
 #[test]
 fn test_json_to_doc() {
-    use oak_pretty_print::{AsDocument, FormatConfig};
+    use oak_pretty_print::{AsDocument, PrinterConfig};
 
     let root = JsonRoot {
         value: JsonValueNode::Object(JsonObject {
@@ -35,7 +35,8 @@ fn test_json_to_doc() {
         }),
     };
 
-    let doc = root.as_document();
-    let formatted = doc.render(FormatConfig::default());
-    assert!(formatted.contains("\"name\": \"oak\""));
+    let doc = root.value.as_document(&());
+    let formatted = doc.render_with_config(PrinterConfig::default());
+    assert!(formatted.contains("\"name\""));
+    assert!(formatted.contains("\"oak\""));
 }

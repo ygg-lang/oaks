@@ -28,7 +28,7 @@ impl TokenSink for Sink {
 fn bench_html_comparison(c: &mut Criterion) {
     let lang = Box::leak(Box::new(HtmlLanguage::default()));
     let lexer = HtmlLexer::new(lang);
-    let parser = HtmlParser::new(*lang);
+    let parser = HtmlParser::new(lang);
 
     // 1. Small HTML
     {

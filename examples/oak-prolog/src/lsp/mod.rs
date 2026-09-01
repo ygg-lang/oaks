@@ -58,7 +58,7 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
         async move {
             let source = source?;
             let language = PrologLanguage::default();
-            let parser = crate::parser::PrologParser::new(language.clone());
+            let parser = crate::parser::PrologParser::new(&language);
             let lexer = crate::lexer::PrologLexer::new(&language);
             let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
             let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);

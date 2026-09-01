@@ -1,21 +1,25 @@
 #![doc = include_str!("readme.md")]
-use crate::language::VonLanguage;
+use crate::language::TsvLanguage;
 use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
 #[cfg(feature = "lsp")]
-pub struct VonLanguageService<V: Vfs> {
+/// Language service implementation for TSV.
+pub struct TsvLanguageService<V: Vfs> {
+    /// The virtual file system.
     vfs: V,
+    /// The workspace manager.
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
-impl<V: Vfs> VonLanguageService<V> {
+impl<V: Vfs> TsvLanguageService<V> {
+    /// Creates a new `TsvLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }
 }
-impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for VonLanguageService<V> {
-    type Lang = VonLanguage;
+impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for TsvLanguageService<V> {
+    type Lang = TsvLanguage;
     type Vfs = V;
     fn vfs(&self) -> &Self::Vfs {
         &self.vfs
@@ -31,9 +35,8 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
         let source = self.vfs().get_source(uri);
         async move {
             let source = source?;
-            let language = VonLanguage::default();
-            let parser = crate::parser::VonParser::new(&language);
-            let lexer = crate::lexer::VonLexer::new(&language);
+            let parser = crate::parser::TsvParser::new();
+            let lexer = crate::lexer::TsvLexer::new();
             let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
             let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
             let green = parse_out.result.ok()?;
